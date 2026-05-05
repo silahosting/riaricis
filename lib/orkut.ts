@@ -102,7 +102,41 @@ export async function createOrkutQrisPayment(
       },
     })
 
-    const data = await response.json()
+    const text = await response.text()
+    
+    if (!text || text.trim() === '') {
+      return {
+        success: false,
+        error: 'API Orkut mengembalikan response kosong',
+        transactionId: '',
+        qrisUrl: '',
+        qrsImageUrl: '',
+        qrString: '',
+        amount: totalAmount,
+        originalAmount: amount,
+        fee,
+        expiresAt: '',
+      }
+    }
+    
+    let data
+    try {
+      data = JSON.parse(text)
+    } catch (parseError) {
+      console.error('[v0] Orkut API parse error:', text.substring(0, 200))
+      return {
+        success: false,
+        error: 'API Orkut mengembalikan format yang tidak valid',
+        transactionId: '',
+        qrisUrl: '',
+        qrsImageUrl: '',
+        qrString: '',
+        amount: totalAmount,
+        originalAmount: amount,
+        fee,
+        expiresAt: '',
+      }
+    }
 
     console.log('[v0] Orkut API Response:', {
       status: data.status,
@@ -202,7 +236,29 @@ export async function checkOrkutPaymentStatus(
       },
     })
 
-    const data = await response.json()
+    const text = await response.text()
+    
+    if (!text || text.trim() === '') {
+      return {
+        success: false,
+        status: 'pending',
+        transactionId,
+        error: 'API Orkut mengembalikan response kosong',
+      }
+    }
+    
+    let data
+    try {
+      data = JSON.parse(text)
+    } catch (parseError) {
+      console.error('[v0] Orkut check status parse error:', text.substring(0, 200))
+      return {
+        success: false,
+        status: 'pending',
+        transactionId,
+        error: 'API Orkut mengembalikan format yang tidak valid',
+      }
+    }
 
     // Check payment status
     if (data.paymentStatus?.status === 'success') {

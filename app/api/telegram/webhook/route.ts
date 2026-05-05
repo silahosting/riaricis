@@ -424,7 +424,8 @@ async function handleCallbackQuery(
     
     // Get payment settings to determine which buttons to show
     const paymentSettings = await getPaymentSettings()
-    const orkutEnabled = paymentSettings?.orkutEnabled ?? false
+    // Default to Orkut enabled if no settings configured yet (backward compatible)
+    const orkutEnabled = paymentSettings ? paymentSettings.orkutEnabled : true
     const midtransEnabled = paymentSettings?.midtransEnabled ?? false
     
     // Build payment buttons based on enabled methods
@@ -496,9 +497,9 @@ async function handleCallbackQuery(
     
     const confirmText = generateOrderConfirmText(product, newQty)
     
-    // Get payment settings to determine which buttons to show
+// Get payment settings to determine which buttons to show
     const paymentSettings = await getPaymentSettings()
-    const orkutEnabled = paymentSettings?.orkutEnabled ?? false
+    const orkutEnabled = paymentSettings ? paymentSettings.orkutEnabled : true
     const midtransEnabled = paymentSettings?.midtransEnabled ?? false
     
     // Build payment buttons based on enabled methods
@@ -533,7 +534,7 @@ async function handleCallbackQuery(
     return
   }
   
-  // Handle refresh order
+  // Handle refresh order data
   if (data.startsWith('refresh_order_')) {
     const productId = data.replace('refresh_order_', '')
     const product = await getProductById(productId)
@@ -552,7 +553,7 @@ async function handleCallbackQuery(
     
     // Get payment settings to determine which buttons to show
     const paymentSettings = await getPaymentSettings()
-    const orkutEnabled = paymentSettings?.orkutEnabled ?? false
+    const orkutEnabled = paymentSettings ? paymentSettings.orkutEnabled : true
     const midtransEnabled = paymentSettings?.midtransEnabled ?? false
     
     // Build payment buttons based on enabled methods
