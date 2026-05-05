@@ -424,9 +424,11 @@ async function handleCallbackQuery(
     
     // Get payment settings to determine which buttons to show
     const paymentSettings = await getPaymentSettings()
+    console.log('[v0] Payment Settings for buy:', JSON.stringify(paymentSettings))
     // Default to Orkut enabled if no settings configured yet (backward compatible)
     const orkutEnabled = paymentSettings ? paymentSettings.orkutEnabled : true
     const midtransEnabled = paymentSettings?.midtransEnabled ?? false
+    console.log('[v0] Orkut enabled:', orkutEnabled, 'Midtrans enabled:', midtransEnabled)
     
     // Build payment buttons based on enabled methods
     const paymentButtons: { text: string; callback_data: string }[][] = []
