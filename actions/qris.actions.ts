@@ -1,5 +1,7 @@
 'use server'
 
+import { getQrisSettings as getQrisSettingsFromDB } from '@/lib/github-db'
+
 export async function createQrisPayment(orderId: string, userId: string) {
   try {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${process.env.VERCEL_URL || 'localhost:3000'}`
@@ -90,23 +92,19 @@ export async function saveQrisSettings(
 
 export async function getQrisSettings(type: 'admin' | 'user' = 'admin', userId?: string) {
   try {
-    const params = new URLSearchParams()
-    params.append('type', type)
-    if (userId) params.append('userId', userId)
-
-    // Get base URL from environment or construct it
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `https://${process.env.VERCEL_URL || 'localhost:3000'}`
-    const url = `${baseUrl}/api/settings/qris?${params}`
-
-    const response = await fetch(url)
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.error || 'Failed to get QRIS settings')
+    // Call the database function directly instead of making an HTTP request
+    const qrisSettings = await getQrisSettingsFromDB(type, userId)
+    
+    if (qrisSettings) {
+      // Hide sensitive data just like the API does
+      return {
+        ...qrisSettings,
+        apiKey: qrisSettings.apiKey ? '***' : '',
+        token: qrisSettings.token ? '***' : '',
+      }
     }
-
-    return data.qrisSettings
+    
+    return null
   } catch (error) {
     console.error('[v0] Get QRIS Settings Error:', error)
     return null
