@@ -63,3 +63,17 @@ export async function destroySession(): Promise<void> {
   const cookieStore = await cookies()
   cookieStore.delete(SESSION_COOKIE_NAME)
 }
+
+export async function isCurrentUserAdmin(): Promise<boolean> {
+  const session = await getSession()
+  if (!session) return false
+  
+  // Check if user has admin role
+  if (session.role === 'admin') return true
+  
+  // Check if user email is in ADMIN_EMAILS env var
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase()) || []
+  if (adminEmails.includes(session.email.toLowerCase())) return true
+  
+  return false
+}

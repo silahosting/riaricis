@@ -3,6 +3,7 @@ export interface User {
   email: string
   name: string
   password: string
+  role: 'user' | 'admin'
   createdAt: string
   updatedAt: string
 }
@@ -74,7 +75,29 @@ export interface Payment {
   qrisUrl?: string
   transactionId?: string
   status: 'unpaid' | 'pending' | 'paid' | 'expired' | 'failed'
-  paymentMethod: 'qris'
+  paymentMethod: 'qris' | 'midtrans'
+  midtransTransactionId?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PaymentSettings {
+  id: string
+  // Orkut QRIS Settings
+  orkutEnabled: boolean
+  orkutUsername: string
+  orkutApiKey: string
+  orkutToken: string
+  orkutMerchantId: string
+  orkutCodeQr: string
+  // Midtrans Settings
+  midtransEnabled: boolean
+  midtransServerKey: string
+  midtransClientKey: string
+  midtransIsProduction: boolean
+  midtransMerchantId: string
+  // Default payment method
+  defaultPaymentMethod: 'orkut' | 'midtrans'
   createdAt: string
   updatedAt: string
 }
@@ -86,6 +109,7 @@ export interface Database {
   orders: Order[]
   qrisSettings: QrisSettings[]
   payments: Payment[]
+  paymentSettings: PaymentSettings | null
 }
 
 export type SessionUser = Omit<User, 'password'>

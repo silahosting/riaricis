@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBotSettingsByToken, getAllProducts, getAllOrders, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder } from '@/lib/github-db'
+import { getBotSettingsByToken, getAllProducts, getAllOrders, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder, getPaymentSettings } from '@/lib/github-db'
 import { createOrkutQrisPayment, checkOrkutPaymentStatus } from '@/lib/orkut'
-import type { Product } from '@/types'
+import { createMidtransQrisPayment, checkMidtransPaymentStatus, isMidtransPaymentPaid } from '@/lib/midtrans'
+import type { Product, PaymentSettings } from '@/types'
 
 // Telegram API base URL
 const TELEGRAM_API = 'https://api.telegram.org/bot'
@@ -420,6 +421,27 @@ async function handleCallbackQuery(
     await answerCallbackQuery(botToken, callbackQuery.id)
     
     const confirmText = generateOrderConfirmText(product, 1)
+    
+    // Get payment settings to determine which buttons to show
+    const paymentSettings = await getPaymentSettings()
+    const orkutEnabled = paymentSettings?.orkutEnabled ?? false
+    const midtransEnabled = paymentSettings?.midtransEnabled ?? false
+    
+    // Build payment buttons based on enabled methods
+    const paymentButtons: { text: string; callback_data: string }[][] = []
+    
+    // Always show saldo button
+    paymentButtons.push([{ text: 'Bayar dengan Saldo ✅', callback_data: `pay_saldo_${productId}` }])
+    
+    // If both QRIS methods enabled, show selection button
+    if (orkutEnabled && midtransEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_select_qris_${productId}` }])
+    } else if (orkutEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Orkut)', callback_data: `pay_qris_orkut_${productId}` }])
+    } else if (midtransEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Midtrans)', callback_data: `pay_qris_midtrans_${productId}` }])
+    }
+    
     const keyboard = {
       inline_keyboard: [
         [
@@ -430,8 +452,7 @@ async function handleCallbackQuery(
           { text: '-5', callback_data: `qty_minus5_${productId}` },
           { text: '+5', callback_data: `qty_plus5_${productId}` }
         ],
-        [{ text: 'Bayar dengan Saldo ✅', callback_data: `pay_saldo_${productId}` }],
-        [{ text: 'Bayar dengan Qris ✅', callback_data: `pay_qris_${productId}` }],
+        ...paymentButtons,
         [{ text: '🔄 Refresh Data', callback_data: `refresh_order_${productId}` }],
         [{ text: '⬅️ BACK', callback_data: `select_${productId}` }]
       ]
@@ -474,6 +495,24 @@ async function handleCallbackQuery(
     await answerCallbackQuery(botToken, callbackQuery.id, `Jumlah: ${newQty}`)
     
     const confirmText = generateOrderConfirmText(product, newQty)
+    
+    // Get payment settings to determine which buttons to show
+    const paymentSettings = await getPaymentSettings()
+    const orkutEnabled = paymentSettings?.orkutEnabled ?? false
+    const midtransEnabled = paymentSettings?.midtransEnabled ?? false
+    
+    // Build payment buttons based on enabled methods
+    const paymentButtons: { text: string; callback_data: string }[][] = []
+    paymentButtons.push([{ text: 'Bayar dengan Saldo ✅', callback_data: `pay_saldo_${productId}` }])
+    
+    if (orkutEnabled && midtransEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_select_qris_${productId}` }])
+    } else if (orkutEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Orkut)', callback_data: `pay_qris_orkut_${productId}` }])
+    } else if (midtransEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Midtrans)', callback_data: `pay_qris_midtrans_${productId}` }])
+    }
+    
     const keyboard = {
       inline_keyboard: [
         [
@@ -484,8 +523,7 @@ async function handleCallbackQuery(
           { text: '-5', callback_data: `qty_minus5_${productId}` },
           { text: '+5', callback_data: `qty_plus5_${productId}` }
         ],
-        [{ text: 'Bayar dengan Saldo ✅', callback_data: `pay_saldo_${productId}` }],
-        [{ text: 'Bayar dengan Qris ✅', callback_data: `pay_qris_${productId}` }],
+        ...paymentButtons,
         [{ text: '🔄 Refresh Data', callback_data: `refresh_order_${productId}` }],
         [{ text: '⬅️ BACK', callback_data: `select_${productId}` }]
       ]
@@ -511,6 +549,24 @@ async function handleCallbackQuery(
     await answerCallbackQuery(botToken, callbackQuery.id, 'Data diperbarui!')
     
     const confirmText = generateOrderConfirmText(product, session.quantity)
+    
+    // Get payment settings to determine which buttons to show
+    const paymentSettings = await getPaymentSettings()
+    const orkutEnabled = paymentSettings?.orkutEnabled ?? false
+    const midtransEnabled = paymentSettings?.midtransEnabled ?? false
+    
+    // Build payment buttons based on enabled methods
+    const paymentButtons: { text: string; callback_data: string }[][] = []
+    paymentButtons.push([{ text: 'Bayar dengan Saldo ✅', callback_data: `pay_saldo_${productId}` }])
+    
+    if (orkutEnabled && midtransEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_select_qris_${productId}` }])
+    } else if (orkutEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Orkut)', callback_data: `pay_qris_orkut_${productId}` }])
+    } else if (midtransEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Midtrans)', callback_data: `pay_qris_midtrans_${productId}` }])
+    }
+    
     const keyboard = {
       inline_keyboard: [
         [
@@ -521,14 +577,47 @@ async function handleCallbackQuery(
           { text: '-5', callback_data: `qty_minus5_${productId}` },
           { text: '+5', callback_data: `qty_plus5_${productId}` }
         ],
-        [{ text: 'Bayar dengan Saldo ✅', callback_data: `pay_saldo_${productId}` }],
-        [{ text: 'Bayar dengan Qris ✅', callback_data: `pay_qris_${productId}` }],
+        ...paymentButtons,
         [{ text: '🔄 Refresh Data', callback_data: `refresh_order_${productId}` }],
         [{ text: '⬅️ BACK', callback_data: `select_${productId}` }]
       ]
     }
     
     await editMessageText(botToken, chatId, messageId, confirmText, { replyMarkup: keyboard })
+    return
+  }
+  
+  // Handle QRIS method selection (when both methods enabled)
+  if (data.startsWith('pay_select_qris_')) {
+    const productId = data.replace('pay_select_qris_', '')
+    const product = await getProductById(productId)
+    
+    if (!product) {
+      await answerCallbackQuery(botToken, callbackQuery.id, 'Produk tidak ditemukan', true)
+      return
+    }
+    
+    await answerCallbackQuery(botToken, callbackQuery.id)
+    
+    const sessionKey = `${chatId}_${messageId}`
+    const session = orderSessions.get(sessionKey) || { productId, quantity: 1, chatId, messageId }
+    const totalPrice = product.price * session.quantity
+    
+    let selectText = `💳 *PILIH METODE PEMBAYARAN QRIS*\n\n`
+    selectText += `📦 *Produk:* ${product.name}\n`
+    selectText += `📊 *Jumlah:* ${session.quantity}x\n`
+    selectText += `💰 *Total:* Rp ${toRupiah(totalPrice)}\n\n`
+    selectText += `Silakan pilih metode QRIS yang ingin digunakan:`
+    
+    const keyboard = {
+      inline_keyboard: [
+        [{ text: '🔵 Orkut QRIS (Order Kuota)', callback_data: `pay_qris_orkut_${productId}` }],
+        [{ text: '🟣 Midtrans QRIS', callback_data: `pay_qris_midtrans_${productId}` }],
+        [{ text: '⬅️ Kembali', callback_data: `buy_${productId}` }]
+      ]
+    }
+    
+    await editMessageText(botToken, chatId, messageId, selectText, { replyMarkup: keyboard })
     return
   }
   
@@ -601,9 +690,9 @@ async function handleCallbackQuery(
     return
   }
   
-  // Handle payment with QRIS
-  if (data.startsWith('pay_qris_')) {
-    const productId = data.replace('pay_qris_', '')
+  // Handle payment with Orkut QRIS
+  if (data.startsWith('pay_qris_orkut_')) {
+    const productId = data.replace('pay_qris_orkut_', '')
     const product = await getProductById(productId)
 
     if (!product) {
@@ -724,6 +813,212 @@ async function handleCallbackQuery(
     } catch (error) {
       console.error('[v0] QRIS Payment Error:', error)
       await answerCallbackQuery(botToken, callbackQuery.id, 'Gagal memproses pembayaran QRIS', true)
+      return
+    }
+  }
+  
+  // Handle payment with Midtrans QRIS
+  if (data.startsWith('pay_qris_midtrans_')) {
+    const productId = data.replace('pay_qris_midtrans_', '')
+    const product = await getProductById(productId)
+
+    if (!product) {
+      await answerCallbackQuery(botToken, callbackQuery.id, 'Produk tidak ditemukan', true)
+      return
+    }
+
+    const sessionKey = `${chatId}_${messageId}`
+    const session = orderSessions.get(sessionKey) || { productId, quantity: 1, chatId, messageId }
+    const quantity = Math.min(session.quantity, product.stock, product.items?.length || 0)
+
+    if (quantity === 0) {
+      await answerCallbackQuery(botToken, callbackQuery.id, 'Stok habis!', true)
+      return
+    }
+
+    try {
+      const totalPrice = product.price * quantity
+
+      // Create order first
+      const newOrder = await createOrder({
+        productId: product.id,
+        productName: product.name,
+        buyerId: userId,
+        buyerName: user.first_name,
+        quantity,
+        totalPrice,
+        status: 'pending',
+        paymentStatus: 'pending'
+      })
+
+      if (!newOrder) {
+        await answerCallbackQuery(botToken, callbackQuery.id, 'Gagal membuat order', true)
+        return
+      }
+
+      // Create Midtrans QRIS payment
+      const midtransResult = await createMidtransQrisPayment(
+        newOrder.id,
+        totalPrice,
+        user.first_name,
+        undefined
+      )
+
+      if (!midtransResult.success) {
+        await answerCallbackQuery(botToken, callbackQuery.id, 'Gagal membuat QRIS: ' + midtransResult.error, true)
+        return
+      }
+
+      // Update order with payment details
+      await updateOrder(newOrder.id, {
+        paymentQrisUrl: midtransResult.qrCodeUrl,
+        paymentTransactionId: midtransResult.transactionId,
+      })
+
+      // Create payment record
+      await createPayment({
+        orderId: newOrder.id,
+        userId,
+        amount: totalPrice,
+        qrisUrl: midtransResult.qrCodeUrl,
+        transactionId: midtransResult.transactionId,
+        status: 'pending',
+        paymentMethod: 'midtrans',
+      })
+
+      // Clean up session
+      orderSessions.delete(sessionKey)
+
+      await answerCallbackQuery(botToken, callbackQuery.id)
+
+      // Send QRIS payment message
+      let qrisText = `💳 *PEMBAYARAN QRIS (MIDTRANS)*\n\n`
+      qrisText += `📦 *Produk:* ${product.name}\n`
+      qrisText += `📊 *Jumlah:* ${quantity}x\n`
+      qrisText += `💰 *Total Bayar:* Rp ${toRupiah(totalPrice)}\n\n`
+      qrisText += `🆔 *ID Transaksi:* \`${midtransResult.transactionId}\`\n\n`
+      qrisText += `📌 *Instruksi Pembayaran:*\n`
+      qrisText += `1. Buka aplikasi e-wallet/banking\n`
+      qrisText += `2. Scan QR Code di bawah\n`
+      qrisText += `3. Ikuti proses pembayaran\n`
+      qrisText += `4. Tunggu konfirmasi (otomatis)\n\n`
+      if (midtransResult.expiryTime) {
+        qrisText += `⏱️ *Berlaku sampai:* ${new Date(midtransResult.expiryTime).toLocaleString('id-ID')}\n\n`
+      }
+      qrisText += `_Pembayaran akan diproses secara otomatis setelah berhasil._`
+
+      const keyboard = {
+        inline_keyboard: [
+          [{ text: '✅ Cek Status Pembayaran', callback_data: `check_payment_midtrans_${newOrder.id}` }],
+          [{ text: '❌ Batal', callback_data: 'menu_main' }]
+        ]
+      }
+
+      // Send QR code image if available
+      if (midtransResult.qrCodeUrl) {
+        try {
+          await fetch(`${TELEGRAM_API}${botToken}/sendPhoto`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              photo: midtransResult.qrCodeUrl,
+              caption: qrisText,
+              parse_mode: 'Markdown',
+              reply_markup: keyboard,
+            }),
+          })
+        } catch (photoError) {
+          console.log('[v0] Failed to send Midtrans QR photo:', photoError)
+          await sendMessage(botToken, chatId, qrisText, { replyMarkup: keyboard })
+        }
+      } else {
+        await sendMessage(botToken, chatId, qrisText, { replyMarkup: keyboard })
+      }
+
+      return
+    } catch (error) {
+      console.error('[v0] Midtrans QRIS Payment Error:', error)
+      await answerCallbackQuery(botToken, callbackQuery.id, 'Gagal memproses pembayaran Midtrans QRIS', true)
+      return
+    }
+  }
+
+  // Handle check Midtrans payment status
+  if (data.startsWith('check_payment_midtrans_')) {
+    const orderId = data.replace('check_payment_midtrans_', '')
+    
+    try {
+      const order = await getOrderById(orderId)
+      
+      if (!order) {
+        await answerCallbackQuery(botToken, callbackQuery.id, 'Order tidak ditemukan', true)
+        return
+      }
+
+      // Get payment record
+      const payment = await getPaymentByOrderId(orderId)
+      if (!payment || !payment.transactionId) {
+        await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran tidak ditemukan', true)
+        return
+      }
+
+      // Check status from Midtrans
+      const isPaid = await isMidtransPaymentPaid(payment.transactionId)
+
+      if (isPaid) {
+        // Update order and payment status
+        await updateOrder(orderId, { paymentStatus: 'paid', status: 'processing' })
+        await updatePaymentByOrderId(orderId, { status: 'paid' })
+
+        // Deliver product
+        const product = await getProductById(order.productId)
+        if (product && product.items && product.items.length > 0) {
+          const itemsToSend = product.items.slice(0, order.quantity)
+          const remainingItems = product.items.slice(order.quantity)
+
+          await updateProduct(product.id, {
+            items: remainingItems,
+            stock: remainingItems.length
+          })
+
+          let successText = `✅ *PEMBAYARAN BERHASIL*\n\n`
+          successText += `📦 *Produk:* ${order.productName}\n`
+          successText += `💰 *Total Bayar:* Rp ${toRupiah(order.totalPrice)}\n`
+          successText += `💳 *Metode:* Midtrans QRIS\n\n`
+          successText += `━━━━━━━━━━━━━━━━━━━━━\n`
+          successText += `📋 *Detail Pesanan:*\n\n`
+          itemsToSend.forEach((item, i) => {
+            successText += `${i + 1}. \`${item}\`\n`
+          })
+          successText += `\n━━━━━━━━━━━━━━━━━━━━━\n`
+          successText += `\n_Terima kasih telah berbelanja!_`
+
+          await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran berhasil!', false)
+          await sendMessage(botToken, chatId, successText)
+        } else {
+          let successText = `✅ *PEMBAYARAN BERHASIL*\n\n`
+          successText += `📦 *Produk:* ${order.productName}\n`
+          successText += `💰 *Total Bayar:* Rp ${toRupiah(order.totalPrice)}\n\n`
+          successText += `_Pesanan Anda sedang diproses._`
+
+          await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran berhasil!', false)
+          await sendMessage(botToken, chatId, successText)
+        }
+      } else {
+        let pendingText = `⏳ *PEMBAYARAN BELUM DIKONFIRMASI*\n\n`
+        pendingText += `🆔 *ID Transaksi:* \`${payment.transactionId}\`\n`
+        pendingText += `📝 *Status:* Menunggu pembayaran\n\n`
+        pendingText += `_Silakan coba lagi dalam beberapa detik_`
+
+        await answerCallbackQuery(botToken, callbackQuery.id, 'Masih menunggu pembayaran...', false)
+        await sendMessage(botToken, chatId, pendingText)
+      }
+
+      return
+    } catch (error) {
+      console.error('[v0] Check Midtrans Payment Error:', error)
+      await answerCallbackQuery(botToken, callbackQuery.id, 'Gagal check status: ' + String(error), true)
       return
     }
   }
