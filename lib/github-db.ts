@@ -1,5 +1,5 @@
 import { GITHUB_CONFIG } from './constants'
-import type { Database, User, BotSettings, Product, Order, QrisSettings, Payment } from '@/types'
+import type { Database, User, BotSettings, Product, Order, QrisSettings, Payment, PaymentSettings } from '@/types'
 
 const defaultDatabase: Database = {
   users: [],
@@ -8,6 +8,7 @@ const defaultDatabase: Database = {
   orders: [],
   qrisSettings: [],
   payments: [],
+  paymentSettings: null,
 }
 
 const API_BASE = "https://api-orkut-iota-seven.vercel.app" // ganti dengan URL API kamu
@@ -43,6 +44,7 @@ async function getFileContent(): Promise<{ content: Database; sha: string | null
       orders: Array.isArray(data.content?.orders) ? data.content.orders : [],
       qrisSettings: Array.isArray(data.content?.qrisSettings) ? data.content.qrisSettings : [],
       payments: Array.isArray(data.content?.payments) ? data.content.payments : [],
+      paymentSettings: data.content?.paymentSettings || null,
     }
     
     return { content, sha: data.sha || null }
@@ -446,4 +448,70 @@ export async function updatePaymentByOrderId(
 
   const success = await updateFile(content, sha)
   return success ? content.payments[index] : null
+}
+
+// Payment Settings operations (Admin)
+export async function getPaymentSettings(): Promise<PaymentSettings | null> {
+  const { content } = await getFileContent()
+  return content.paymentSettings
+}
+
+export async function savePaymentSettings(
+  settings: Partial<Omit<PaymentSettings, 'id' | 'createdAt' | 'updatedAt'>>
+): Promise<PaymentSettings | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  if (content.paymentSettings) {
+    // Update existing
+    content.paymentSettings = {
+      ...content.paymentSettings,
+      ...settings,
+      updatedAt: now,
+    }
+  } else {
+    // Create new
+    content.paymentSettings = {
+      id: generateId(),
+      orkutEnabled: false,
+      orkutUsername: '',
+      orkutApiKey: '',
+      orkutToken: '',
+      orkutMerchantId: '',
+      orkutCodeQr: '',
+      midtransEnabled: false,
+      midtransServerKey: '',
+      midtransClientKey: '',
+      midtransIsProduction: false,
+      midtransMerchantId: '',
+      defaultPaymentMethod: 'orkut',
+      ...settings,
+      createdAt: now,
+      updatedAt: now,
+    }
+  }
+
+  const success = await updateFile(content, sha)
+  return success ? content.paymentSettings : null
+}
+
+// Admin check
+export async function isUserAdmin(userId: string): Promise<boolean> {
+  const user = await getUserById(userId)
+  if (!user) return false
+  
+  // Check if user has admin role
+  if (user.role === 'admin') return true
+  
+  // Check if user email is in ADMIN_EMAILS env var
+  const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(e => e.trim().toLowerCase()) || []
+  if (adminEmails.includes(user.email.toLowerCase())) return true
+  
+  return false
+}
+
+// Get all users (for admin)
+export async function getAllUsers(): Promise<User[]> {
+  const { content } = await getFileContent()
+  return content.users
 }
