@@ -11,6 +11,7 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/products', label: 'Produk', icon: Package },
   { href: '/dashboard/orders', label: 'Pesanan', icon: ShoppingCart },
+  { href: '/dashboard/withdraw', label: 'Pencairan Dana', icon: Wallet },
   { href: '/dashboard/profile', label: 'Profil', icon: User },
   { href: '/dashboard/settings', label: 'Pengaturan Bot', icon: Settings },
 ]
