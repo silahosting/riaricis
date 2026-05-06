@@ -290,7 +290,8 @@ async function handleCallbackQuery(
   callbackQuery: TelegramCallbackQuery,
   ownerId: string,
   telegramUserId: string,
-  botOwnerId: string // Database user ID of bot owner
+  botOwnerId: string, // Database user ID of bot owner
+  botSettings: { preferredPaymentMethod?: 'orkut' | 'midtrans' } // Bot settings with payment preference
 ) {
   const chatId = callbackQuery.message?.chat.id
   const messageId = callbackQuery.message?.message_id
@@ -301,6 +302,9 @@ async function handleCallbackQuery(
   
   // Get products for this bot owner only (filtered by userId)
   const allProducts = await getProductsByUserId(botOwnerId)
+  console.log("[v0] handleCallbackQuery - botOwnerId:", botOwnerId)
+  console.log("[v0] handleCallbackQuery - allProducts count:", allProducts?.length)
+  console.log("[v0] handleCallbackQuery - allProducts userIds:", allProducts?.map(p => ({ id: p.id, name: p.name, userId: p.userId })))
   const products = allProducts?.filter(p => p.isActive) || []
   const orders = await getOrdersByUserId(botOwnerId)
   
@@ -1200,6 +1204,9 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
   
   // Get data for stats - only products from this bot owner
   const allProducts = await getProductsByUserId(botOwnerId)
+  console.log("[v0] handleMessage - botOwnerId:", botOwnerId)
+  console.log("[v0] handleMessage - allProducts count:", allProducts?.length)
+  console.log("[v0] handleMessage - allProducts userIds:", allProducts?.map(p => ({ id: p.id, name: p.name, userId: p.userId })))
   const products = allProducts?.filter(p => p.isActive) || []
   const orders = await getOrdersByUserId(botOwnerId)
   
@@ -1302,7 +1309,7 @@ export async function POST(request: NextRequest) {
     // Handle callback queries (button clicks)
     if (update.callback_query) {
       const telegramUserId = update.callback_query.from.id.toString()
-      await handleCallbackQuery(botToken, update.callback_query, settings.ownerId, telegramUserId, settings.userId)
+      await handleCallbackQuery(botToken, update.callback_query, settings.ownerId, telegramUserId, settings.userId, settings)
       return NextResponse.json({ ok: true })
     }
 
