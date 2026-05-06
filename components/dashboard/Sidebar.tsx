@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Bot, LayoutDashboard, Package, ShoppingCart, Settings, User, LogOut, X } from 'lucide-react'
+import { Bot, LayoutDashboard, Package, ShoppingCart, Settings, User, LogOut, X, Wallet } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NeoButton } from '@/components/ui/neo-button'
 import { logoutAction } from '@/actions/auth.actions'

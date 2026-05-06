@@ -1,5 +1,5 @@
 import { GITHUB_CONFIG } from './constants'
-import type { Database, User, BotSettings, Product, Order, QrisSettings, Payment, PaymentSettings } from '@/types'
+import type { Database, User, BotSettings, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal } from '@/types'
 
 const defaultDatabase: Database = {
   users: [],
@@ -9,6 +9,7 @@ const defaultDatabase: Database = {
   qrisSettings: [],
   payments: [],
   paymentSettings: null,
+  withdrawals: [],
 }
 
 const API_BASE = "https://api-orkut-iota-seven.vercel.app" // ganti dengan URL API kamu
@@ -45,6 +46,7 @@ async function getFileContent(): Promise<{ content: Database; sha: string | null
       qrisSettings: Array.isArray(data.content?.qrisSettings) ? data.content.qrisSettings : [],
       payments: Array.isArray(data.content?.payments) ? data.content.payments : [],
       paymentSettings: data.content?.paymentSettings || null,
+      withdrawals: Array.isArray(data.content?.withdrawals) ? data.content.withdrawals : [],
     }
     
     return { content, sha: data.sha || null }
@@ -527,4 +529,101 @@ export async function isUserAdmin(userId: string): Promise<boolean> {
 export async function getAllUsers(): Promise<User[]> {
   const { content } = await getFileContent()
   return content.users
+}
+
+// Withdrawal operations
+export async function getWithdrawals(userId: string): Promise<Withdrawal[]> {
+  const { content } = await getFileContent()
+  return content.withdrawals.filter((w) => w.userId === userId)
+}
+
+export async function getAllWithdrawals(): Promise<Withdrawal[]> {
+  const { content } = await getFileContent()
+  return content.withdrawals
+}
+
+export async function getWithdrawalById(id: string): Promise<Withdrawal | null> {
+  const { content } = await getFileContent()
+  return content.withdrawals.find((w) => w.id === id) || null
+}
+
+// Check if user can withdraw today (1x per day limit)
+export async function canUserWithdrawToday(userId: string): Promise<boolean> {
+  const { content } = await getFileContent()
+  const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+  
+  const todayWithdrawals = content.withdrawals.filter((w) => {
+    const withdrawalDate = w.createdAt.split('T')[0]
+    return w.userId === userId && withdrawalDate === today
+  })
+  
+  return todayWithdrawals.length === 0
+}
+
+// Get user's last withdrawal
+export async function getLastWithdrawal(userId: string): Promise<Withdrawal | null> {
+  const { content } = await getFileContent()
+  const userWithdrawals = content.withdrawals
+    .filter((w) => w.userId === userId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  
+  return userWithdrawals[0] || null
+}
+
+export async function createWithdrawal(
+  withdrawalData: Omit<Withdrawal, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<Withdrawal | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  const newWithdrawal: Withdrawal = {
+    ...withdrawalData,
+    id: generateId(),
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  content.withdrawals.push(newWithdrawal)
+  const success = await updateFile(content, sha)
+  return success ? newWithdrawal : null
+}
+
+export async function updateWithdrawal(id: string, data: Partial<Withdrawal>): Promise<Withdrawal | null> {
+  const { content, sha } = await getFileContent()
+  const index = content.withdrawals.findIndex((w) => w.id === id)
+
+  if (index === -1) return null
+
+  content.withdrawals[index] = {
+    ...content.withdrawals[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  }
+
+  const success = await updateFile(content, sha)
+  return success ? content.withdrawals[index] : null
+}
+
+// Get withdrawal stats for admin
+export async function getWithdrawalStats() {
+  const { content } = await getFileContent()
+  const withdrawals = content.withdrawals
+
+  const pending = withdrawals.filter((w) => w.status === 'pending').length
+  const processing = withdrawals.filter((w) => w.status === 'processing').length
+  const completed = withdrawals.filter((w) => w.status === 'completed').length
+  const rejected = withdrawals.filter((w) => w.status === 'rejected').length
+  
+  const totalDisbursed = withdrawals
+    .filter((w) => w.status === 'completed')
+    .reduce((sum, w) => sum + w.netAmount, 0)
+
+  return {
+    pending,
+    processing,
+    completed,
+    rejected,
+    total: withdrawals.length,
+    totalDisbursed,
+  }
 }

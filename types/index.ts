@@ -105,6 +105,48 @@ export interface PaymentSettings {
   updatedAt: string
 }
 
+export interface Withdrawal {
+  id: string
+  userId: string
+  userName: string
+  userEmail: string
+  amount: number
+  fee: number
+  netAmount: number // amount - fee
+  bankType: 'bca' | 'bni' | 'bri' | 'mandiri' | 'dana' | 'ovo' | 'gopay' | 'shopeepay'
+  bankAccount: string // nomor rekening/HP
+  bankAccountName: string // nama pemilik
+  status: 'pending' | 'processing' | 'completed' | 'rejected'
+  adminNotes?: string
+  processedAt?: string
+  processedBy?: string
+  createdAt: string
+  updatedAt: string
+}
+
+// Fee structure for withdrawals
+export const WITHDRAWAL_FEES: Record<string, number> = {
+  bca: 6500,
+  bni: 6500,
+  bri: 6500,
+  mandiri: 6500,
+  dana: 1000,
+  ovo: 1000,
+  gopay: 1000,
+  shopeepay: 1000,
+}
+
+export const BANK_LABELS: Record<string, string> = {
+  bca: 'BCA',
+  bni: 'BNI',
+  bri: 'BRI',
+  mandiri: 'Mandiri',
+  dana: 'DANA',
+  ovo: 'OVO',
+  gopay: 'GoPay',
+  shopeepay: 'ShopeePay',
+}
+
 export interface Database {
   users: User[]
   botSettings: BotSettings[]
@@ -113,6 +155,7 @@ export interface Database {
   qrisSettings: QrisSettings[]
   payments: Payment[]
   paymentSettings: PaymentSettings | null
+  withdrawals: Withdrawal[]
 }
 
 export type SessionUser = Omit<User, 'password'>
