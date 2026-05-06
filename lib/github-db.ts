@@ -334,8 +334,9 @@ export async function getDashboardStats(userId: string) {
   const totalOrders = orders.length
   const pendingOrders = orders.filter((o) => o.status === 'pending').length
   const completedOrders = orders.filter((o) => o.status === 'completed').length
+  // Exclude sandbox orders from revenue calculation (sandbox = testing, not real money)
   const totalRevenue = orders
-    .filter((o) => o.status === 'completed')
+    .filter((o) => o.status === 'completed' && !o.isSandbox)
     .reduce((sum, o) => sum + o.totalPrice, 0)
   const isBotActive = botSettings?.isActive || false
 

@@ -16,8 +16,9 @@ export async function GET() {
       getPaymentSettings(),
     ])
 
+    // Exclude sandbox orders from revenue calculation (sandbox = testing, not real money)
     const totalRevenue = orders
-      .filter((o) => o.status === 'completed')
+      .filter((o) => o.status === 'completed' && !o.isSandbox)
       .reduce((sum, o) => sum + o.totalPrice, 0)
 
     let activePaymentMethods = 0

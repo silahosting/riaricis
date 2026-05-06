@@ -50,6 +50,8 @@ export interface Order {
   paymentStatus?: 'unpaid' | 'pending' | 'paid' | 'expired' | 'failed'
   paymentQrisUrl?: string
   paymentTransactionId?: string
+  paymentMethod?: 'qris' | 'midtrans' | 'saldo' // Payment method used
+  isSandbox?: boolean // true if paid with Midtrans Sandbox (not real money)
   createdAt: string
   updatedAt: string
 }

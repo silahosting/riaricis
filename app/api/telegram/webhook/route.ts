@@ -361,11 +361,12 @@ async function handleCallbackQuery(
   
   // Calculate stats
   const completedOrders = orders?.filter(o => o.status === 'completed') || []
-  const totalSold = completedOrders.reduce((sum, o) => sum + o.quantity, 0)
-  const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalPrice, 0)
-  const totalUsers = new Set(orders?.map(o => o.buyerId) || []).size || 183 // Default demo value
+  // Exclude sandbox orders from revenue calculation (sandbox = testing, not real money)
+  const realOrders = completedOrders.filter(o => !o.isSandbox)
+  const totalSold = realOrders.reduce((sum, o) => sum + o.quantity, 0)
+  const totalRevenue = realOrders.reduce((sum, o) => sum + o.totalPrice, 0)
+  const totalUsers = new Set(orders?.map(o => o.buyerId).filter(Boolean) || []).size
   
-  // User stats (in production, get from user database)
   const userOrders = completedOrders.filter(o => o.buyerId === telegramUserId)
   const userStats = {
     transactions: userOrders.reduce((sum, o) => sum + o.totalPrice, 0),
@@ -695,7 +696,7 @@ async function handleCallbackQuery(
       stock: remainingItems.length
     })
     
-    // Create order record
+    // Create order record (saldo payment is real money, not sandbox)
     await createOrder({
       userId: botOwnerId,
       productId: product.id,
@@ -706,7 +707,9 @@ async function handleCallbackQuery(
       quantity,
       totalPrice: product.price * quantity,
       status: 'completed',
-      paymentStatus: 'paid'
+      paymentStatus: 'paid',
+      paymentMethod: 'saldo',
+      isSandbox: false
     })
     
     // Clean up session
@@ -760,7 +763,7 @@ async function handleCallbackQuery(
     try {
       const totalPrice = product.price * quantity
 
-      // Create order first
+      // Create order first (Orkut is always production, not sandbox)
       const newOrder = await createOrder({
         userId: botOwnerId,
         productId: product.id,
@@ -771,7 +774,9 @@ async function handleCallbackQuery(
         quantity,
         totalPrice,
         status: 'pending',
-        paymentStatus: 'pending'
+        paymentStatus: 'pending',
+        paymentMethod: 'qris',
+        isSandbox: false
       })
 
       if (!newOrder) {
@@ -885,6 +890,10 @@ async function handleCallbackQuery(
     try {
       const totalPrice = product.price * quantity
 
+      // Get payment settings to check if sandbox mode
+      const paymentSettingsMidtrans = await getPaymentSettings()
+      const isSandboxMode = !(paymentSettingsMidtrans?.midtransIsProduction ?? false)
+
       // Create order first
       const newOrder = await createOrder({
         userId: botOwnerId,
@@ -896,7 +905,9 @@ async function handleCallbackQuery(
         quantity,
         totalPrice,
         status: 'pending',
-        paymentStatus: 'pending'
+        paymentStatus: 'pending',
+        paymentMethod: 'midtrans',
+        isSandbox: isSandboxMode
       })
 
       if (!newOrder) {
@@ -1322,10 +1333,12 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
   const orders = await getOrdersByUserId(botOwnerId)
   
   const completedOrders = orders?.filter(o => o.status === 'completed') || []
-  const totalSold = completedOrders.reduce((sum, o) => sum + o.quantity, 0)
-  const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalPrice, 0)
-  const totalUsers = new Set(orders?.map(o => o.buyerId) || []).size || 183
-  
+  // Exclude sandbox orders from revenue calculation (sandbox = testing, not real money)
+  const realOrders = completedOrders.filter(o => !o.isSandbox)
+  const totalSold = realOrders.reduce((sum, o) => sum + o.quantity, 0)
+  const totalRevenue = realOrders.reduce((sum, o) => sum + o.totalPrice, 0)
+  const totalUsers = new Set(orders?.map(o => o.buyerId).filter(Boolean) || []).size
+
   const userOrders = completedOrders.filter(o => o.buyerId === userId)
   const userStats = {
     transactions: userOrders.reduce((sum, o) => sum + o.totalPrice, 0),
