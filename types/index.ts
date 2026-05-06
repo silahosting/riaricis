@@ -147,6 +147,37 @@ export const BANK_LABELS: Record<string, string> = {
   shopeepay: 'ShopeePay',
 }
 
+// Bot subscription for premium features
+export interface BotSubscription {
+  id: string
+  userId: string
+  userName: string
+  userEmail: string
+  plan: '3month' // Currently only 3 months plan
+  price: number // 25000
+  status: 'pending' | 'active' | 'expired'
+  orderId?: string // Reference to order if paid via order system
+  paymentMethod: 'saldo' | 'qris'
+  startDate?: string
+  endDate?: string
+  createdAt: string
+  updatedAt: string
+}
+
+// Balance adjustment for admin manual top-up
+export interface BalanceAdjustment {
+  id: string
+  userId: string
+  userName: string
+  userEmail: string
+  amount: number
+  type: 'add' | 'deduct'
+  reason: string
+  adminId: string
+  adminName: string
+  createdAt: string
+}
+
 export interface Database {
   users: User[]
   botSettings: BotSettings[]
@@ -156,6 +187,8 @@ export interface Database {
   payments: Payment[]
   paymentSettings: PaymentSettings | null
   withdrawals: Withdrawal[]
+  balanceAdjustments: BalanceAdjustment[]
+  botSubscriptions: BotSubscription[]
 }
 
 export type SessionUser = Omit<User, 'password'>

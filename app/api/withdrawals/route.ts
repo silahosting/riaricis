@@ -4,7 +4,7 @@ import {
   getWithdrawals, 
   createWithdrawal, 
   canUserWithdrawToday,
-  getDashboardStats 
+  getUserBalance
 } from '@/lib/github-db'
 import { WITHDRAWAL_FEES } from '@/types'
 
@@ -19,19 +19,17 @@ export async function GET() {
 
     const withdrawals = await getWithdrawals(session.id)
     const canWithdraw = await canUserWithdrawToday(session.id)
-    const stats = await getDashboardStats(session.id)
-
-    // Calculate actual available balance (revenue - completed withdrawals)
-    const completedWithdrawals = withdrawals.filter(w => w.status === 'completed')
-    const totalWithdrawn = completedWithdrawals.reduce((sum, w) => sum + w.amount, 0)
-    const availableBalance = stats.totalRevenue - totalWithdrawn
+    
+    // Use getUserBalance which includes adjustments
+    const balance = await getUserBalance(session.id)
 
     return NextResponse.json({
       withdrawals,
       canWithdraw,
-      balance: Math.max(0, availableBalance), // User's available balance
-      totalRevenue: stats.totalRevenue,
-      totalWithdrawn,
+      balance: balance.availableBalance,
+      totalRevenue: balance.totalRevenue,
+      totalWithdrawn: balance.totalWithdrawn,
+      totalAdjustments: balance.totalAdjustments,
     })
   } catch (error) {
     console.error('Error fetching withdrawals:', error)
@@ -64,17 +62,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Anda sudah melakukan penarikan hari ini. Coba lagi besok.' }, { status: 400 })
     }
 
-    // Check user balance
-    const stats = await getDashboardStats(session.id)
-    const userWithdrawals = await getWithdrawals(session.id)
-    const completedWithdrawals = userWithdrawals.filter(w => w.status === 'completed')
-    const totalWithdrawn = completedWithdrawals.reduce((sum, w) => sum + w.amount, 0)
-    const availableBalance = stats.totalRevenue - totalWithdrawn
+    // Check user balance (includes adjustments)
+    const balance = await getUserBalance(session.id)
     
     const fee = WITHDRAWAL_FEES[bankType] || 0
     const netAmount = amount - fee
 
-    if (amount > availableBalance) {
+    if (amount > balance.availableBalance) {
       return NextResponse.json({ error: 'Saldo tidak mencukupi' }, { status: 400 })
     }
 

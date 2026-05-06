@@ -1,5 +1,5 @@
 import { GITHUB_CONFIG } from './constants'
-import type { Database, User, BotSettings, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal } from '@/types'
+import type { Database, User, BotSettings, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal, BalanceAdjustment, BotSubscription } from '@/types'
 
 const defaultDatabase: Database = {
   users: [],
@@ -10,6 +10,8 @@ const defaultDatabase: Database = {
   payments: [],
   paymentSettings: null,
   withdrawals: [],
+  balanceAdjustments: [],
+  botSubscriptions: [],
 }
 
 const API_BASE = "https://api-orkut-iota-seven.vercel.app" // ganti dengan URL API kamu
@@ -47,6 +49,8 @@ async function getFileContent(): Promise<{ content: Database; sha: string | null
       payments: Array.isArray(data.content?.payments) ? data.content.payments : [],
       paymentSettings: data.content?.paymentSettings || null,
       withdrawals: Array.isArray(data.content?.withdrawals) ? data.content.withdrawals : [],
+      balanceAdjustments: Array.isArray(data.content?.balanceAdjustments) ? data.content.balanceAdjustments : [],
+      botSubscriptions: Array.isArray(data.content?.botSubscriptions) ? data.content.botSubscriptions : [],
     }
     
     return { content, sha: data.sha || null }
@@ -626,4 +630,133 @@ export async function getWithdrawalStats() {
     total: withdrawals.length,
     totalDisbursed,
   }
+}
+
+// Balance Adjustment operations (Admin)
+export async function getBalanceAdjustments(userId?: string): Promise<BalanceAdjustment[]> {
+  const { content } = await getFileContent()
+  if (userId) {
+    return content.balanceAdjustments.filter((b) => b.userId === userId)
+  }
+  return content.balanceAdjustments
+}
+
+export async function createBalanceAdjustment(
+  data: Omit<BalanceAdjustment, 'id' | 'createdAt'>
+): Promise<BalanceAdjustment | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  const newAdjustment: BalanceAdjustment = {
+    ...data,
+    id: generateId(),
+    createdAt: now,
+  }
+
+  content.balanceAdjustments.push(newAdjustment)
+  const success = await updateFile(content, sha)
+  return success ? newAdjustment : null
+}
+
+// Get user balance including adjustments
+export async function getUserBalance(userId: string) {
+  const { content } = await getFileContent()
+  
+  // Get user info for email matching
+  const user = content.users.find(u => u.id === userId)
+  const userEmail = user?.email?.toLowerCase()
+  
+  // Revenue from completed orders (non-sandbox)
+  const orders = content.orders.filter(o => o.userId === userId)
+  const completedOrders = orders.filter(o => o.status === 'completed' && !o.isSandbox)
+  const totalRevenue = completedOrders.reduce((sum, o) => sum + o.totalPrice, 0)
+  
+  // Completed withdrawals
+  const withdrawals = content.withdrawals.filter(w => w.userId === userId)
+  const completedWithdrawals = withdrawals.filter(w => w.status === 'completed')
+  const totalWithdrawn = completedWithdrawals.reduce((sum, w) => sum + w.amount, 0)
+  
+  // Balance adjustments - match by userId OR by email (more reliable)
+  const allAdjustments = content.balanceAdjustments || []
+  const adjustments = allAdjustments.filter(b => {
+    // Match by userId
+    if (b.userId === userId) return true
+    // Also match by email as fallback (in case ID mismatch)
+    if (userEmail && b.userEmail?.toLowerCase() === userEmail) return true
+    return false
+  })
+  
+  const totalAdjustments = adjustments.reduce((sum, b) => {
+    return sum + (b.type === 'add' ? b.amount : -b.amount)
+  }, 0)
+  
+  const availableBalance = totalRevenue - totalWithdrawn + totalAdjustments
+  
+  return {
+    totalRevenue,
+    totalWithdrawn,
+    totalAdjustments,
+    availableBalance: Math.max(0, availableBalance),
+  }
+}
+
+// Bot Subscription operations
+export async function getUserSubscription(userId: string): Promise<BotSubscription | null> {
+  const { content } = await getFileContent()
+  const subscriptions = content.botSubscriptions || []
+  
+  // Find active subscription for user
+  const now = new Date()
+  const activeSubscription = subscriptions.find(s => {
+    if (s.userId !== userId) return false
+    if (s.status !== 'active') return false
+    if (s.endDate && new Date(s.endDate) < now) return false
+    return true
+  })
+  
+  return activeSubscription || null
+}
+
+export async function createSubscription(
+  data: Omit<BotSubscription, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<BotSubscription | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  const newSubscription: BotSubscription = {
+    ...data,
+    id: generateId(),
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  content.botSubscriptions = content.botSubscriptions || []
+  content.botSubscriptions.push(newSubscription)
+  const success = await updateFile(content, sha)
+  return success ? newSubscription : null
+}
+
+export async function activateSubscription(subscriptionId: string): Promise<BotSubscription | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date()
+  
+  const subscription = content.botSubscriptions?.find(s => s.id === subscriptionId)
+  if (!subscription) return null
+
+  // Set start and end dates (3 months from now)
+  const endDate = new Date(now)
+  endDate.setMonth(endDate.getMonth() + 3)
+  
+  subscription.status = 'active'
+  subscription.startDate = now.toISOString()
+  subscription.endDate = endDate.toISOString()
+  subscription.updatedAt = now.toISOString()
+
+  const success = await updateFile(content, sha)
+  return success ? subscription : null
+}
+
+export async function getAllSubscriptions(): Promise<BotSubscription[]> {
+  const { content } = await getFileContent()
+  return content.botSubscriptions || []
 }

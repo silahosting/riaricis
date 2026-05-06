@@ -20,7 +20,9 @@ import {
   Info,
   Calendar,
   TrendingDown,
-  Shield
+  TrendingUp,
+  Shield,
+  Gift
 } from 'lucide-react'
 import { WITHDRAWAL_FEES, BANK_LABELS, type Withdrawal } from '@/types'
 
@@ -70,6 +72,7 @@ export default function WithdrawPage() {
   const [balance, setBalance] = useState(0)
   const [totalRevenue, setTotalRevenue] = useState(0)
   const [totalWithdrawn, setTotalWithdrawn] = useState(0)
+  const [totalAdjustments, setTotalAdjustments] = useState(0)
   const [canWithdraw, setCanWithdraw] = useState(true)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -98,6 +101,7 @@ export default function WithdrawPage() {
         setBalance(data.balance || 0)
         setTotalRevenue(data.totalRevenue || 0)
         setTotalWithdrawn(data.totalWithdrawn || 0)
+        setTotalAdjustments(data.totalAdjustments || 0)
         setCanWithdraw(data.canWithdraw)
       }
     } catch (err) {
@@ -153,8 +157,8 @@ export default function WithdrawPage() {
       </div>
 
       {/* Balance Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <NeoCard className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 sm:col-span-1">
+      <div className={`grid grid-cols-1 gap-4 ${totalAdjustments !== 0 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
+        <NeoCard className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
           <NeoCardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
@@ -180,7 +184,7 @@ export default function WithdrawPage() {
                 </p>
               </div>
               <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                <TrendingDown className="w-6 h-6 text-emerald-500 rotate-180" />
+                <TrendingUp className="w-6 h-6 text-emerald-500" />
               </div>
             </div>
           </NeoCardContent>
@@ -201,6 +205,24 @@ export default function WithdrawPage() {
             </div>
           </NeoCardContent>
         </NeoCard>
+
+        {totalAdjustments !== 0 && (
+          <NeoCard className={`bg-gradient-to-br ${totalAdjustments > 0 ? 'from-violet-500/10 to-violet-500/5 border-violet-500/20' : 'from-red-500/10 to-red-500/5 border-red-500/20'}`}>
+            <NeoCardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-muted-foreground text-xs">Bonus/Penyesuaian</p>
+                  <p className={`text-2xl font-bold mt-1 ${totalAdjustments > 0 ? 'text-violet-600' : 'text-red-600'}`}>
+                    {loading ? '...' : `${totalAdjustments > 0 ? '+' : ''}${formatCurrency(totalAdjustments)}`}
+                  </p>
+                </div>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${totalAdjustments > 0 ? 'bg-violet-500/20' : 'bg-red-500/20'}`}>
+                  <Gift className={`w-6 h-6 ${totalAdjustments > 0 ? 'text-violet-500' : 'text-red-500'}`} />
+                </div>
+              </div>
+            </NeoCardContent>
+          </NeoCard>
+        )}
       </div>
 
       {/* Info Cards */}
