@@ -361,7 +361,18 @@ async function handleCallbackQuery(
   if (data === 'menu_main') {
     await answerCallbackQuery(botToken, callbackQuery.id)
     const menuText = generateStartMenuText(user, { totalSold, totalRevenue, totalUsers }, userStats)
-    await editMessageText(botToken, chatId, messageId, menuText, {
+    const startMenuPhoto = 'https://files.catbox.moe/992896.jpg'
+    
+    // Delete old message and send new photo message
+    try {
+      await deleteMessage(botToken, chatId, messageId)
+    } catch (e) {
+      // Ignore delete errors
+    }
+    
+    await sendPhoto(botToken, chatId, startMenuPhoto, {
+      caption: menuText,
+      parseMode: 'Markdown',
       replyMarkup: generateMainMenuKeyboard(userStats.balance)
     })
     return
@@ -1309,7 +1320,10 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
   // Handle /start command
   if (text.startsWith('/start')) {
     const menuText = generateStartMenuText(user, { totalSold, totalRevenue, totalUsers }, userStats)
-    await sendMessage(botToken, chatId, menuText, {
+    const startMenuPhoto = 'https://files.catbox.moe/992896.jpg'
+    await sendPhoto(botToken, chatId, startMenuPhoto, {
+      caption: menuText,
+      parseMode: 'Markdown',
       replyMarkup: generateMainMenuKeyboard(userStats.balance)
     })
     return
