@@ -45,8 +45,8 @@ export default async function DashboardPage() {
   const recentOrders = orders.slice(-5).reverse()
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
+    <div className="flex flex-col gap-6 animate-fade-in">
+      <div className="animate-slide-down">
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-muted-foreground text-sm">Ringkasan aktivitas bot Anda</p>
       </div>
@@ -59,6 +59,7 @@ export default async function DashboardPage() {
           icon={Package}
           variant="primary"
           description={`${stats.activeProducts} produk aktif`}
+          animationDelay={50}
         />
         <StatsCard
           title="Total Pesanan"
@@ -66,6 +67,7 @@ export default async function DashboardPage() {
           icon={ShoppingCart}
           variant="secondary"
           description={`${stats.pendingOrders} menunggu proses`}
+          animationDelay={100}
         />
         <StatsCard
           title="Pendapatan"
@@ -73,6 +75,7 @@ export default async function DashboardPage() {
           icon={DollarSign}
           variant="success"
           description={`${stats.completedOrders} pesanan selesai`}
+          animationDelay={150}
         />
         <StatsCard
           title="Status Bot"
@@ -80,30 +83,31 @@ export default async function DashboardPage() {
           icon={Bot}
           variant={stats.isBotActive ? 'accent' : 'warning'}
           description={stats.isBotActive ? 'Bot berjalan normal' : 'Konfigurasi diperlukan'}
+          animationDelay={200}
         />
       </div>
 
       {/* Quick Actions */}
-      <NeoCard>
+      <NeoCard className="animate-slide-up" style={{ animationDelay: '250ms' }}>
         <NeoCardHeader>
           <NeoCardTitle>Aksi Cepat</NeoCardTitle>
         </NeoCardHeader>
         <NeoCardContent>
           <div className="flex flex-wrap gap-3">
             <Link href="/dashboard/products/new">
-              <NeoButton variant="default">
+              <NeoButton variant="default" className="hover:scale-105 active:scale-95 transition-transform">
                 <Package className="w-5 h-5" />
                 Tambah Produk
               </NeoButton>
             </Link>
             <Link href="/dashboard/orders">
-              <NeoButton variant="secondary">
+              <NeoButton variant="secondary" className="hover:scale-105 active:scale-95 transition-transform">
                 <ShoppingCart className="w-5 h-5" />
                 Lihat Pesanan
               </NeoButton>
             </Link>
             <Link href="/dashboard/settings">
-              <NeoButton variant="accent">
+              <NeoButton variant="accent" className="hover:scale-105 active:scale-95 transition-transform">
                 <Bot className="w-5 h-5" />
                 Pengaturan Bot
               </NeoButton>

@@ -7,9 +7,11 @@ interface StatsCardProps {
   icon: LucideIcon
   variant?: 'default' | 'primary' | 'secondary' | 'accent' | 'success' | 'warning'
   description?: string
+  className?: string
+  animationDelay?: number
 }
 
-export function StatsCard({ title, value, icon: Icon, variant = 'default', description }: StatsCardProps) {
+export function StatsCard({ title, value, icon: Icon, variant = 'default', description, className, animationDelay = 0 }: StatsCardProps) {
   const styles = {
     default: {
       bg: 'bg-card',
@@ -46,7 +48,15 @@ export function StatsCard({ title, value, icon: Icon, variant = 'default', descr
   const style = styles[variant]
 
   return (
-    <div className={cn('p-5 rounded-xl', style.bg, style.text)}>
+    <div 
+      className={cn(
+        'p-5 rounded-xl hover-lift transition-all duration-300 animate-slide-up',
+        style.bg, 
+        style.text,
+        className
+      )}
+      style={{ animationDelay: `${animationDelay}ms` }}
+    >
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
@@ -55,7 +65,7 @@ export function StatsCard({ title, value, icon: Icon, variant = 'default', descr
             <p className="text-xs mt-2 text-muted-foreground">{description}</p>
           )}
         </div>
-        <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center', style.icon)}>
+        <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform', style.icon)}>
           <Icon className="w-5 h-5" />
         </div>
       </div>

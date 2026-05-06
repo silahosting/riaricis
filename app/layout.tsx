@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 const inter = Inter({ 
@@ -52,6 +53,27 @@ export default function RootLayout({
     <html lang="id" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body className="font-sans antialiased bg-background text-foreground">
         {children}
+        <Toaster 
+          position="top-center"
+          expand={true}
+          richColors
+          closeButton
+          theme="dark"
+          toastOptions={{
+            style: {
+              background: 'hsl(var(--card))',
+              border: '1px solid hsl(var(--border))',
+              color: 'hsl(var(--foreground))',
+            },
+            classNames: {
+              toast: 'animate-in slide-in-from-top-2 duration-300',
+              success: 'bg-success/10 border-success/30 text-success',
+              error: 'bg-destructive/10 border-destructive/30 text-destructive',
+              warning: 'bg-warning/10 border-warning/30 text-warning',
+              info: 'bg-primary/10 border-primary/30 text-primary',
+            },
+          }}
+        />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

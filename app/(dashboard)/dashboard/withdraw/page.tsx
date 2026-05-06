@@ -1,12 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 import { NeoCard, NeoCardHeader, NeoCardTitle, NeoCardContent } from '@/components/ui/neo-card'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoInput } from '@/components/ui/neo-input'
 import { NeoBadge } from '@/components/ui/neo-badge'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { StatusModal, useStatusModal } from '@/components/ui/status-modal'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { 
   Wallet, 
   ArrowDownToLine, 
@@ -22,7 +25,9 @@ import {
   TrendingDown,
   TrendingUp,
   Shield,
-  Gift
+  Gift,
+  Sparkles,
+  Send
 } from 'lucide-react'
 import { WITHDRAWAL_FEES, BANK_LABELS, type Withdrawal } from '@/types'
 
@@ -76,8 +81,10 @@ export default function WithdrawPage() {
   const [canWithdraw, setCanWithdraw] = useState(true)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [submitState, setSubmitState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const { showSuccess: showSuccessModal, showError: showErrorModal, StatusModalComponent } = useStatusModal()
 
   // Form state
   const [amount, setAmount] = useState('')
@@ -116,6 +123,7 @@ export default function WithdrawPage() {
     setError('')
     setSuccess('')
     setSubmitting(true)
+    setSubmitState('loading')
 
     try {
       const res = await fetch('/api/withdrawals', {
@@ -133,32 +141,75 @@ export default function WithdrawPage() {
 
       if (!res.ok) {
         setError(data.error || 'Gagal membuat permintaan penarikan')
+        setSubmitState('error')
+        showErrorModal(
+          'Penarikan Gagal',
+          data.error || 'Gagal membuat permintaan penarikan. Silakan periksa kembali data Anda.',
+          { actionLabel: 'Coba Lagi' }
+        )
+        toast.error(data.error || 'Gagal membuat permintaan penarikan', {
+          icon: <XCircle className="w-5 h-5" />,
+          description: 'Silakan periksa kembali data penarikan Anda',
+        })
+        setTimeout(() => setSubmitState('idle'), 2000)
         return
       }
 
+      setSubmitState('success')
       setSuccess('Permintaan penarikan berhasil dibuat!')
+      showSuccessModal(
+        'Penarikan Berhasil Diajukan!',
+        `${formatCurrency(Number(amount))} akan segera diproses ke ${BANK_LABELS[bankType] || bankType}. Estimasi 1x24 jam.`,
+        { 
+          actionLabel: 'Lihat Riwayat',
+          showConfetti: true,
+          autoClose: 5000
+        }
+      )
+      toast.success('Permintaan penarikan berhasil!', {
+        icon: <CheckCircle2 className="w-5 h-5" />,
+        description: `${formatCurrency(Number(amount))} akan segera diproses ke ${BANK_LABELS[bankType] || bankType}`,
+        duration: 5000,
+      })
       setAmount('')
       setBankType('')
       setBankAccount('')
       setBankAccountName('')
       fetchData()
+      setTimeout(() => setSubmitState('idle'), 3000)
     } catch (err) {
       setError('Terjadi kesalahan')
+      setSubmitState('error')
+      showErrorModal(
+        'Terjadi Kesalahan',
+        'Silakan coba lagi nanti',
+        { actionLabel: 'Tutup' }
+      )
+      toast.error('Terjadi kesalahan', {
+        icon: <XCircle className="w-5 h-5" />,
+        description: 'Silakan coba lagi nanti',
+      })
+      setTimeout(() => setSubmitState('idle'), 2000)
     } finally {
       setSubmitting(false)
     }
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Pencairan Dana</h1>
-        <p className="text-muted-foreground text-sm">Tarik saldo pendapatan Anda</p>
-      </div>
+    <>
+      {StatusModalComponent}
+      <div className="flex flex-col gap-6 animate-fade-in">
+        <div className="animate-slide-down">
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            Pencairan Dana
+            <Sparkles className="w-5 h-5 text-primary animate-float" />
+          </h1>
+          <p className="text-muted-foreground text-sm">Tarik saldo pendapatan Anda</p>
+        </div>
 
       {/* Balance Cards */}
       <div className={`grid grid-cols-1 gap-4 ${totalAdjustments !== 0 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
-        <NeoCard className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+        <NeoCard className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20 hover-lift animate-slide-up stagger-1">
           <NeoCardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
@@ -174,7 +225,7 @@ export default function WithdrawPage() {
           </NeoCardContent>
         </NeoCard>
         
-        <NeoCard className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20">
+        <NeoCard className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-emerald-500/20 hover-lift animate-slide-up stagger-2">
           <NeoCardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
@@ -190,7 +241,7 @@ export default function WithdrawPage() {
           </NeoCardContent>
         </NeoCard>
         
-        <NeoCard className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/20">
+        <NeoCard className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border-orange-500/20 hover-lift animate-slide-up stagger-3">
           <NeoCardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
@@ -207,7 +258,7 @@ export default function WithdrawPage() {
         </NeoCard>
 
         {totalAdjustments !== 0 && (
-          <NeoCard className={`bg-gradient-to-br ${totalAdjustments > 0 ? 'from-violet-500/10 to-violet-500/5 border-violet-500/20' : 'from-red-500/10 to-red-500/5 border-red-500/20'}`}>
+          <NeoCard className={`bg-gradient-to-br hover-lift animate-slide-up stagger-4 ${totalAdjustments > 0 ? 'from-violet-500/10 to-violet-500/5 border-violet-500/20' : 'from-red-500/10 to-red-500/5 border-red-500/20'}`}>
             <NeoCardContent className="p-5">
               <div className="flex items-center justify-between">
                 <div>
@@ -226,8 +277,8 @@ export default function WithdrawPage() {
       </div>
 
       {/* Info Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-4 rounded-xl bg-muted/50 border border-border flex items-start gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 animate-slide-up">
+        <div className="p-4 rounded-xl bg-muted/50 border border-border flex items-start gap-3 hover-scale transition-all">
           <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
             <TrendingDown className="w-5 h-5 text-amber-500" />
           </div>
@@ -238,7 +289,7 @@ export default function WithdrawPage() {
             </p>
           </div>
         </div>
-        <div className="p-4 rounded-xl bg-muted/50 border border-border flex items-start gap-3">
+        <div className="p-4 rounded-xl bg-muted/50 border border-border flex items-start gap-3 hover-scale transition-all">
           <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
             <Calendar className="w-5 h-5 text-blue-500" />
           </div>
@@ -444,23 +495,20 @@ export default function WithdrawPage() {
                 </div>
               )}
 
-              <NeoButton
+              <LoadingButton
                 type="submit"
                 className="w-full"
                 disabled={!canWithdraw || submitting || !amount || !bankType || !bankAccount || !bankAccountName || Number(amount) < MIN_WITHDRAWAL || Number(amount) > balance}
+                loading={submitState === 'loading'}
+                loadingText="Memproses Penarikan..."
+                success={submitState === 'success'}
+                successText="Penarikan Berhasil!"
+                error={submitState === 'error'}
+                errorText="Penarikan Gagal"
               >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Memproses...
-                  </>
-                ) : (
-                  <>
-                    <ArrowDownToLine className="w-4 h-4" />
-                    Ajukan Penarikan
-                  </>
-                )}
-              </NeoButton>
+                <Send className="w-4 h-4" />
+                Ajukan Penarikan
+              </LoadingButton>
             </form>
           </NeoCardContent>
         </NeoCard>
@@ -519,6 +567,7 @@ export default function WithdrawPage() {
           </NeoCardContent>
         </NeoCard>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
