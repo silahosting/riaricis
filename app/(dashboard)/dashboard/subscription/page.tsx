@@ -400,7 +400,7 @@ export default function SubscriptionPage() {
 
             {/* Merchant Info */}
             <div className="text-center mb-4">
-              <h2 className="text-white font-bold text-lg">CINDIGITAL GROUP</h2>
+              <h2 className="text-white font-bold text-lg">SEWA BOT AUTO ORDER/h2>
               <p className="text-white/70 text-xs">NMID: 9360050300000879140</p>
             </div>
 
@@ -503,7 +503,7 @@ export default function SubscriptionPage() {
               {/* Merchant Name */}
               <div>
                 <p className="text-gray-400 text-xs">Merchant Name</p>
-                <p className="text-white text-sm">CINDIGITAL GROUP</p>
+                <p className="text-white text-sm">SEWA BOT AUTO ORDER</p>
               </div>
 
               <div className="h-px bg-[#1a3a5c]" />
