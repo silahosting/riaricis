@@ -777,19 +777,15 @@ async function handleCallbackQuery(
 
       // Send QR code image from Orkut API
       try {
-        await fetch(`${TELEGRAM_API}${botToken}/sendPhoto`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            photo: qrisResult.qrsImageUrl,
-            caption: qrisText,
-            parse_mode: 'Markdown',
-            reply_markup: keyboard,
-          }),
+        const photoResult = await sendPhoto(botToken, chatId, qrisResult.qrsImageUrl, {
+          caption: qrisText,
+          replyMarkup: keyboard
         })
+        if (!photoResult.ok) {
+          await sendMessage(botToken, chatId, qrisText, { replyMarkup: keyboard })
+        }
       } catch (photoError) {
-        console.error('Failed to send photo, sending text with QR string:', photoError)
+        console.error('Failed to send photo:', photoError)
         await sendMessage(botToken, chatId, qrisText, { replyMarkup: keyboard })
       }
 
@@ -902,20 +898,11 @@ async function handleCallbackQuery(
 
       // Send QR code image if available
       if (midtransResult.qrCodeUrl) {
-        try {
-          await fetch(`${TELEGRAM_API}${botToken}/sendPhoto`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chat_id: chatId,
-              photo: midtransResult.qrCodeUrl,
-              caption: qrisText,
-              parse_mode: 'Markdown',
-              reply_markup: keyboard,
-            }),
-          })
-        } catch (photoError) {
-          console.error('Failed to send Midtrans QR photo:', photoError)
+        const photoResult = await sendPhoto(botToken, chatId, midtransResult.qrCodeUrl, {
+          caption: qrisText,
+          replyMarkup: keyboard
+        })
+        if (!photoResult.ok) {
           await sendMessage(botToken, chatId, qrisText, { replyMarkup: keyboard })
         }
       } else {
