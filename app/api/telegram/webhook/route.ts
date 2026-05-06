@@ -173,6 +173,22 @@ async function deleteMessage(botToken: string, chatId: number, messageId: number
   return response.json()
 }
 
+// Helper to replace message (delete old, send new) - works with both text and photo messages
+async function replaceWithMessage(
+  botToken: string,
+  chatId: number,
+  messageId: number,
+  text: string,
+  options?: { replyMarkup?: object }
+) {
+  try {
+    await deleteMessage(botToken, chatId, messageId)
+  } catch (e) {
+    // Ignore delete errors
+  }
+  return sendMessage(botToken, chatId, text, options)
+}
+
 // Generate paginated product list text
 function generateProductListText(products: Product[], page: number, totalPages: number): string {
   if (!products || products.length === 0) {
@@ -390,7 +406,7 @@ async function handleCallbackQuery(
     const listText = generateProductListText(pageProducts, page, totalPages)
     const keyboard = generateProductListKeyboard(pageProducts, page, totalPages)
     
-    await editMessageText(botToken, chatId, messageId, listText, { replyMarkup: keyboard })
+    await replaceWithMessage(botToken, chatId, messageId, listText, { replyMarkup: keyboard })
     return
   }
   
@@ -418,7 +434,7 @@ async function handleCallbackQuery(
       ]
     }
     
-    await editMessageText(botToken, chatId, messageId, infoText, { replyMarkup: keyboard })
+    await replaceWithMessage(botToken, chatId, messageId, infoText, { replyMarkup: keyboard })
     return
   }
   
@@ -446,7 +462,7 @@ async function handleCallbackQuery(
       ]
     }
     
-    await editMessageText(botToken, chatId, messageId, infoText, { replyMarkup: keyboard })
+    await replaceWithMessage(botToken, chatId, messageId, infoText, { replyMarkup: keyboard })
     return
   }
   
@@ -513,7 +529,7 @@ async function handleCallbackQuery(
       ]
     }
     
-    await editMessageText(botToken, chatId, messageId, confirmText, { replyMarkup: keyboard })
+    await replaceWithMessage(botToken, chatId, messageId, confirmText, { replyMarkup: keyboard })
     return
   }
   
@@ -588,7 +604,7 @@ async function handleCallbackQuery(
       ]
     }
     
-    await editMessageText(botToken, chatId, messageId, confirmText, { replyMarkup: keyboard })
+    await replaceWithMessage(botToken, chatId, messageId, confirmText, { replyMarkup: keyboard })
     return
   }
   
@@ -646,7 +662,7 @@ async function handleCallbackQuery(
       ]
     }
     
-    await editMessageText(botToken, chatId, messageId, confirmText, { replyMarkup: keyboard3 })
+    await replaceWithMessage(botToken, chatId, messageId, confirmText, { replyMarkup: keyboard3 })
     return
   }
   
@@ -718,7 +734,7 @@ async function handleCallbackQuery(
       ]
     }
     
-    await editMessageText(botToken, chatId, messageId, successText, { replyMarkup: keyboard })
+    await replaceWithMessage(botToken, chatId, messageId, successText, { replyMarkup: keyboard })
     return
   }
   
@@ -1203,10 +1219,10 @@ async function handleCallbackQuery(
   // Handle CS
   if (data === 'cs') {
     await answerCallbackQuery(botToken, callbackQuery.id)
-    const csText = `*👩‍💼 Customer Service*\n\nHubungi admin untuk bantuan:\n\n_Silakan chat langsung untuk pertanyaan atau keluhan._`
-    await editMessageText(botToken, chatId, messageId, csText, {
+    const csText = `*Customer Service*\n\nHubungi admin untuk bantuan:\n\n_Silakan chat langsung untuk pertanyaan atau keluhan._`
+    await replaceWithMessage(botToken, chatId, messageId, csText, {
       replyMarkup: {
-        inline_keyboard: [[{ text: '⬅️ Kembali', callback_data: 'menu_main' }]]
+        inline_keyboard: [[{ text: 'Kembali', callback_data: 'menu_main' }]]
       }
     })
     return
@@ -1217,24 +1233,24 @@ async function handleCallbackQuery(
     await answerCallbackQuery(botToken, callbackQuery.id)
     
     if (userOrders.length === 0) {
-      const historyText = `*📜 Riwayat Transaksi*\n\nBelum ada transaksi.`
-      await editMessageText(botToken, chatId, messageId, historyText, {
+      const historyText = `*Riwayat Transaksi*\n\nBelum ada transaksi.`
+      await replaceWithMessage(botToken, chatId, messageId, historyText, {
         replyMarkup: {
-          inline_keyboard: [[{ text: '⬅️ Kembali', callback_data: 'menu_main' }]]
+          inline_keyboard: [[{ text: 'Kembali', callback_data: 'menu_main' }]]
         }
       })
       return
     }
     
-    let historyText = `*📜 Riwayat Transaksi*\n\n`
+    let historyText = `*Riwayat Transaksi*\n\n`
     userOrders.slice(0, 10).forEach((order, i) => {
       historyText += `${i + 1}. *${order.productName}*\n`
       historyText += `   Qty: ${order.quantity} | Rp ${toRupiah(order.totalPrice)}\n\n`
     })
     
-    await editMessageText(botToken, chatId, messageId, historyText, {
+    await replaceWithMessage(botToken, chatId, messageId, historyText, {
       replyMarkup: {
-        inline_keyboard: [[{ text: '⬅️ Kembali', callback_data: 'menu_main' }]]
+        inline_keyboard: [[{ text: 'Kembali', callback_data: 'menu_main' }]]
       }
     })
     return
@@ -1247,7 +1263,7 @@ async function handleCallbackQuery(
     // Sort by sold count (in production, track this properly)
     const popularProducts = products.slice(0, 5)
     
-    let popularText = `*✨ Produk Populer*\n\n`
+    let popularText = `*Produk Populer*\n\n`
     if (popularProducts.length === 0) {
       popularText += `Belum ada produk populer.`
     } else {
@@ -1259,12 +1275,12 @@ async function handleCallbackQuery(
     
     const keyboard = {
       inline_keyboard: [
-        ...popularProducts.map(p => ([{ text: `📦 ${p.name}`, callback_data: `select_${p.id}` }])),
-        [{ text: '⬅️ Kembali', callback_data: 'menu_main' }]
+        ...popularProducts.map(p => ([{ text: `${p.name}`, callback_data: `select_${p.id}` }])),
+        [{ text: 'Kembali', callback_data: 'menu_main' }]
       ]
     }
     
-    await editMessageText(botToken, chatId, messageId, popularText, { replyMarkup: keyboard })
+    await replaceWithMessage(botToken, chatId, messageId, popularText, { replyMarkup: keyboard })
     return
   }
   
@@ -1272,7 +1288,7 @@ async function handleCallbackQuery(
   if (data === 'how_to_order') {
     await answerCallbackQuery(botToken, callbackQuery.id)
     
-    const howText = `*❓ Cara Order*\n\n` +
+    const howText = `*Cara Order*\n\n` +
       `1. Klik *List Produk* untuk melihat daftar produk\n` +
       `2. Pilih nomor produk yang ingin dibeli\n` +
       `3. Klik tombol *Beli* untuk konfirmasi\n` +
@@ -1281,9 +1297,9 @@ async function handleCallbackQuery(
       `6. Data akan dikirim otomatis setelah pembayaran\n\n` +
       `_Hubungi CS jika ada kendala._`
     
-    await editMessageText(botToken, chatId, messageId, howText, {
+    await replaceWithMessage(botToken, chatId, messageId, howText, {
       replyMarkup: {
-        inline_keyboard: [[{ text: '⬅️ Kembali', callback_data: 'menu_main' }]]
+        inline_keyboard: [[{ text: 'Kembali', callback_data: 'menu_main' }]]
       }
     })
     return
