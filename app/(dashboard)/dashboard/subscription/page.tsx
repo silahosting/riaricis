@@ -400,7 +400,7 @@ export default function SubscriptionPage() {
 
             {/* Merchant Info */}
             <div className="text-center mb-4">
-              <h2 className="text-white font-bold text-lg">SEWA BOT AUTO ORDER/h2>
+              <h2 className="text-white font-bold text-lg">SEWA BOT AUTO ORDER</h2>
               <p className="text-white/70 text-xs">NMID: 9360050300000879140</p>
             </div>
 
