@@ -220,36 +220,17 @@
     print-color-adjust: exact;
   }
   
-  .print\\:hidden {
+  .no-print {
     display: none !important;
   }
   
-  .print\\:shadow-none {
+  .print-invoice {
     box-shadow: none !important;
-  }
-  
-  .print\\:border-2 {
-    border-width: 2px !important;
-  }
-  
-  .print\\:border-b-2 {
-    border-bottom-width: 2px !important;
-  }
-  
-  .print\\:border-r-2 {
-    border-right-width: 2px !important;
-  }
-  
-  .print\\:border-t-2 {
-    border-top-width: 2px !important;
-  }
-  
-  .print\\:p-4 {
+    border: 2px solid black !important;
     padding: 1rem !important;
   }
   
-  .print\\:text-2xl {
+  .print-invoice h1 {
     font-size: 1.5rem !important;
-    line-height: 2rem !important;
   }
 }

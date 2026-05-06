@@ -84,7 +84,7 @@ export default function InvoicePage() {
   return (
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
       {/* Header Actions - Hide on print */}
-      <div className="flex items-center justify-between print:hidden">
+      <div className="flex items-center justify-between no-print">
         <Link href={`/dashboard/orders/${order.id}`}>
           <NeoButton variant="outline" size="icon">
             <ArrowLeft className="w-5 h-5" />
@@ -101,10 +101,10 @@ export default function InvoicePage() {
       {/* Invoice Card */}
       <div 
         ref={invoiceRef}
-        className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] print:shadow-none print:border-2"
+        className="bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] print-invoice"
       >
         {/* Invoice Header */}
-        <div className="border-b-4 border-black p-6 print:p-4 print:border-b-2">
+        <div className="border-b-4 border-black p-6">
           <div className="flex items-start justify-between">
             <div>
               <h1 className="text-3xl font-black tracking-tight print:text-2xl">INVOICE</h1>
@@ -118,8 +118,8 @@ export default function InvoicePage() {
         </div>
 
         {/* Invoice Info */}
-        <div className="grid grid-cols-2 border-b-4 border-black print:border-b-2">
-          <div className="p-6 print:p-4 border-r-4 border-black print:border-r-2">
+        <div className="grid grid-cols-2 border-b-4 border-black">
+          <div className="p-6 border-r-4 border-black">
             <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase mb-2">
               <User className="w-4 h-4" />
               Pembeli
@@ -127,7 +127,7 @@ export default function InvoicePage() {
             <p className="font-bold text-lg">{order.buyerName}</p>
             <p className="text-sm text-gray-600 font-mono">{order.buyerContact}</p>
           </div>
-          <div className="p-6 print:p-4">
+          <div className="p-6">
             <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase mb-2">
               <Calendar className="w-4 h-4" />
               Tanggal
@@ -138,7 +138,7 @@ export default function InvoicePage() {
         </div>
 
         {/* Product Details */}
-        <div className="p-6 print:p-4 border-b-4 border-black print:border-b-2">
+        <div className="p-6 border-b-4 border-black">
           <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase mb-4">
             <Package className="w-4 h-4" />
             Detail Produk
@@ -175,7 +175,7 @@ export default function InvoicePage() {
         </div>
 
         {/* Payment Summary */}
-        <div className="p-6 print:p-4 border-b-4 border-black print:border-b-2">
+        <div className="p-6 border-b-4 border-black">
           <div className="flex items-center gap-2 text-gray-500 text-xs font-bold uppercase mb-4">
             <CreditCard className="w-4 h-4" />
             Ringkasan Pembayaran
@@ -236,7 +236,7 @@ export default function InvoicePage() {
         </div>
 
         {/* Footer */}
-        <div className="p-6 print:p-4 bg-gray-50 border-t-4 border-black print:border-t-2">
+        <div className="p-6 bg-gray-50 border-t-4 border-black">
           <div className="text-center">
             <p className="text-xs text-gray-500 mb-2">Terima kasih telah berbelanja!</p>
             <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
