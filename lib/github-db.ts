@@ -169,12 +169,7 @@ export async function getAllProducts(): Promise<Product[]> {
 // Get products by userId (for bot - filter by owner)
 export async function getProductsByUserId(userId: string): Promise<Product[]> {
   const { content } = await getFileContent()
-  console.log("[v0] getProductsByUserId - filtering for userId:", userId)
-  console.log("[v0] getProductsByUserId - total products in DB:", content.products.length)
-  console.log("[v0] getProductsByUserId - all product userIds:", content.products.map(p => ({ name: p.name, userId: p.userId })))
-  const filtered = content.products.filter(p => p.userId === userId)
-  console.log("[v0] getProductsByUserId - filtered products:", filtered.length)
-  return filtered
+  return content.products.filter(p => p.userId === userId)
 }
 
 // Get all orders (for bot stats)

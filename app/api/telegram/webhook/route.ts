@@ -96,6 +96,31 @@ async function sendMessage(
   return response.json()
 }
 
+// Send photo to Telegram
+async function sendPhoto(
+  botToken: string,
+  chatId: number,
+  photo: string,
+  options?: {
+    caption?: string
+    parseMode?: string
+    replyMarkup?: object
+  }
+) {
+  const response = await fetch(`${TELEGRAM_API}${botToken}/sendPhoto`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      photo,
+      caption: options?.caption,
+      parse_mode: options?.parseMode || 'Markdown',
+      reply_markup: options?.replyMarkup,
+    }),
+  })
+  return response.json()
+}
+
 // Answer callback query
 async function answerCallbackQuery(botToken: string, callbackQueryId: string, text?: string, showAlert?: boolean) {
   const response = await fetch(`${TELEGRAM_API}${botToken}/answerCallbackQuery`, {
@@ -130,6 +155,19 @@ async function editMessageText(
       text,
       parse_mode: options?.parseMode || 'Markdown',
       reply_markup: options?.replyMarkup,
+    }),
+  })
+  return response.json()
+}
+
+// Delete a message
+async function deleteMessage(botToken: string, chatId: number, messageId: number) {
+  const response = await fetch(`${TELEGRAM_API}${botToken}/deleteMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: chatId,
+      message_id: messageId,
     }),
   })
   return response.json()
@@ -302,9 +340,6 @@ async function handleCallbackQuery(
   
   // Get products for this bot owner only (filtered by userId)
   const allProducts = await getProductsByUserId(botOwnerId)
-  console.log("[v0] handleCallbackQuery - botOwnerId:", botOwnerId)
-  console.log("[v0] handleCallbackQuery - allProducts count:", allProducts?.length)
-  console.log("[v0] handleCallbackQuery - allProducts userIds:", allProducts?.map(p => ({ id: p.id, name: p.name, userId: p.userId })))
   const products = allProducts?.filter(p => p.isActive) || []
   const orders = await getOrdersByUserId(botOwnerId)
   
@@ -775,7 +810,7 @@ async function handleCallbackQuery(
         inline_keyboard: [
           [{ text: '✅ Cek Status Pembayaran', callback_data: `check_payment_${newOrder.id}` }],
           [{ text: '🔄 Refresh', callback_data: `refresh_payment_${newOrder.id}` }],
-          [{ text: '❌ Batal', callback_data: 'menu_main' }]
+          [{ text: '❌ Batal', callback_data: `cancel_order_${newOrder.id}` }]
         ]
       }
 
@@ -896,7 +931,7 @@ async function handleCallbackQuery(
       const keyboard = {
         inline_keyboard: [
           [{ text: '✅ Cek Status Pembayaran', callback_data: `check_payment_midtrans_${newOrder.id}` }],
-          [{ text: '❌ Batal', callback_data: 'menu_main' }]
+          [{ text: '❌ Batal', callback_data: `cancel_order_${newOrder.id}` }]
         ]
       }
 
@@ -917,6 +952,58 @@ async function handleCallbackQuery(
     } catch (error) {
       console.error('[v0] Midtrans QRIS Payment Error:', error)
       await answerCallbackQuery(botToken, callbackQuery.id, 'Gagal memproses pembayaran Midtrans QRIS', true)
+      return
+    }
+  }
+
+  // Handle cancel order
+  if (data.startsWith('cancel_order_')) {
+    const orderId = data.replace('cancel_order_', '')
+    
+    try {
+      const order = await getOrderById(orderId)
+      
+      if (!order) {
+        await answerCallbackQuery(botToken, callbackQuery.id, 'Order tidak ditemukan', true)
+        return
+      }
+
+      // Update order status to cancelled
+      await updateOrder(orderId, {
+        status: 'cancelled',
+        paymentStatus: 'cancelled'
+      })
+
+      // Delete the payment message (QR code message)
+      try {
+        await deleteMessage(botToken, chatId, messageId)
+      } catch (deleteError) {
+        console.error('Failed to delete message:', deleteError)
+      }
+
+      // Send cancellation confirmation
+      const cancelText = `❌ *PESANAN DIBATALKAN*\n\n` +
+        `📦 *Produk:* ${order.productName}\n` +
+        `📊 *Jumlah:* ${order.quantity}x\n` +
+        `💰 *Total:* Rp ${toRupiah(order.totalPrice)}\n` +
+        `🆔 *Order ID:* \`${order.id}\`\n\n` +
+        `📋 *Status:* Dibatalkan\n` +
+        `📅 *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n` +
+        `_Pesanan Anda telah dibatalkan. Silakan order kembali jika diperlukan._`
+
+      const keyboard = {
+        inline_keyboard: [
+          [{ text: '🏠 Menu Utama', callback_data: 'menu_main' }],
+          [{ text: '🛒 Order Lagi', callback_data: 'menu_products' }]
+        ]
+      }
+
+      await sendMessage(botToken, chatId, cancelText, { replyMarkup: keyboard })
+      await answerCallbackQuery(botToken, callbackQuery.id, 'Pesanan berhasil dibatalkan')
+      return
+    } catch (error) {
+      console.error('[v0] Cancel Order Error:', error)
+      await answerCallbackQuery(botToken, callbackQuery.id, 'Gagal membatalkan pesanan', true)
       return
     }
   }
@@ -1204,9 +1291,6 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
   
   // Get data for stats - only products from this bot owner
   const allProducts = await getProductsByUserId(botOwnerId)
-  console.log("[v0] handleMessage - botOwnerId:", botOwnerId)
-  console.log("[v0] handleMessage - allProducts count:", allProducts?.length)
-  console.log("[v0] handleMessage - allProducts userIds:", allProducts?.map(p => ({ id: p.id, name: p.name, userId: p.userId })))
   const products = allProducts?.filter(p => p.isActive) || []
   const orders = await getOrdersByUserId(botOwnerId)
   
