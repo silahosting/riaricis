@@ -158,6 +158,7 @@ export interface BotSubscription {
   status: 'pending' | 'active' | 'expired'
   orderId?: string // Reference to order if paid via order system
   paymentMethod: 'saldo' | 'qris'
+  paymentTransactionId?: string // Transaction ID for QRIS payments
   startDate?: string
   endDate?: string
   createdAt: string

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { NeoCard, NeoCardHeader, NeoCardTitle, NeoCardContent } from '@/components/ui/neo-card'
 import { NeoButton } from '@/components/ui/neo-button'
@@ -16,8 +16,17 @@ import {
   Package,
   Settings,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  QrCode,
+  RefreshCw,
+  Copy,
+  Check,
+  ChevronLeft,
+  Download,
+  XCircle,
+  Info
 } from 'lucide-react'
+import Image from 'next/image'
 import type { BotSubscription } from '@/types'
 
 const BOT_SUBSCRIPTION_PRICE = 25000
@@ -48,10 +57,67 @@ export default function SubscriptionPage() {
   const [purchasing, setPurchasing] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  
+  // QRIS payment state
+  const [showQrisPayment, setShowQrisPayment] = useState(false)
+  const [qrisData, setQrisData] = useState<{
+    qrisUrl: string
+    transactionId: string
+    subscriptionId: string
+    amount: number
+    originalAmount: number
+    fee: number
+    expiresAt: string
+    merchantName?: string
+    merchantId?: string
+    qrisId?: string
+    issuedBy?: string
+  } | null>(null)
+  const [checkingPayment, setCheckingPayment] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [countdown, setCountdown] = useState({ minutes: 0, seconds: 0 })
+  const [isExpired, setIsExpired] = useState(false)
 
   useEffect(() => {
     fetchSubscription()
   }, [])
+
+  // Countdown timer
+  useEffect(() => {
+    if (!showQrisPayment || !qrisData?.expiresAt) return
+
+    const updateCountdown = () => {
+      const now = new Date().getTime()
+      const expiry = new Date(qrisData.expiresAt).getTime()
+      const diff = expiry - now
+
+      if (diff <= 0) {
+        setIsExpired(true)
+        setCountdown({ minutes: 0, seconds: 0 })
+        return
+      }
+
+      const minutes = Math.floor(diff / (1000 * 60))
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000)
+      setCountdown({ minutes, seconds })
+    }
+
+    updateCountdown()
+    const interval = setInterval(updateCountdown, 1000)
+
+    return () => clearInterval(interval)
+  }, [showQrisPayment, qrisData?.expiresAt])
+
+  // Auto check payment status every 5 seconds when QRIS is shown
+  useEffect(() => {
+    if (!showQrisPayment || !qrisData || isExpired) return
+
+    const interval = setInterval(() => {
+      checkPaymentStatus()
+    }, 5000)
+
+    return () => clearInterval(interval)
+  }, [showQrisPayment, qrisData, isExpired])
 
   async function fetchSubscription() {
     try {
@@ -70,12 +136,7 @@ export default function SubscriptionPage() {
     }
   }
 
-  async function handlePurchase() {
-    if (balance < BOT_SUBSCRIPTION_PRICE) {
-      setError('Saldo tidak mencukupi. Silakan top up saldo terlebih dahulu.')
-      return
-    }
-
+  async function handlePurchaseQris() {
     setPurchasing(true)
     setError('')
     setSuccess('')
@@ -84,20 +145,24 @@ export default function SubscriptionPage() {
       const res = await fetch('/api/subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ paymentMethod: 'saldo' }),
+        body: JSON.stringify({ paymentMethod: 'qris' }),
       })
 
       const data = await res.json()
 
-      if (res.ok) {
-        setSuccess('Langganan berhasil diaktifkan! Anda sekarang bisa mengakses fitur Produk dan Settings Bot.')
-        await fetchSubscription()
-        // Redirect to dashboard after 2 seconds
-        setTimeout(() => {
-          router.push('/dashboard/products')
-        }, 2000)
+      if (res.ok && data.success) {
+        setQrisData({
+          qrisUrl: data.qrisUrl,
+          transactionId: data.transactionId,
+          subscriptionId: data.subscription.id,
+          amount: data.amount,
+          originalAmount: data.originalAmount,
+          fee: data.fee,
+          expiresAt: data.expiresAt,
+        })
+        setShowQrisPayment(true)
       } else {
-        setError(data.error || 'Gagal membeli langganan')
+        setError(data.error || 'Gagal membuat pembayaran QRIS')
       }
     } catch (err) {
       setError('Terjadi kesalahan. Silakan coba lagi.')
@@ -106,10 +171,310 @@ export default function SubscriptionPage() {
     }
   }
 
+  async function checkPaymentStatus() {
+    if (!qrisData || checkingPayment) return
+
+    setCheckingPayment(true)
+
+    try {
+      const res = await fetch('/api/subscription/check-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscriptionId: qrisData.subscriptionId,
+          transactionId: qrisData.transactionId,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.status === 'paid') {
+        setSuccess('Pembayaran berhasil! Langganan Anda sudah aktif.')
+        setShowQrisPayment(false)
+        setQrisData(null)
+        await fetchSubscription()
+        // Redirect to products after 2 seconds
+        setTimeout(() => {
+          router.push('/dashboard/products')
+        }, 2000)
+      }
+    } catch (err) {
+      console.error('Error checking payment:', err)
+    } finally {
+      setCheckingPayment(false)
+    }
+  }
+
+  async function copyTransactionId() {
+    if (!qrisData) return
+    try {
+      await navigator.clipboard.writeText(qrisData.transactionId)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  async function downloadQrCode() {
+    if (!qrisData) return
+    try {
+      const response = await fetch(qrisData.qrisUrl)
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `QRIS-${qrisData.transactionId}.png`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      window.URL.revokeObjectURL(url)
+    } catch (err) {
+      console.error('Failed to download:', err)
+    }
+  }
+
+  function cancelPayment() {
+    setShowQrisPayment(false)
+    setQrisData(null)
+    setIsExpired(false)
+    setCountdown({ minutes: 0, seconds: 0 })
+  }
+
+  function formatTime(num: number) {
+    return num.toString().padStart(2, '0')
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  // QRIS Payment View
+  if (showQrisPayment && qrisData) {
+    return (
+      <div className="flex flex-col min-h-screen -m-4 sm:-m-6">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-[#0a1628] to-[#0d1f3c] px-4 py-3 flex items-center gap-4">
+          <button 
+            onClick={cancelPayment}
+            className="text-primary flex items-center gap-1 text-sm font-medium hover:opacity-80 transition-opacity"
+          >
+            <ChevronLeft className="w-5 h-5" />
+            Kembali
+          </button>
+          <h1 className="text-lg font-semibold text-white flex-1 text-center pr-16">Payment</h1>
+        </div>
+
+        <div className="flex-1 bg-gradient-to-b from-[#0a1628] to-[#0d1f3c] px-4 py-4 space-y-4">
+          {/* Expiry Timer Section */}
+          <div className="bg-[#0d2847] rounded-2xl p-4 border border-[#1a3a5c]">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-gray-400 text-xs">Waktu Kadaluarsa</p>
+                <p className="text-white font-medium text-sm">
+                  {new Date(qrisData.expiresAt).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })}, {new Date(qrisData.expiresAt).toLocaleTimeString('id-ID', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })} WIB
+                </p>
+              </div>
+              {/* Countdown Timer */}
+              <div className="flex items-center gap-1">
+                <div className="bg-[#1a3a5c] rounded-lg px-2.5 py-1.5">
+                  <span className="text-white font-mono font-bold text-lg">{formatTime(countdown.minutes)}</span>
+                </div>
+                <span className="text-gray-400 font-bold">:</span>
+                <div className="bg-[#1a3a5c] rounded-lg px-2.5 py-1.5">
+                  <span className="text-white font-mono font-bold text-lg">{formatTime(countdown.seconds)}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Warning Message */}
+            <div className="flex items-start gap-2 bg-[#0a1628]/50 rounded-xl p-3 border border-[#1a3a5c]/50">
+              <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <p className="text-xs text-gray-300">
+                Harap membayar sebelum waktu kadaluarsa yang ditentukan agar saldo dapat di proses
+              </p>
+            </div>
+          </div>
+
+          {/* QRIS Card */}
+          <div className="bg-gradient-to-br from-[#0066cc] to-[#004499] rounded-2xl p-5 relative overflow-hidden">
+            {/* Logo Header */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="bg-white rounded-md px-2 py-1">
+                  <span className="font-bold text-[#0066cc] text-sm tracking-tight">QRIS</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+                <span className="text-white/80 text-xs font-medium">GPN</span>
+              </div>
+            </div>
+
+            {/* Merchant Info */}
+            <div className="text-center mb-4">
+              <h2 className="text-white font-bold text-lg">CINDIGITAL GROUP</h2>
+              <p className="text-white/70 text-xs">NMID: 9360050300000879140</p>
+            </div>
+
+            {/* QR Code */}
+            <div className="bg-white rounded-2xl p-4 mb-4">
+              <div className="relative w-full aspect-square max-w-[220px] mx-auto">
+                <Image
+                  src={qrisData.qrisUrl}
+                  alt="QRIS Payment"
+                  fill
+                  className="object-contain"
+                  unoptimized
+                  crossOrigin="anonymous"
+                />
+              </div>
+            </div>
+
+            {/* Total */}
+            <div className="flex items-center justify-between text-white">
+              <span className="font-medium">Total</span>
+              <span className="font-bold text-lg">{formatCurrency(qrisData.amount).replace('Rp', '')} IDR</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <button
+              onClick={cancelPayment}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-transparent border-2 border-red-500 text-red-500 font-medium hover:bg-red-500/10 transition-colors"
+            >
+              <XCircle className="w-5 h-5" />
+              Batalkan
+            </button>
+            <button
+              onClick={downloadQrCode}
+              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+            >
+              <Download className="w-5 h-5" />
+              Download
+            </button>
+          </div>
+
+          {/* Saya sudah membayar Button */}
+          <button
+            onClick={checkPaymentStatus}
+            disabled={checkingPayment || isExpired}
+            className="w-full flex items-center justify-center gap-2 py-3.5 px-4 rounded-xl bg-[#0d2847] border border-[#1a3a5c] text-primary font-medium hover:bg-[#1a3a5c] transition-colors disabled:opacity-50"
+          >
+            {checkingPayment ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Mengecek...
+              </>
+            ) : (
+              <>
+                Saya sudah membayar
+                <CheckCircle2 className="w-5 h-5" />
+              </>
+            )}
+          </button>
+
+          {/* Warning Text */}
+          <p className="text-xs text-gray-400 text-center px-4">
+            Jangan membatalkan apabila telah membayar karena mengganggu proses pengecekan dan jangan di bayar apabila telah di batalkan atau expired
+          </p>
+
+          {/* Detail Pembayaran */}
+          <div className="bg-[#0d2847] rounded-2xl p-4 border border-[#1a3a5c] space-y-4">
+            <h3 className="text-white font-semibold">Detail Pembayaran</h3>
+            
+            <div className="space-y-3">
+              {/* Payment ID */}
+              <div>
+                <p className="text-gray-400 text-xs">Payment ID</p>
+                <div className="flex items-center justify-between">
+                  <code className="text-white text-sm truncate flex-1 mr-2">{qrisData.transactionId}</code>
+                  <button
+                    onClick={copyTransactionId}
+                    className="p-1.5 rounded-lg hover:bg-[#1a3a5c] transition-colors"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-green-500" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-gray-400" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="h-px bg-[#1a3a5c]" />
+
+              {/* Merchant ID */}
+              <div>
+                <p className="text-gray-400 text-xs">Merchant ID</p>
+                <p className="text-white text-sm">9360050300000879140</p>
+              </div>
+
+              <div className="h-px bg-[#1a3a5c]" />
+
+              {/* Merchant Name */}
+              <div>
+                <p className="text-gray-400 text-xs">Merchant Name</p>
+                <p className="text-white text-sm">CINDIGITAL GROUP</p>
+              </div>
+
+              <div className="h-px bg-[#1a3a5c]" />
+
+              {/* QRIS ID */}
+              <div>
+                <p className="text-gray-400 text-xs">QRIS ID</p>
+                <p className="text-white text-sm">ID2025429755718</p>
+              </div>
+
+              <div className="h-px bg-[#1a3a5c]" />
+
+              {/* Issued By */}
+              <div>
+                <p className="text-gray-400 text-xs">Diterbitkan Oleh</p>
+                <p className="text-white text-sm font-medium">BANK NOBU</p>
+              </div>
+
+              <div className="h-px bg-[#1a3a5c]" />
+
+              {/* Price Breakdown */}
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400 text-sm">Nominal</span>
+                <span className="text-white text-sm">{formatCurrency(qrisData.originalAmount).replace('Rp', '')} IDR</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400 text-sm">Biaya Admin</span>
+                <span className="text-white text-sm">{formatCurrency(qrisData.fee).replace('Rp', '')} IDR</span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <span className="text-gray-400 text-sm">Total Pembayaran</span>
+                <span className="text-primary font-bold">{formatCurrency(qrisData.amount).replace('Rp', '')} IDR</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center py-4">
+            <p className="text-gray-500 text-xs">
+              Gateway pembayaran oleh <span className="text-primary">Orkut</span>
+            </p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -236,27 +601,22 @@ export default function SubscriptionPage() {
                 </div>
               </div>
 
-              {/* Balance Info */}
-              <div className="p-4 rounded-xl bg-background/50 border border-border mb-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Wallet className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">Saldo Anda</span>
+              {/* Fee Info */}
+              <div className="p-4 rounded-xl bg-muted/50 border border-border mb-4">
+                <div className="flex items-start gap-3">
+                  <QrCode className="w-5 h-5 text-primary mt-0.5" />
+                  <div>
+                    <p className="font-medium text-sm">Pembayaran via QRIS</p>
+                    <p className="text-muted-foreground text-xs mt-1">
+                      Biaya admin Rp 100 - Rp 200 akan ditambahkan ke total pembayaran
+                    </p>
                   </div>
-                  <span className={`font-bold ${balance >= BOT_SUBSCRIPTION_PRICE ? 'text-emerald-500' : 'text-destructive'}`}>
-                    {formatCurrency(balance)}
-                  </span>
                 </div>
-                {balance < BOT_SUBSCRIPTION_PRICE && (
-                  <p className="text-xs text-destructive mt-2">
-                    Saldo tidak mencukupi. Butuh minimal {formatCurrency(BOT_SUBSCRIPTION_PRICE)}
-                  </p>
-                )}
               </div>
 
               <NeoButton 
-                onClick={handlePurchase} 
-                disabled={purchasing || balance < BOT_SUBSCRIPTION_PRICE}
+                onClick={handlePurchaseQris} 
+                disabled={purchasing}
                 className="w-full"
                 size="lg"
               >
@@ -267,27 +627,74 @@ export default function SubscriptionPage() {
                   </>
                 ) : (
                   <>
-                    <Wallet className="w-4 h-4" />
-                    Bayar dengan Saldo
+                    <QrCode className="w-4 h-4" />
+                    Bayar dengan QRIS
                   </>
                 )}
               </NeoButton>
 
               <p className="text-xs text-muted-foreground text-center mt-3">
-                Pembayaran akan langsung dipotong dari saldo Anda
+                Scan QRIS dan bayar dengan aplikasi e-wallet atau m-banking
               </p>
             </NeoCardContent>
           </NeoCard>
+
+          {/* Saldo Option - Optional */}
+          {balance >= BOT_SUBSCRIPTION_PRICE && (
+            <NeoCard className="border-border">
+              <NeoCardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Wallet className="w-5 h-5 text-muted-foreground" />
+                    <div>
+                      <p className="font-medium text-sm">Bayar dengan Saldo</p>
+                      <p className="text-xs text-muted-foreground">Saldo: {formatCurrency(balance)}</p>
+                    </div>
+                  </div>
+                  <NeoButton
+                    onClick={async () => {
+                      setPurchasing(true)
+                      setError('')
+                      try {
+                        const res = await fetch('/api/subscription', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ paymentMethod: 'saldo' }),
+                        })
+                        const data = await res.json()
+                        if (res.ok) {
+                          setSuccess('Langganan berhasil diaktifkan!')
+                          await fetchSubscription()
+                          setTimeout(() => router.push('/dashboard/products'), 2000)
+                        } else {
+                          setError(data.error || 'Gagal membeli langganan')
+                        }
+                      } catch (err) {
+                        setError('Terjadi kesalahan')
+                      } finally {
+                        setPurchasing(false)
+                      }
+                    }}
+                    disabled={purchasing}
+                    variant="outline"
+                    size="sm"
+                  >
+                    {purchasing ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Gunakan Saldo'}
+                  </NeoButton>
+                </div>
+              </NeoCardContent>
+            </NeoCard>
+          )}
 
           {/* Info */}
           <div className="p-4 rounded-xl bg-muted/50 border border-border">
             <div className="flex items-start gap-3">
               <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
               <div>
-                <p className="font-medium text-sm">Cara Top Up Saldo</p>
+                <p className="font-medium text-sm">Metode Pembayaran</p>
                 <p className="text-muted-foreground text-xs mt-1">
-                  Untuk menambah saldo, hubungi admin atau lakukan penjualan produk. 
-                  Pendapatan dari penjualan akan otomatis masuk ke saldo Anda.
+                  Pembayaran QRIS dapat dilakukan menggunakan OVO, GoPay, DANA, ShopeePay, 
+                  LinkAja, atau m-banking yang mendukung QRIS.
                 </p>
               </div>
             </div>
