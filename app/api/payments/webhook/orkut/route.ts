@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { updatePaymentByOrderId, getOrderById } from '@/lib/github-db'
+import { updatePaymentByOrderId, getOrderById, updateOrder } from '@/lib/github-db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -54,14 +54,15 @@ export async function POST(request: NextRequest) {
       status: newStatus,
     })
 
-    // TODO: If payment is successful, deliver products and update order status
+    // If payment is successful, update order status to completed
     if (newStatus === 'paid') {
-      // Deliver product items
       const order = await getOrderById(orderId)
       if (order) {
-        // Update order status to completed
-        console.log('[v0] Payment received for order:', orderId)
-        // Send Telegram notification to buyer
+        await updateOrder(orderId, { 
+          paymentStatus: 'paid', 
+          status: 'completed' 
+        })
+        console.log('[v0] Order status updated to completed:', orderId)
       }
     }
 

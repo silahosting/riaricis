@@ -160,10 +160,16 @@ export async function getBotSettingsByToken(botToken: string): Promise<BotSettin
   return content.botSettings.find((s) => s.botToken === botToken) || null
 }
 
-// Get all products (for bot - no userId filter)
+  // Get all products (for bot - no userId filter)
 export async function getAllProducts(): Promise<Product[]> {
   const { content } = await getFileContent()
   return content.products
+  }
+
+// Get products by userId (for bot - filter by owner)
+export async function getProductsByUserId(userId: string): Promise<Product[]> {
+  const { content } = await getFileContent()
+  return content.products.filter(p => p.userId === userId)
 }
 
 // Get all orders (for bot stats)
@@ -266,6 +272,12 @@ export async function getOrders(userId: string): Promise<Order[]> {
 export async function getOrderById(id: string): Promise<Order | null> {
   const { content } = await getFileContent()
   return content.orders.find((o) => o.id === id) || null
+}
+
+// Get orders by seller userId (for bot stats)
+export async function getOrdersByUserId(userId: string): Promise<Order[]> {
+  const { content } = await getFileContent()
+  return content.orders.filter(o => o.userId === userId)
 }
 
 export async function createOrder(orderData: Omit<Order, 'id' | 'createdAt' | 'updatedAt'>): Promise<Order | null> {

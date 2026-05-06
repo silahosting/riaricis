@@ -80,7 +80,7 @@ export async function generateQrisPaymentAction(orderId: string) {
     revalidatePath(`/dashboard/orders/${orderId}`, 'max')
     return { success: true, ...data }
   } catch (error) {
-    console.error('[v0] Generate QRIS Error:', error)
+    console.error('Generate QRIS Error:', error)
     return { error: 'Gagal membuat QRIS payment' }
   }
 }

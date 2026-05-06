@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Package, User, Phone, Calendar, DollarSign, Hash, FileText, Save } from 'lucide-react'
+import { ArrowLeft, Package, User, Phone, Calendar, DollarSign, Hash, FileText, Save, Receipt } from 'lucide-react'
 import { NeoCard, NeoCardHeader, NeoCardTitle, NeoCardContent, NeoCardFooter } from '@/components/ui/neo-card'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoBadge } from '@/components/ui/neo-badge'
@@ -100,6 +100,12 @@ export default function OrderDetailPage() {
           <h1 className="text-2xl font-black uppercase tracking-tight">Detail Pesanan</h1>
           <p className="text-muted-foreground text-sm">ID: {order.id}</p>
         </div>
+        <Link href={`/dashboard/orders/${order.id}/invoice`}>
+          <NeoButton variant="outline">
+            <Receipt className="w-4 h-4" />
+            Invoice
+          </NeoButton>
+        </Link>
         <NeoBadge variant={statusVariants[order.status]} className="text-sm px-4 py-2">
           {ORDER_STATUS[order.status].label}
         </NeoBadge>

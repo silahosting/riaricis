@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, Trash2, Check, X, Clock, RefreshCw } from 'lucide-react'
+import { Eye, Trash2, Receipt } from 'lucide-react'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoBadge } from '@/components/ui/neo-badge'
 import { NeoSelect } from '@/components/ui/neo-select'
@@ -109,6 +109,12 @@ export function OrderTable({ orders, onUpdate }: OrderTableProps) {
             <Link href={`/dashboard/orders/${order.id}`}>
               <NeoButton variant="outline" size="icon-sm">
                 <Eye className="w-4 h-4" />
+              </NeoButton>
+            </Link>
+
+            <Link href={`/dashboard/orders/${order.id}/invoice`}>
+              <NeoButton variant="outline" size="icon-sm">
+                <Receipt className="w-4 h-4" />
               </NeoButton>
             </Link>
             

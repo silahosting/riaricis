@@ -15,6 +15,7 @@ export interface BotSettings {
   ownerId: string
   botName?: string
   isActive: boolean
+  preferredPaymentMethod?: 'orkut' | 'midtrans' // User's preferred payment method
   createdAt: string
   updatedAt: string
 }

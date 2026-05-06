@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBotSettingsByToken, getAllProducts, getAllOrders, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder, getPaymentSettings } from '@/lib/github-db'
+import { getBotSettingsByToken, getAllProducts, getProductsByUserId, getAllOrders, getOrdersByUserId, getOrderById, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder, getPaymentSettings } from '@/lib/github-db'
 import { createOrkutQrisPayment, checkOrkutPaymentStatus } from '@/lib/orkut'
 import { createMidtransQrisPayment, checkMidtransPaymentStatus, isMidtransPaymentPaid } from '@/lib/midtrans'
 import type { Product, PaymentSettings } from '@/types'
@@ -289,7 +289,8 @@ async function handleCallbackQuery(
   botToken: string, 
   callbackQuery: TelegramCallbackQuery,
   ownerId: string,
-  userId: string
+  telegramUserId: string,
+  botOwnerId: string // Database user ID of bot owner
 ) {
   const chatId = callbackQuery.message?.chat.id
   const messageId = callbackQuery.message?.message_id
@@ -298,10 +299,10 @@ async function handleCallbackQuery(
   
   if (!chatId || !messageId) return
   
-  // Get products for calculations
-  const allProducts = await getAllProducts()
+  // Get products for this bot owner only (filtered by userId)
+  const allProducts = await getProductsByUserId(botOwnerId)
   const products = allProducts?.filter(p => p.isActive) || []
-  const orders = await getAllOrders()
+  const orders = await getOrdersByUserId(botOwnerId)
   
   // Calculate stats
   const completedOrders = orders?.filter(o => o.status === 'completed') || []
@@ -310,7 +311,7 @@ async function handleCallbackQuery(
   const totalUsers = new Set(orders?.map(o => o.buyerId) || []).size || 183 // Default demo value
   
   // User stats (in production, get from user database)
-  const userOrders = completedOrders.filter(o => o.buyerId === userId)
+  const userOrders = completedOrders.filter(o => o.buyerId === telegramUserId)
   const userStats = {
     transactions: userOrders.reduce((sum, o) => sum + o.totalPrice, 0),
     purchased: userOrders.reduce((sum, o) => sum + o.quantity, 0),
@@ -422,24 +423,28 @@ async function handleCallbackQuery(
     
     const confirmText = generateOrderConfirmText(product, 1)
     
-    // Get payment settings to determine which buttons to show
+    // Get payment settings and user's preferred method
     const paymentSettings = await getPaymentSettings()
     const orkutEnabled = paymentSettings?.orkutEnabled ?? false
     const midtransEnabled = paymentSettings?.midtransEnabled ?? false
+    const userPreferredMethod = botSettings.preferredPaymentMethod || 'orkut'
     
-    // Build payment buttons based on enabled methods
+    // Build payment buttons based on enabled methods and user preference
     const paymentButtons: { text: string; callback_data: string }[][] = []
     
     // Always show saldo button
-    paymentButtons.push([{ text: 'Bayar dengan Saldo ✅', callback_data: `pay_saldo_${productId}` }])
+    paymentButtons.push([{ text: 'Bayar dengan Saldo', callback_data: `pay_saldo_${productId}` }])
     
-    // If both QRIS methods enabled, show selection button
-    if (orkutEnabled && midtransEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_select_qris_${productId}` }])
-    } else if (orkutEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Orkut)', callback_data: `pay_qris_orkut_${productId}` }])
+    // Show QRIS button based on user's preferred method
+    if (userPreferredMethod === 'midtrans' && midtransEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
+    } else if (userPreferredMethod === 'orkut' && orkutEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
     } else if (midtransEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Midtrans)', callback_data: `pay_qris_midtrans_${productId}` }])
+      // Fallback to any available method
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
+    } else if (orkutEnabled) {
+      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
     }
     
     const keyboard = {
@@ -496,21 +501,25 @@ async function handleCallbackQuery(
     
     const confirmText = generateOrderConfirmText(product, newQty)
     
-    // Get payment settings to determine which buttons to show
-    const paymentSettings = await getPaymentSettings()
-    const orkutEnabled = paymentSettings?.orkutEnabled ?? false
-    const midtransEnabled = paymentSettings?.midtransEnabled ?? false
+    // Get payment settings and user's preferred method
+    const paymentSettings2 = await getPaymentSettings()
+    const orkutEnabled2 = paymentSettings2?.orkutEnabled ?? false
+    const midtransEnabled2 = paymentSettings2?.midtransEnabled ?? false
+    const userPreferredMethod2 = botSettings.preferredPaymentMethod || 'orkut'
     
-    // Build payment buttons based on enabled methods
-    const paymentButtons: { text: string; callback_data: string }[][] = []
-    paymentButtons.push([{ text: 'Bayar dengan Saldo ✅', callback_data: `pay_saldo_${productId}` }])
+    // Build payment buttons based on enabled methods and user preference
+    const paymentButtons2: { text: string; callback_data: string }[][] = []
+    paymentButtons2.push([{ text: 'Bayar dengan Saldo', callback_data: `pay_saldo_${productId}` }])
     
-    if (orkutEnabled && midtransEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_select_qris_${productId}` }])
-    } else if (orkutEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Orkut)', callback_data: `pay_qris_orkut_${productId}` }])
-    } else if (midtransEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Midtrans)', callback_data: `pay_qris_midtrans_${productId}` }])
+    // Show QRIS button based on user's preferred method
+    if (userPreferredMethod2 === 'midtrans' && midtransEnabled2) {
+      paymentButtons2.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
+    } else if (userPreferredMethod2 === 'orkut' && orkutEnabled2) {
+      paymentButtons2.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
+    } else if (midtransEnabled2) {
+      paymentButtons2.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
+    } else if (orkutEnabled2) {
+      paymentButtons2.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
     }
     
     const keyboard = {
@@ -523,7 +532,7 @@ async function handleCallbackQuery(
           { text: '-5', callback_data: `qty_minus5_${productId}` },
           { text: '+5', callback_data: `qty_plus5_${productId}` }
         ],
-        ...paymentButtons,
+        ...paymentButtons2,
         [{ text: '🔄 Refresh Data', callback_data: `refresh_order_${productId}` }],
         [{ text: '⬅️ BACK', callback_data: `select_${productId}` }]
       ]
@@ -550,24 +559,28 @@ async function handleCallbackQuery(
     
     const confirmText = generateOrderConfirmText(product, session.quantity)
     
-    // Get payment settings to determine which buttons to show
-    const paymentSettings = await getPaymentSettings()
-    const orkutEnabled = paymentSettings?.orkutEnabled ?? false
-    const midtransEnabled = paymentSettings?.midtransEnabled ?? false
+    // Get payment settings and user's preferred method
+    const paymentSettings3 = await getPaymentSettings()
+    const orkutEnabled3 = paymentSettings3?.orkutEnabled ?? false
+    const midtransEnabled3 = paymentSettings3?.midtransEnabled ?? false
+    const userPreferredMethod3 = botSettings.preferredPaymentMethod || 'orkut'
     
-    // Build payment buttons based on enabled methods
-    const paymentButtons: { text: string; callback_data: string }[][] = []
-    paymentButtons.push([{ text: 'Bayar dengan Saldo ✅', callback_data: `pay_saldo_${productId}` }])
+    // Build payment buttons based on enabled methods and user preference
+    const paymentButtons3: { text: string; callback_data: string }[][] = []
+    paymentButtons3.push([{ text: 'Bayar dengan Saldo', callback_data: `pay_saldo_${productId}` }])
     
-    if (orkutEnabled && midtransEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_select_qris_${productId}` }])
-    } else if (orkutEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Orkut)', callback_data: `pay_qris_orkut_${productId}` }])
-    } else if (midtransEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS (Midtrans)', callback_data: `pay_qris_midtrans_${productId}` }])
+    // Show QRIS button based on user's preferred method
+    if (userPreferredMethod3 === 'midtrans' && midtransEnabled3) {
+      paymentButtons3.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
+    } else if (userPreferredMethod3 === 'orkut' && orkutEnabled3) {
+      paymentButtons3.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
+    } else if (midtransEnabled3) {
+      paymentButtons3.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
+    } else if (orkutEnabled3) {
+      paymentButtons3.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
     }
     
-    const keyboard = {
+    const keyboard3 = {
       inline_keyboard: [
         [
           { text: '-', callback_data: `qty_minus_${productId}` },
@@ -577,47 +590,13 @@ async function handleCallbackQuery(
           { text: '-5', callback_data: `qty_minus5_${productId}` },
           { text: '+5', callback_data: `qty_plus5_${productId}` }
         ],
-        ...paymentButtons,
+        ...paymentButtons3,
         [{ text: '🔄 Refresh Data', callback_data: `refresh_order_${productId}` }],
         [{ text: '⬅️ BACK', callback_data: `select_${productId}` }]
       ]
     }
     
-    await editMessageText(botToken, chatId, messageId, confirmText, { replyMarkup: keyboard })
-    return
-  }
-  
-  // Handle QRIS method selection (when both methods enabled)
-  if (data.startsWith('pay_select_qris_')) {
-    const productId = data.replace('pay_select_qris_', '')
-    const product = await getProductById(productId)
-    
-    if (!product) {
-      await answerCallbackQuery(botToken, callbackQuery.id, 'Produk tidak ditemukan', true)
-      return
-    }
-    
-    await answerCallbackQuery(botToken, callbackQuery.id)
-    
-    const sessionKey = `${chatId}_${messageId}`
-    const session = orderSessions.get(sessionKey) || { productId, quantity: 1, chatId, messageId }
-    const totalPrice = product.price * session.quantity
-    
-    let selectText = `💳 *PILIH METODE PEMBAYARAN QRIS*\n\n`
-    selectText += `📦 *Produk:* ${product.name}\n`
-    selectText += `📊 *Jumlah:* ${session.quantity}x\n`
-    selectText += `💰 *Total:* Rp ${toRupiah(totalPrice)}\n\n`
-    selectText += `Silakan pilih metode QRIS yang ingin digunakan:`
-    
-    const keyboard = {
-      inline_keyboard: [
-        [{ text: '🔵 Orkut QRIS (Order Kuota)', callback_data: `pay_qris_orkut_${productId}` }],
-        [{ text: '🟣 Midtrans QRIS', callback_data: `pay_qris_midtrans_${productId}` }],
-        [{ text: '⬅️ Kembali', callback_data: `buy_${productId}` }]
-      ]
-    }
-    
-    await editMessageText(botToken, chatId, messageId, selectText, { replyMarkup: keyboard })
+    await editMessageText(botToken, chatId, messageId, confirmText, { replyMarkup: keyboard3 })
     return
   }
   
@@ -652,13 +631,16 @@ async function handleCallbackQuery(
     
     // Create order record
     await createOrder({
+      userId: botOwnerId,
       productId: product.id,
       productName: product.name,
-      buyerId: userId,
+      buyerId: telegramUserId,
       buyerName: user.first_name,
+      buyerContact: user.username || user.first_name,
       quantity,
       totalPrice: product.price * quantity,
-      status: 'completed'
+      status: 'completed',
+      paymentStatus: 'paid'
     })
     
     // Clean up session
@@ -714,10 +696,12 @@ async function handleCallbackQuery(
 
       // Create order first
       const newOrder = await createOrder({
+        userId: botOwnerId,
         productId: product.id,
         productName: product.name,
-        buyerId: userId,
+        buyerId: telegramUserId,
         buyerName: user.first_name,
+        buyerContact: user.username || user.first_name,
         quantity,
         totalPrice,
         status: 'pending',
@@ -730,11 +714,11 @@ async function handleCallbackQuery(
       }
 
       // Try to get user QRIS, fallback to admin QRIS
-      let qrisResult = await createOrkutQrisPayment(totalPrice, `Pembayaran ${product.name}`, 'user', userId)
+      let qrisResult = await createOrkutQrisPayment(totalPrice, `Pembayaran ${product.name}`, 'user', telegramUserId)
       
       if (!qrisResult.success) {
         // Fallback to admin QRIS
-        console.log('[v0] User QRIS not found or failed, falling back to admin QRIS')
+        // User QRIS not found or failed, falling back to admin QRIS
         qrisResult = await createOrkutQrisPayment(totalPrice, `Pembayaran ${product.name}`, 'admin')
       }
 
@@ -753,7 +737,7 @@ async function handleCallbackQuery(
       // Create payment record
       await createPayment({
         orderId: newOrder.id,
-        userId,
+        userId: telegramUserId,
         amount: qrisResult.amount,
         qrisUrl: qrisResult.qrString,
         transactionId: qrisResult.transactionId,
@@ -805,7 +789,7 @@ async function handleCallbackQuery(
           }),
         })
       } catch (photoError) {
-        console.log('[v0] Failed to send photo, sending text with QR string:', photoError)
+        console.error('Failed to send photo, sending text with QR string:', photoError)
         await sendMessage(botToken, chatId, qrisText, { replyMarkup: keyboard })
       }
 
@@ -841,10 +825,12 @@ async function handleCallbackQuery(
 
       // Create order first
       const newOrder = await createOrder({
+        userId: botOwnerId,
         productId: product.id,
         productName: product.name,
-        buyerId: userId,
+        buyerId: telegramUserId,
         buyerName: user.first_name,
+        buyerContact: user.username || user.first_name,
         quantity,
         totalPrice,
         status: 'pending',
@@ -878,7 +864,7 @@ async function handleCallbackQuery(
       // Create payment record
       await createPayment({
         orderId: newOrder.id,
-        userId,
+        userId: telegramUserId,
         amount: totalPrice,
         qrisUrl: midtransResult.qrCodeUrl,
         transactionId: midtransResult.transactionId,
@@ -929,7 +915,7 @@ async function handleCallbackQuery(
             }),
           })
         } catch (photoError) {
-          console.log('[v0] Failed to send Midtrans QR photo:', photoError)
+          console.error('Failed to send Midtrans QR photo:', photoError)
           await sendMessage(botToken, chatId, qrisText, { replyMarkup: keyboard })
         }
       } else {
@@ -967,8 +953,8 @@ async function handleCallbackQuery(
       const isPaid = await isMidtransPaymentPaid(payment.transactionId)
 
       if (isPaid) {
-        // Update order and payment status
-        await updateOrder(orderId, { paymentStatus: 'paid', status: 'processing' })
+        // Update order and payment status to completed
+        await updateOrder(orderId, { paymentStatus: 'paid', status: 'completed' })
         await updatePaymentByOrderId(orderId, { status: 'paid' })
 
         // Deliver product
@@ -1017,8 +1003,9 @@ async function handleCallbackQuery(
 
       return
     } catch (error) {
-      console.error('[v0] Check Midtrans Payment Error:', error)
-      await answerCallbackQuery(botToken, callbackQuery.id, 'Gagal check status: ' + String(error), true)
+      console.error('Check Midtrans Payment Error:', error)
+      const errorMsg = error instanceof Error ? error.message : 'Terjadi kesalahan'
+      await answerCallbackQuery(botToken, callbackQuery.id, `Gagal cek status: ${errorMsg}`, true)
       return
     }
   }
@@ -1028,8 +1015,7 @@ async function handleCallbackQuery(
     const orderId = data.replace('check_payment_', '')
     
     try {
-      const orders = await getAllOrders()
-      const order = orders?.find(o => o.id === orderId)
+      const order = await getOrderById(orderId)
       
       if (!order) {
         await answerCallbackQuery(botToken, callbackQuery.id, 'Order tidak ditemukan', true)
@@ -1051,8 +1037,8 @@ async function handleCallbackQuery(
       )
 
       if (statusCheck.status === 'paid') {
-        // Update order and payment status
-        await updateOrder(orderId, { paymentStatus: 'paid', status: 'processing' })
+        // Update order and payment status to completed
+        await updateOrder(orderId, { paymentStatus: 'paid', status: 'completed' })
         await updatePaymentByOrderId(orderId, { status: 'paid' })
 
         let statusText = `✅ *PEMBAYARAN BERHASIL*\n\n`
@@ -1062,7 +1048,7 @@ async function handleCallbackQuery(
         statusText += `📝 *Ket:* ${statusCheck.description || '-'}\n\n`
         statusText += `🆔 *ID Transaksi:* \`${statusCheck.transactionId}\`\n`
         statusText += `⏰ *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n`
-        statusText += `_Pesanan Anda sedang diproses. Terima kasih!_`
+        statusText += `_Pesanan selesai. Terima kasih!_`
 
         await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran terkonfirmasi!', false)
         await sendMessage(botToken, chatId, statusText)
@@ -1219,16 +1205,16 @@ async function handleCallbackQuery(
 }
 
 // Handle bot commands and messages
-async function handleMessage(botToken: string, message: TelegramMessage, ownerId: string) {
+async function handleMessage(botToken: string, message: TelegramMessage, ownerId: string, botOwnerId: string) {
   const chatId = message.chat.id
   const text = message.text || ''
   const userId = message.from.id.toString()
   const user = message.from
-
-  // Get data for stats
-  const allProducts = await getAllProducts()
+  
+  // Get data for stats - only products from this bot owner
+  const allProducts = await getProductsByUserId(botOwnerId)
   const products = allProducts?.filter(p => p.isActive) || []
-  const orders = await getAllOrders()
+  const orders = await getOrdersByUserId(botOwnerId)
   
   const completedOrders = orders?.filter(o => o.status === 'completed') || []
   const totalSold = completedOrders.reduce((sum, o) => sum + o.quantity, 0)
@@ -1328,14 +1314,14 @@ export async function POST(request: NextRequest) {
 
     // Handle callback queries (button clicks)
     if (update.callback_query) {
-      const userId = update.callback_query.from.id.toString()
-      await handleCallbackQuery(botToken, update.callback_query, settings.ownerId, userId)
+      const telegramUserId = update.callback_query.from.id.toString()
+      await handleCallbackQuery(botToken, update.callback_query, settings.ownerId, telegramUserId, settings.userId)
       return NextResponse.json({ ok: true })
     }
 
     // Handle messages
     if (update.message) {
-      await handleMessage(botToken, update.message, settings.ownerId)
+      await handleMessage(botToken, update.message, settings.ownerId, settings.userId)
       return NextResponse.json({ ok: true })
     }
 

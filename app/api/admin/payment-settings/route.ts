@@ -2,18 +2,30 @@ import { NextResponse } from 'next/server'
 import { isCurrentUserAdmin } from '@/lib/auth'
 import { getPaymentSettings, savePaymentSettings } from '@/lib/github-db'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const isAdmin = await isCurrentUserAdmin()
+    // Check if this is an internal request (from bot/server)
+    const url = new URL(request.url)
+    const isInternal = url.searchParams.get('internal') === 'true'
     
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    // For non-internal requests, check admin auth
+    if (!isInternal) {
+      const isAdmin = await isCurrentUserAdmin()
+      
+      if (!isAdmin) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      }
     }
 
     const settings = await getPaymentSettings()
 
-    // Mask sensitive keys for display
     if (settings) {
+      // For internal requests, return full settings (no masking)
+      if (isInternal) {
+        return NextResponse.json({ settings })
+      }
+      
+      // Mask sensitive keys for display (admin UI)
       return NextResponse.json({
         settings: {
           ...settings,
