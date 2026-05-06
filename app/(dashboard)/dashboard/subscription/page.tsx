@@ -77,6 +77,33 @@ export default function SubscriptionPage() {
   const [copied, setCopied] = useState(false)
   const [countdown, setCountdown] = useState({ minutes: 0, seconds: 0 })
   const [isExpired, setIsExpired] = useState(false)
+  const [pendingPayment, setPendingPayment] = useState<typeof qrisData>(null)
+
+  // Load pending payment from localStorage on mount
+  useEffect(() => {
+    const savedPayment = localStorage.getItem('pending_subscription_payment')
+    if (savedPayment) {
+      try {
+        const parsed = JSON.parse(savedPayment)
+        // Check if expired
+        if (new Date(parsed.expiresAt).getTime() > Date.now()) {
+          setPendingPayment(parsed)
+        } else {
+          localStorage.removeItem('pending_subscription_payment')
+        }
+      } catch (e) {
+        localStorage.removeItem('pending_subscription_payment')
+      }
+    }
+  }, [])
+
+  // Save QRIS data to localStorage when created
+  useEffect(() => {
+    if (qrisData) {
+      localStorage.setItem('pending_subscription_payment', JSON.stringify(qrisData))
+      setPendingPayment(qrisData)
+    }
+  }, [qrisData])
 
   useEffect(() => {
     fetchSubscription()
@@ -189,6 +216,9 @@ export default function SubscriptionPage() {
       const data = await res.json()
 
       if (data.status === 'paid') {
+        // Clear pending payment
+        localStorage.removeItem('pending_subscription_payment')
+        setPendingPayment(null)
         setSuccess('Pembayaran berhasil! Langganan Anda sudah aktif.')
         setShowQrisPayment(false)
         setQrisData(null)
@@ -234,11 +264,55 @@ export default function SubscriptionPage() {
     }
   }
 
-  function cancelPayment() {
+  function cancelPayment(clearPending = false) {
     setShowQrisPayment(false)
     setQrisData(null)
     setIsExpired(false)
     setCountdown({ minutes: 0, seconds: 0 })
+    if (clearPending) {
+      localStorage.removeItem('pending_subscription_payment')
+      setPendingPayment(null)
+    }
+  }
+
+  function continuePendingPayment() {
+    if (pendingPayment) {
+      setQrisData(pendingPayment)
+      setShowQrisPayment(true)
+      setIsExpired(false)
+    }
+  }
+
+  async function checkPendingPaymentStatus() {
+    if (!pendingPayment) return
+    
+    setCheckingPayment(true)
+    try {
+      const res = await fetch('/api/subscription/check-payment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          subscriptionId: pendingPayment.subscriptionId,
+          transactionId: pendingPayment.transactionId,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (data.status === 'paid') {
+        localStorage.removeItem('pending_subscription_payment')
+        setPendingPayment(null)
+        setSuccess('Pembayaran berhasil! Langganan Anda sudah aktif.')
+        await fetchSubscription()
+        setTimeout(() => {
+          router.push('/dashboard/products')
+        }, 2000)
+      }
+    } catch (err) {
+      console.error('Error checking payment:', err)
+    } finally {
+      setCheckingPayment(false)
+    }
   }
 
   function formatTime(num: number) {
@@ -260,7 +334,7 @@ export default function SubscriptionPage() {
         {/* Header */}
         <div className="bg-gradient-to-r from-[#0a1628] to-[#0d1f3c] px-4 py-3 flex items-center gap-4">
           <button 
-            onClick={cancelPayment}
+            onClick={() => cancelPayment(false)}
             className="text-primary flex items-center gap-1 text-sm font-medium hover:opacity-80 transition-opacity"
           >
             <ChevronLeft className="w-5 h-5" />
@@ -354,7 +428,7 @@ export default function SubscriptionPage() {
           {/* Action Buttons */}
           <div className="flex gap-3">
             <button
-              onClick={cancelPayment}
+              onClick={() => cancelPayment(true)}
               className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-transparent border-2 border-red-500 text-red-500 font-medium hover:bg-red-500/10 transition-colors"
             >
               <XCircle className="w-5 h-5" />
@@ -539,6 +613,86 @@ export default function SubscriptionPage() {
         </NeoCard>
       ) : (
         <>
+          {/* Pending Payment Alert */}
+          {pendingPayment && !showQrisPayment && (
+            <NeoCard className="bg-gradient-to-br from-yellow-500/20 to-yellow-500/5 border-yellow-500/30">
+              <NeoCardContent className="p-4">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-yellow-500/20 flex items-center justify-center shrink-0">
+                    <Clock className="w-5 h-5 text-yellow-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-yellow-500">Pembayaran Pending</h3>
+                    <p className="text-muted-foreground text-xs mt-0.5">
+                      Anda memiliki pembayaran yang belum selesai
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="bg-background/50 rounded-xl p-3 border border-border mb-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Total</span>
+                    <span className="font-semibold">{formatCurrency(pendingPayment.amount)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Transaction ID</span>
+                    <code className="text-xs truncate max-w-[150px]">{pendingPayment.transactionId}</code>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Kadaluarsa</span>
+                    <span className={new Date(pendingPayment.expiresAt).getTime() < Date.now() ? 'text-red-500' : 'text-yellow-500'}>
+                      {new Date(pendingPayment.expiresAt).toLocaleString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <NeoButton
+                    onClick={continuePendingPayment}
+                    className="flex-1"
+                    size="sm"
+                    disabled={new Date(pendingPayment.expiresAt).getTime() < Date.now()}
+                  >
+                    <QrCode className="w-4 h-4" />
+                    Lihat QR Code
+                  </NeoButton>
+                  <NeoButton
+                    onClick={checkPendingPaymentStatus}
+                    variant="outline"
+                    size="sm"
+                    disabled={checkingPayment}
+                  >
+                    {checkingPayment ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4" />
+                    )}
+                    Cek Status
+                  </NeoButton>
+                  <NeoButton
+                    onClick={() => cancelPayment(true)}
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-500/10"
+                  >
+                    <XCircle className="w-4 h-4" />
+                  </NeoButton>
+                </div>
+
+                {new Date(pendingPayment.expiresAt).getTime() < Date.now() && (
+                  <p className="text-xs text-red-500 text-center mt-3">
+                    Pembayaran ini sudah kadaluarsa. Silakan buat pembayaran baru.
+                  </p>
+                )}
+              </NeoCardContent>
+            </NeoCard>
+          )}
+
           {/* Subscription Plan */}
           <NeoCard className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/30 overflow-hidden relative">
             <div className="absolute top-4 right-4">
