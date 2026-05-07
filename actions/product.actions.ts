@@ -169,6 +169,7 @@ export async function createProductAction(formData: FormData) {
   const description = formData.get('description') as string
   const price = parseFloat(formData.get('price') as string)
   const itemsInput = formData.get('items') as string
+  const successMessage = formData.get('successMessage') as string
   const isActive = formData.get('isActive') === 'on'
 
   // Parse stock items
@@ -200,6 +201,7 @@ export async function createProductAction(formData: FormData) {
     price,
     stock,
     items,
+    successMessage: successMessage || undefined,
     isActive,
   })
 
@@ -226,6 +228,7 @@ export async function updateProductAction(id: string, formData: FormData) {
   const description = formData.get('description') as string
   const price = parseFloat(formData.get('price') as string)
   const itemsInput = formData.get('items') as string
+  const successMessage = formData.get('successMessage') as string
   const isActive = formData.get('isActive') === 'on'
 
   // Parse stock items
@@ -242,6 +245,7 @@ export async function updateProductAction(id: string, formData: FormData) {
     price,
     stock,
     items,
+    successMessage: successMessage || undefined,
     isActive,
   })
 

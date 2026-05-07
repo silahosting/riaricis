@@ -1010,6 +1010,11 @@ async function handleCallbackQuery(
     }
     
     await replaceWithMessage(botToken, chatId, messageId, successText, { replyMarkup: keyboard })
+    
+    // Send additional success message if product has one
+    if (product.successMessage) {
+      await sendMessage(botToken, chatId, product.successMessage)
+    }
     return
   }
   
@@ -1422,6 +1427,11 @@ async function handleCallbackQuery(
 
         await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran berhasil!', false)
         await sendMessage(botToken, chatId, successText)
+        
+        // Send additional success message if product has one
+        if (product?.successMessage) {
+          await sendMessage(botToken, chatId, product.successMessage)
+        }
       } else {
         let pendingText = `⏳ *PEMBAYARAN BELUM DIKONFIRMASI*\n\n`
         pendingText += `🆔 *ID Transaksi:* \`${payment.transactionId}\`\n`
@@ -1537,6 +1547,11 @@ async function handleCallbackQuery(
 
         await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran terkonfirmasi!', false)
         await sendMessage(botToken, chatId, statusText)
+        
+        // Send additional success message if product has one
+        if (product?.successMessage) {
+          await sendMessage(botToken, chatId, product.successMessage)
+        }
       } else if (statusCheck.status === 'pending') {
         let pendingText = `⏳ *PEMBAYARAN BELUM DIKONFIRMASI*\n\n`
         pendingText += `🆔 *ID Transaksi:* \`${statusCheck.transactionId}\`\n`

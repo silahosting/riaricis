@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Package, DollarSign, Hash, FileText, Save, ArrowLeft, Database, CheckCircle2, XCircle, Sparkles, FolderOpen } from 'lucide-react'
+import { Package, DollarSign, Hash, FileText, Save, ArrowLeft, Database, CheckCircle2, XCircle, Sparkles, FolderOpen, MessageSquareText } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
@@ -232,6 +232,34 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
                 required
               />
             </div>
+          </div>
+
+          {/* Success Message */}
+          <div className="flex flex-col gap-2">
+            <label htmlFor="successMessage" className="text-sm font-medium text-white/60">
+              Pesan Tambahan Setelah Transaksi (Opsional)
+            </label>
+            <div className="relative">
+              <MessageSquareText className="absolute left-3 top-4 w-5 h-5 text-white/40" />
+              <NeoTextarea
+                id="successMessage"
+                name="successMessage"
+                placeholder={`Contoh:
+🎀 CAPCUT SHARING 1 BLN 🎀
+
+SNK CAPCUT SHARING 📌
+🪷 LOGIN MAX 1 DEVICE
+🪷 Garansi 20 hari
+🪷 Dilarang otak atik akun
+
+Thanks for your order ❤️`}
+                className="pl-11 min-h-[150px]"
+                defaultValue={product?.successMessage || ''}
+              />
+            </div>
+            <p className="text-xs text-white/40">
+              Pesan ini akan dikirim sebagai pesan terpisah setelah detail transaksi sukses. Cocok untuk SNK, tutorial, atau pesan promosi.
+            </p>
           </div>
 
           {/* Stock Items Input */}

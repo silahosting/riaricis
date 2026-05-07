@@ -46,6 +46,7 @@ export interface Product {
   stock: number // Auto-calculated from items.length
   isActive: boolean
   items: string[] // Stock items in email:password format
+  successMessage?: string // Additional message sent after successful transaction
   createdAt: string
   updatedAt: string
 }
