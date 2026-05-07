@@ -330,20 +330,21 @@ function generateVariantListKeyboard(categoryCode: string, variants: Product[], 
 // Generate paginated product list text (legacy - kept for backward compatibility)
 function generateProductListText(products: Product[], page: number, totalPages: number): string {
   if (!products || products.length === 0) {
-    return '┌─────────────────────────────┐\n│  Belum ada produk tersedia  │\n└─────────────────────────────┘'
+    return '┌---------------------\n│  Belum ada produk tersedia  │\n└---------------------'
   }
 
-  let teks = '┌─────────────────────────────┐\n'
+  let teks = '┌---------------------\n'
   teks += `   LIST PRODUK\n`
   teks += `   page ${page} / ${totalPages}\n`
-  teks += '└─────────────────────────────┘\n\n'
+  teks += '└---------------------\n\n'
   
   const startIndex = (page - 1) * ITEMS_PER_PAGE
   products.forEach((product, index) => {
+    teks += `┌---------------------\n`
     teks += `│ [${startIndex + index + 1}] ${product.name}\n`
   })
   
-  teks += '└─────────────────────────────┘'
+  teks += '└---------------------'
   
   return teks
 }
