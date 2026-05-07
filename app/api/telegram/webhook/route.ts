@@ -225,22 +225,21 @@ function generateCategoryListText(categories: ProductCategory[], products: Produ
     return '┌──────────────────────────\n│  Belum ada produk tersedia  │\n└──────────────────────────'
   }
 
-  let teks = '┌──────────────────────────\n'
-  teks += `   DAFTAR PRODUK\n`
-  teks += `   Pilih produk yang kamu mau\n`
-  teks += `   page ${page} / ${totalPages}\n`
-  teks += '└───────────────────────────\n\n'
+  let teks = '╭ - - - - - - - - - - - - - - - - - - - ╮\n'
+  teks += `┊   DAFTAR PRODUK\n`
+  teks += `┊   Pilih produk yang kamu mau\n`
+  teks += `┊   page ${page} / ${totalPages}\n`
+  teks += `┊ - - - - - - - - - - - - - - - - - - - \n\n`
   
   const startIndex = (page - 1) * ITEMS_PER_PAGE
   categories.forEach((category, index) => {
     // Count total stock for this category
     const categoryProducts = products.filter(p => p.categoryCode === category.code)
     const totalStock = categoryProducts.reduce((sum, p) => sum + (p.items?.length || p.stock || 0), 0)
-    teks += `│ [${startIndex + index + 1}] ${category.name} (${totalStock} stok)\n`
+    teks += `┊ [${startIndex + index + 1}] ${category.name} (${totalStock} stok)\n`
   })
   
-  teks += '└──────────────────────────'
-  
+  teks += '╰ - - - - - - - - - - - - - - - - - - - ╯'
   return teks
 }
 

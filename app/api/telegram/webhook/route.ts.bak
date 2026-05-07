@@ -72,7 +72,37 @@ function getIndonesianDate(): string {
   const wibTime = new Date(now.getTime() + (7 * 60 * 60 * 1000))
   return `${days[wibTime.getDay()]}, ${wibTime.getDate().toString().padStart(2, '0')} ${months[wibTime.getMonth()]} ${wibTime.getFullYear()} ${getWIBTime()}`
 }
+async function replaceWithPhoto(
+  botToken: string,
+  chatId: number,
+  messageId: number,
+  photoUrl: string,
+  caption: string,
+  keyboard?: any
+) {
+  const response = await fetch(
+    `https://api.telegram.org/bot${botToken}/editMessageMedia`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        chat_id: chatId,
+        message_id: messageId,
+        media: {
+          type: 'photo',
+          media: photoUrl,
+          caption,
+          parse_mode: 'HTML'
+        },
+        reply_markup: keyboard
+      })
+    }
+  )
 
+  return response.json()
+}
 // Send message to Telegram
 async function sendMessage(
   botToken: string, 
@@ -195,18 +225,18 @@ function generateCategoryListText(categories: ProductCategory[], products: Produ
     return '┌──────────────────────────\n│  Belum ada produk tersedia  │\n└──────────────────────────'
   }
 
-  let teks = '┌──────────────────────────\n'
-  teks += `   DAFTAR PRODUK\n`
-  teks += `   Pilih produk yang kamu mau\n`
-  teks += `   page ${page} / ${totalPages}\n`
-  teks += '└───────────────────────────\n\n'
+  let teks = '╭ - - - - - - - - - - - - - - - - - - - ╮\n'
+  teks += `┊   DAFTAR PRODUK\n`
+  teks += `┊   Pilih produk yang kamu mau\n`
+  teks += `┊   page ${page} / ${totalPages}\n`
+  teks += `┊ - - - - - - - - - - - - - - - - - - - \n\n`
   
   const startIndex = (page - 1) * ITEMS_PER_PAGE
   categories.forEach((category, index) => {
     // Count total stock for this category
     const categoryProducts = products.filter(p => p.categoryCode === category.code)
     const totalStock = categoryProducts.reduce((sum, p) => sum + (p.items?.length || p.stock || 0), 0)
-    teks += `│ [${startIndex + index + 1}] ${category.name} (${totalStock} stok)\n`
+    teks += `┊ [${startIndex + index + 1}] ${category.name} (${totalStock} stok)\n`
   })
   
   teks += '└──────────────────────────'
