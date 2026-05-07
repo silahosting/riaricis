@@ -30,7 +30,7 @@ import {
   Send
 } from 'lucide-react'
 import { WITHDRAWAL_FEES, BANK_LABELS, type Withdrawal } from '@/types'
-import { PaymentLogo, PAYMENT_BRAND_COLORS } from '@/components/ui/payment-logos'
+import { PaymentLogo } from '@/components/ui/payment-logos'
 
 const MIN_WITHDRAWAL = 10000
 
@@ -384,9 +384,7 @@ export default function WithdrawPage() {
                   
                   <TabsContent value="ewallet" className="mt-3">
                     <div className="grid grid-cols-2 gap-2">
-                      {EWALLET_OPTIONS.map((option) => {
-                        const brandColor = PAYMENT_BRAND_COLORS[option.value]
-                        return (
+                      {EWALLET_OPTIONS.map((option) => (
                           <button
                             key={option.value}
                             type="button"
@@ -398,10 +396,7 @@ export default function WithdrawPage() {
                                 : 'border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
-                            <div 
-                              className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md overflow-hidden"
-                              style={{ backgroundColor: brandColor?.bg || '#666' }}
-                            >
+                            <div className="w-12 h-12 rounded-xl shadow-md overflow-hidden">
                               <PaymentLogo type={option.value} className="w-full h-full" />
                             </div>
                             <span className="text-sm font-semibold">{option.label}</span>
@@ -410,7 +405,7 @@ export default function WithdrawPage() {
                             </span>
                           </button>
                         )
-                      })}
+                      )}
                     </div>
                     <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                       <p className="text-xs text-emerald-600 flex items-center gap-2">
@@ -422,9 +417,7 @@ export default function WithdrawPage() {
                   
                   <TabsContent value="bank" className="mt-3">
                     <div className="grid grid-cols-2 gap-2">
-                      {BANK_OPTIONS.map((option) => {
-                        const brandColor = PAYMENT_BRAND_COLORS[option.value]
-                        return (
+                      {BANK_OPTIONS.map((option) => (
                           <button
                             key={option.value}
                             type="button"
@@ -436,10 +429,7 @@ export default function WithdrawPage() {
                                 : 'border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
-                            <div 
-                              className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md overflow-hidden"
-                              style={{ backgroundColor: brandColor?.bg || '#666' }}
-                            >
+                            <div className="w-12 h-12 rounded-xl shadow-md overflow-hidden">
                               <PaymentLogo type={option.value} className="w-full h-full" />
                             </div>
                             <span className="text-sm font-semibold">{option.label}</span>
@@ -448,7 +438,7 @@ export default function WithdrawPage() {
                             </span>
                           </button>
                         )
-                      })}
+                      )}
                     </div>
                     <div className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                       <p className="text-xs text-amber-600 flex items-center gap-2">
@@ -547,17 +537,13 @@ export default function WithdrawPage() {
               <div className="space-y-3">
                 {withdrawals.slice().reverse().map((w) => {
                   const StatusIcon = STATUS_CONFIG[w.status].icon
-                  const brandColor = PAYMENT_BRAND_COLORS[w.bankType]
                   return (
                     <div
                       key={w.id}
                       className="p-4 rounded-lg bg-muted/50 border border-border"
                     >
                       <div className="flex items-start gap-3">
-                        <div 
-                          className="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm shrink-0 overflow-hidden"
-                          style={{ backgroundColor: brandColor?.bg || '#666' }}
-                        >
+                        <div className="w-10 h-10 rounded-lg shadow-sm shrink-0 overflow-hidden">
                           <PaymentLogo type={w.bankType} className="w-full h-full" />
                         </div>
                         <div className="flex-1 min-w-0">

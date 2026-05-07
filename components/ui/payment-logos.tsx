@@ -1,115 +1,41 @@
 'use client'
 
-import { SVGProps } from 'react'
-
-// Bank BCA Logo
-export function BCALogo(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 100 32" fill="none" {...props}>
-      <rect width="100" height="32" rx="4" fill="#0066AE"/>
-      <text x="50" y="22" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" fontFamily="Arial, sans-serif">BCA</text>
-    </svg>
-  )
+// Payment Logo URLs - using actual brand logos
+const PAYMENT_LOGO_URLS: Record<string, string> = {
+  bca: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/BCA-Logo-Feature-ECpuUMJKk98GT4az4HC53b1CbEkpjs.jpg',
+  bni: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/bni-bank-negara-indonesia8078.logowik.com-BBq3I2kurIC9O0gqO8rSB8NPTnlqxV.webp',
+  bri: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-bank-bri-Q0f9xwiOkaI7FDTO2xN4jVzdolxRUt.jpg',
+  mandiri: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/png-transparent-bank-indonesia-mandiri-banks-in-indonesia-logo-badge-icon-TZdqB701qnSCYgqatCyeQgaQi7fcnX.png',
+  dana: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/f58ca3528b238877e9855fcac1daa328-tAuEdG9AaGwsFl37oJFTmq0YOABtYo.jpg',
+  ovo: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-ovo-l-min-EjCegCPSVOZ48fOUEGuVW5cRhRgroS.jpg',
+  gopay: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/66b3fbad834dc_com.gojek.gopay-k8sLQMDF2gcMwD0Re2xQavkMOiacy3.png',
+  shopeepay: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot_20260507_190933_Google-9nUBSNSoSh3QEKAwwDrJLcklmgZRzL.jpg',
 }
 
-// Bank BNI Logo
-export function BNILogo(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 100 32" fill="none" {...props}>
-      <rect width="100" height="32" rx="4" fill="#F15A22"/>
-      <text x="50" y="22" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" fontFamily="Arial, sans-serif">BNI</text>
-    </svg>
-  )
-}
-
-// Bank BRI Logo
-export function BRILogo(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 100 32" fill="none" {...props}>
-      <rect width="100" height="32" rx="4" fill="#00529C"/>
-      <text x="50" y="22" textAnchor="middle" fill="white" fontSize="16" fontWeight="bold" fontFamily="Arial, sans-serif">BRI</text>
-    </svg>
-  )
-}
-
-// Bank Mandiri Logo
-export function MandiriLogo(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 100 32" fill="none" {...props}>
-      <rect width="100" height="32" rx="4" fill="#003366"/>
-      <text x="50" y="22" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold" fontFamily="Arial, sans-serif">mandiri</text>
-    </svg>
-  )
-}
-
-// DANA Logo
-export function DANALogo(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 100 32" fill="none" {...props}>
-      <rect width="100" height="32" rx="4" fill="#108EE9"/>
-      <text x="50" y="22" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold" fontFamily="Arial, sans-serif">DANA</text>
-    </svg>
-  )
-}
-
-// OVO Logo
-export function OVOLogo(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 100 32" fill="none" {...props}>
-      <rect width="100" height="32" rx="4" fill="#4C2A86"/>
-      <text x="50" y="22" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold" fontFamily="Arial, sans-serif">OVO</text>
-    </svg>
-  )
-}
-
-// GoPay Logo
-export function GopayLogo(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 100 32" fill="none" {...props}>
-      <rect width="100" height="32" rx="4" fill="#00AA13"/>
-      <text x="50" y="22" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold" fontFamily="Arial, sans-serif">GoPay</text>
-    </svg>
-  )
-}
-
-// ShopeePay Logo
-export function ShopeePayLogo(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 100 32" fill="none" {...props}>
-      <rect width="100" height="32" rx="4" fill="#EE4D2D"/>
-      <text x="50" y="21" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" fontFamily="Arial, sans-serif">ShopeePay</text>
-    </svg>
-  )
-}
-
-// Payment Logo Component
+// Payment Logo Component - now using actual images
 export function PaymentLogo({ type, className }: { type: string; className?: string }) {
-  const logos: Record<string, React.FC<SVGProps<SVGSVGElement>>> = {
-    bca: BCALogo,
-    bni: BNILogo,
-    bri: BRILogo,
-    mandiri: MandiriLogo,
-    dana: DANALogo,
-    ovo: OVOLogo,
-    gopay: GopayLogo,
-    shopeepay: ShopeePayLogo,
-  }
-
-  const Logo = logos[type.toLowerCase()]
+  const logoUrl = PAYMENT_LOGO_URLS[type.toLowerCase()]
   
-  if (!Logo) return null
+  if (!logoUrl) return null
   
-  return <Logo className={className} />
+  return (
+    <img 
+      src={logoUrl} 
+      alt={`${type.toUpperCase()} logo`}
+      className={`object-cover ${className || ''}`}
+      loading="lazy"
+    />
+  )
 }
 
-// Mapping for payment icons with proper brand colors
+// Mapping for payment icons with proper brand colors (for backgrounds)
 export const PAYMENT_BRAND_COLORS: Record<string, { bg: string; text: string }> = {
   bca: { bg: '#0066AE', text: 'white' },
-  bni: { bg: '#F15A22', text: 'white' },
+  bni: { bg: '#FFFFFF', text: '#1a5276' },
   bri: { bg: '#00529C', text: 'white' },
   mandiri: { bg: '#003366', text: 'white' },
-  dana: { bg: '#108EE9', text: 'white' },
+  dana: { bg: '#FFFFFF', text: '#108EE9' },
   ovo: { bg: '#4C2A86', text: 'white' },
-  gopay: { bg: '#00AA13', text: 'white' },
+  gopay: { bg: '#00AED6', text: 'white' },
   shopeepay: { bg: '#EE4D2D', text: 'white' },
 }

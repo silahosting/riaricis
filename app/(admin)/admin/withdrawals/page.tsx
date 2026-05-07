@@ -29,7 +29,7 @@ import {
   Banknote
 } from 'lucide-react'
 import { BANK_LABELS, type Withdrawal } from '@/types'
-import { PaymentLogo, PAYMENT_BRAND_COLORS } from '@/components/ui/payment-logos'
+import { PaymentLogo } from '@/components/ui/payment-logos'
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('id-ID', {
@@ -259,7 +259,6 @@ export default function AdminWithdrawalsPage() {
             <div className="space-y-3">
               {filteredWithdrawals.map((w) => {
                 const StatusIcon = STATUS_CONFIG[w.status].icon
-                const brandColor = PAYMENT_BRAND_COLORS[w.bankType]
                 
                 return (
                   <div
@@ -268,10 +267,7 @@ export default function AdminWithdrawalsPage() {
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-start gap-4">
-                        <div 
-                          className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg overflow-hidden"
-                          style={{ backgroundColor: brandColor?.bg || '#666' }}
-                        >
+                        <div className="w-12 h-12 rounded-xl shrink-0 shadow-lg overflow-hidden">
                           <PaymentLogo type={w.bankType} className="w-full h-full" />
                         </div>
                         <div>
