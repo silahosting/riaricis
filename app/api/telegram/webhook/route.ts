@@ -310,13 +310,13 @@ function generateVariantListText(
 
   const startIndex = (page - 1) * ITEMS_PER_PAGE
 
-  variants.forEach((variant, index) => {
-    const stock = variant.items?.length || variant.stock || 0
+variants.forEach((variant, index) => {
+  const stock = variant.items?.length || variant.stock || 0
+  const nomor = startIndex + index + 1
 
-    teks += `┊ [${startIndex + index + 1}] ${variant.name}\n`
-    teks += `┊     Rp ${toRupiah(variant.price)} [${stock} stok]\n`
-  })
-
+  teks += `┊ [${nomor}] ${variant.name}\n`
+  teks += `┊     Rp ${toRupiah(variant.price)} (${stock} stok)\n`
+})
   teks += '╰ - - - - - - - - - - - - - - - - - - - ╯'
 
   return teks
