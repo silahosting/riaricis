@@ -5,7 +5,7 @@ import { NeoCard, NeoCardHeader, NeoCardTitle, NeoCardDescription, NeoCardConten
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoInput } from '@/components/ui/neo-input'
 import { NeoBadge } from '@/components/ui/neo-badge'
-import { Save, Eye, EyeOff, AlertCircle, CheckCircle, CreditCard, QrCode, Loader2 } from 'lucide-react'
+import { Save, Eye, EyeOff, AlertCircle, CheckCircle, CreditCard, QrCode, Loader2, Percent, Hash } from 'lucide-react'
 import type { PaymentSettings } from '@/types'
 
 export default function PaymentSettingsPage() {
@@ -21,6 +21,10 @@ export default function PaymentSettingsPage() {
     midtransClientKey: '',
     midtransIsProduction: false,
     midtransMerchantId: '',
+    midtransFeeType: 'fixed',
+    midtransFeeAmount: 0,
+    midtransRandomFeeMin: 1,
+    midtransRandomFeeMax: 100,
     defaultPaymentMethod: 'orkut',
   })
   const [loading, setLoading] = useState(true)
@@ -340,6 +344,96 @@ export default function PaymentSettingsPage() {
                 settings.midtransIsProduction ? 'left-8' : 'left-1'
               }`} />
             </button>
+          </div>
+
+          {/* Fee Settings */}
+          <div className="p-4 rounded-xl bg-gradient-to-r from-violet-500/10 to-cyan-500/10 border border-violet-500/20 space-y-4">
+            <div className="flex items-center gap-2">
+              <Percent className="w-5 h-5 text-violet-400" />
+              <p className="text-white font-medium">Fee Settings</p>
+            </div>
+            
+            {/* Fee Type */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                type="button"
+                onClick={() => setSettings({ ...settings, midtransFeeType: 'fixed' })}
+                className={`flex-1 p-3 rounded-lg border transition-all ${
+                  settings.midtransFeeType === 'fixed'
+                    ? 'border-violet-500 bg-violet-500/20 text-white'
+                    : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Hash className="w-4 h-4" />
+                  <span className="text-sm font-medium">Nominal Tetap (Rp)</span>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSettings({ ...settings, midtransFeeType: 'percent' })}
+                className={`flex-1 p-3 rounded-lg border transition-all ${
+                  settings.midtransFeeType === 'percent'
+                    ? 'border-violet-500 bg-violet-500/20 text-white'
+                    : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Percent className="w-4 h-4" />
+                  <span className="text-sm font-medium">Persentase (%)</span>
+                </div>
+              </button>
+            </div>
+
+            {/* Fee Amount */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-white/80">
+                {settings.midtransFeeType === 'fixed' ? 'Nominal Fee (Rp)' : 'Persentase Fee (%)'}
+              </label>
+              <NeoInput
+                type="number"
+                value={settings.midtransFeeAmount || 0}
+                onChange={(e) => setSettings({ ...settings, midtransFeeAmount: parseFloat(e.target.value) || 0 })}
+                placeholder={settings.midtransFeeType === 'fixed' ? 'Contoh: 1000' : 'Contoh: 2.5'}
+                className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                min={0}
+                step={settings.midtransFeeType === 'percent' ? '0.1' : '100'}
+              />
+              <p className="text-xs text-white/40">
+                {settings.midtransFeeType === 'fixed' 
+                  ? 'Fee akan ditambahkan ke setiap transaksi'
+                  : 'Fee dihitung dari persentase total harga produk'}
+              </p>
+            </div>
+
+            {/* Random Fee Range */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white/80">Random Fee Min</label>
+                <NeoInput
+                  type="number"
+                  value={settings.midtransRandomFeeMin || 1}
+                  onChange={(e) => setSettings({ ...settings, midtransRandomFeeMin: parseInt(e.target.value) || 1 })}
+                  placeholder="1"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                  min={0}
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white/80">Random Fee Max</label>
+                <NeoInput
+                  type="number"
+                  value={settings.midtransRandomFeeMax || 100}
+                  onChange={(e) => setSettings({ ...settings, midtransRandomFeeMax: parseInt(e.target.value) || 100 })}
+                  placeholder="100"
+                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                  min={0}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-white/40">
+              Random fee akan ditambahkan ke fee dasar (antara min dan max) untuk membuat kode unik setiap transaksi
+            </p>
           </div>
 
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">

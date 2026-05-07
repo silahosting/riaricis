@@ -79,6 +79,11 @@ export async function POST(request: Request) {
       midtransClientKey: body.midtransClientKey === '***hidden***'
         ? existingSettings?.midtransClientKey || ''
         : body.midtransClientKey || '',
+      // Fee settings
+      midtransFeeType: body.midtransFeeType || 'fixed',
+      midtransFeeAmount: body.midtransFeeAmount ?? 0,
+      midtransRandomFeeMin: body.midtransRandomFeeMin ?? 1,
+      midtransRandomFeeMax: body.midtransRandomFeeMax ?? 100,
       defaultPaymentMethod: body.defaultPaymentMethod || 'orkut',
     }
 

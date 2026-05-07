@@ -7,6 +7,10 @@ export interface MidtransQrisResponse {
   qrCodeUrl?: string
   qrString?: string
   expiryTime?: string
+  originalAmount?: number
+  feeAmount?: number
+  randomFee?: number
+  totalAmount?: number
   error?: string
 }
 
@@ -41,6 +45,34 @@ async function getMidtransClient() {
   return { coreApi, settings }
 }
 
+// Helper function to calculate fee
+function calculateMidtransFee(
+  amount: number,
+  feeType: 'fixed' | 'percent',
+  feeAmount: number,
+  randomFeeMin: number,
+  randomFeeMax: number
+): { baseFee: number; randomFee: number; totalFee: number } {
+  // Calculate base fee
+  let baseFee = 0
+  if (feeType === 'fixed') {
+    baseFee = feeAmount
+  } else if (feeType === 'percent') {
+    baseFee = Math.round((amount * feeAmount) / 100)
+  }
+
+  // Calculate random fee (between min and max, default 1-100)
+  const min = randomFeeMin || 1
+  const max = randomFeeMax || 100
+  const randomFee = Math.floor(Math.random() * (max - min + 1)) + min
+
+  return {
+    baseFee,
+    randomFee,
+    totalFee: baseFee + randomFee,
+  }
+}
+
 export async function createMidtransQrisPayment(
   orderId: string,
   amount: number,
@@ -48,13 +80,30 @@ export async function createMidtransQrisPayment(
   customerEmail?: string
 ): Promise<MidtransQrisResponse> {
   try {
-    const { coreApi } = await getMidtransClient()
+    const { coreApi, settings } = await getMidtransClient()
+
+    // Calculate fee from settings
+    const feeType = settings.midtransFeeType || 'fixed'
+    const feeAmount = settings.midtransFeeAmount || 0
+    const randomFeeMin = settings.midtransRandomFeeMin || 1
+    const randomFeeMax = settings.midtransRandomFeeMax || 100
+
+    const { baseFee, randomFee, totalFee } = calculateMidtransFee(
+      amount,
+      feeType,
+      feeAmount,
+      randomFeeMin,
+      randomFeeMax
+    )
+
+    // Total amount = original amount + base fee + random fee
+    const totalAmount = amount + totalFee
 
     const parameter = {
       payment_type: 'qris',
       transaction_details: {
         order_id: `MIDTRANS-${orderId}-${Date.now()}`,
-        gross_amount: amount,
+        gross_amount: totalAmount,
       },
       customer_details: {
         first_name: customerName,
@@ -80,6 +129,10 @@ export async function createMidtransQrisPayment(
         qrCodeUrl: qrisAction?.url || response.actions?.[0]?.url,
         qrString: response.qr_string,
         expiryTime: response.expiry_time,
+        originalAmount: amount,
+        feeAmount: baseFee,
+        randomFee: randomFee,
+        totalAmount: totalAmount,
       }
     }
 

@@ -118,6 +118,11 @@ export interface PaymentSettings {
   midtransClientKey: string
   midtransIsProduction: boolean
   midtransMerchantId: string
+  // Fee Settings
+  midtransFeeType: 'fixed' | 'percent' // Tipe fee: nominal tetap atau persentase
+  midtransFeeAmount: number // Nominal fee (jika fixed) atau persentase (jika percent)
+  midtransRandomFeeMin: number // Random fee min (default 1)
+  midtransRandomFeeMax: number // Random fee max (default 100)
   // Default payment method
   defaultPaymentMethod: 'orkut' | 'midtrans'
   createdAt: string

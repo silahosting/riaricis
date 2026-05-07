@@ -1104,7 +1104,7 @@ async function handleCallbackQuery(
       qrisText += `📊 *Jumlah:* ${quantity}x\n`
       qrisText += `💰 *Harga:* Rp ${toRupiah(qrisResult.originalAmount)}\n`
       qrisText += `💸 *Admin Fee:* Rp ${toRupiah(qrisResult.fee)}\n`
-      qrisText += `━━━━━━━━━━━━━━━━━━━━━\n`
+      qrisText += `━━━━━━━━━━━━���━━━━━━━━\n`
       qrisText += `💵 *Total Bayar:* Rp ${toRupiah(qrisResult.amount)}\n\n`
       qrisText += `🆔 *ID Transaksi:* \`${qrisResult.transactionId}\`\n\n`
       qrisText += `📌 *Instruksi Pembayaran:*\n`
@@ -1172,13 +1172,13 @@ async function handleCallbackQuery(
     }
 
     try {
-      const totalPrice = product.price * quantity
+      const basePrice = product.price * quantity
 
       // Get payment settings to check if sandbox mode
       const paymentSettingsMidtrans = await getPaymentSettings()
       const isSandboxMode = !(paymentSettingsMidtrans?.midtransIsProduction ?? false)
 
-      // Create order first
+      // Create order first with base price
       const newOrder = await createOrder({
         userId: botOwnerId,
         productId: product.id,
@@ -1187,7 +1187,7 @@ async function handleCallbackQuery(
         buyerName: user.first_name,
         buyerContact: user.username || user.first_name,
         quantity,
-        totalPrice,
+        totalPrice: basePrice, // Store base price in order
         status: 'pending',
         paymentStatus: 'pending',
         paymentMethod: 'midtrans',
@@ -1199,10 +1199,10 @@ async function handleCallbackQuery(
         return
       }
 
-      // Create Midtrans QRIS payment
+      // Create Midtrans QRIS payment - fee is calculated inside this function
       const midtransResult = await createMidtransQrisPayment(
         newOrder.id,
-        totalPrice,
+        basePrice, // Pass base price, fee will be added automatically
         user.first_name,
         undefined
       )
@@ -1212,17 +1212,23 @@ async function handleCallbackQuery(
         return
       }
 
+      // Get fee info from midtrans result
+      const baseFee = midtransResult.feeAmount || 0
+      const randomFee = midtransResult.randomFee || 0
+      const totalFee = baseFee + randomFee
+      const totalPrice = midtransResult.totalAmount || basePrice
+
       // Update order with payment details
       await updateOrder(newOrder.id, {
         paymentQrisUrl: midtransResult.qrCodeUrl,
         paymentTransactionId: midtransResult.transactionId,
       })
 
-      // Create payment record
+      // Create payment record with total amount including fee
       await createPayment({
         orderId: newOrder.id,
         userId: telegramUserId,
-        amount: totalPrice,
+        amount: totalPrice, // Total with fee
         qrisUrl: midtransResult.qrCodeUrl,
         transactionId: midtransResult.transactionId,
         status: 'pending',
@@ -1238,6 +1244,12 @@ async function handleCallbackQuery(
       let qrisText = `💳 *PEMBAYARAN QRIS (MIDTRANS)*\n\n`
       qrisText += `📦 *Produk:* ${product.name}\n`
       qrisText += `📊 *Jumlah:* ${quantity}x\n`
+      qrisText += `💵 *Harga:* Rp ${toRupiah(basePrice)}\n`
+      if (totalFee > 0) {
+        qrisText += `💳 *Admin Fee:* Rp ${toRupiah(baseFee)}\n`
+        qrisText += `🔢 *Kode Unik:* Rp ${toRupiah(randomFee)}\n`
+      }
+      qrisText += `━━━━━━━━━━━━━━━━━━━━\n`
       qrisText += `💰 *Total Bayar:* Rp ${toRupiah(totalPrice)}\n\n`
       qrisText += `🆔 *ID Transaksi:* \`${midtransResult.transactionId}\`\n\n`
       qrisText += `📌 *Instruksi Pembayaran:*\n`
