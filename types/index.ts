@@ -91,10 +91,13 @@ export interface Payment {
   userId: string
   amount: number
   qrisUrl?: string
+  qrString?: string
   transactionId?: string
   status: 'unpaid' | 'pending' | 'paid' | 'expired' | 'failed'
   paymentMethod: 'qris' | 'midtrans'
   midtransTransactionId?: string
+  qrisMessageId?: number // Message ID of QRIS photo for auto-delete
+  qrisChatId?: number // Chat ID for auto-delete
   createdAt: string
   updatedAt: string
 }

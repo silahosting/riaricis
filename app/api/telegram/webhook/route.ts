@@ -970,18 +970,37 @@ async function handleCallbackQuery(
     
     await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran berhasil!')
     
-    // Send success message with items
-    let successText = `✅ PEMBAYARAN BERHASIL!\n\n`
-    successText += `*Produk:* ${product.name}\n`
-    successText += `*Jumlah:* ${quantity}x\n`
-    successText += `*Total:* Rp ${toRupiah(product.price * quantity)}\n\n`
-    successText += `━━━━━━━━━━━━━━━━━━━━━\n`
-    successText += `📦 *Detail Pesanan:*\n\n`
+    // Generate unique code
+    const uniqueCode = `${product.code || 'TRX'}-${Math.random().toString(36).substring(2, 15)}`
+    const transactionDate = new Date().toLocaleString('id-ID', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+
+    // New format for success message
+    let successText = `╭────〔 TRANSAKSI SUKSES 〕─\n`
+    successText += `┊\n`
+    successText += `┊・Pay ID : SALDO-${Date.now()}\n`
+    successText += `┊・Kode Unik : ${uniqueCode}\n`
+    successText += `┊・Nama Produk : ${product.name}\n`
+    successText += `┊・ID Buyer : ${user.id || chatId}\n`
+    successText += `┊・Nomor Buyer : ${chatId}\n`
+    successText += `┊・Jumlah Beli : ${quantity}\n`
+    successText += `┊・Berhasil Dipenuhi : ${itemsToSend.length} akun\n`
+    successText += `┊・Harga Terpakai : ${toRupiah(product.price * quantity)}\n`
+    successText += `┊・Fee : 0\n`
+    successText += `┊・Total Dibayar : ${toRupiah(product.price * quantity)}\n`
+    successText += `┊・Methode Pay : Saldo\n`
+    successText += `┊・Tanggal/Jam Transaksi : ${transactionDate}\n`
+    successText += `╰┈┈┈┈┈┈┈┈\n\n`
+    
+    successText += `〔 *PRODUCT DETAIL* 〕\n`
     itemsToSend.forEach((item, i) => {
       successText += `${i + 1}. \`${item}\`\n`
     })
-    successText += `\n━━━━━━━━━━━━━━━━━━━━━\n`
-    successText += `\n_Terima kasih telah membeli!_`
     
     const keyboard = {
       inline_keyboard: [
@@ -1105,6 +1124,13 @@ async function handleCallbackQuery(
           caption: qrisText,
           replyMarkup: keyboard
         })
+        if (photoResult.ok && photoResult.result?.message_id) {
+          // Save message ID for auto-delete later
+          await updatePaymentByOrderId(newOrder.id, {
+            qrisMessageId: photoResult.result.message_id,
+            qrisChatId: chatId
+          })
+        }
         if (!photoResult.ok) {
           await sendMessage(botToken, chatId, qrisText, { replyMarkup: keyboard })
         }
@@ -1232,6 +1258,13 @@ async function handleCallbackQuery(
           caption: qrisText,
           replyMarkup: keyboard
         })
+        if (photoResult.ok && photoResult.result?.message_id) {
+          // Save message ID for auto-delete later
+          await updatePaymentByOrderId(newOrder.id, {
+            qrisMessageId: photoResult.result.message_id,
+            qrisChatId: chatId
+          })
+        }
         if (!photoResult.ok) {
           await sendMessage(botToken, chatId, qrisText, { replyMarkup: keyboard })
         }
@@ -1326,8 +1359,19 @@ async function handleCallbackQuery(
         await updateOrder(orderId, { paymentStatus: 'paid', status: 'completed' })
         await updatePaymentByOrderId(orderId, { status: 'paid' })
 
+        // Delete QRIS message if exists
+        if (payment.qrisMessageId && payment.qrisChatId) {
+          try {
+            await deleteMessage(botToken, payment.qrisChatId, payment.qrisMessageId)
+          } catch (deleteErr) {
+            // Ignore delete errors
+          }
+        }
+
         // Deliver product
         const product = await getProductById(order.productId)
+        let itemsDelivered: string[] = []
+        
         if (product && product.items && product.items.length > 0) {
           const itemsToSend = product.items.slice(0, order.quantity)
           const remainingItems = product.items.slice(order.quantity)
@@ -1336,30 +1380,48 @@ async function handleCallbackQuery(
             items: remainingItems,
             stock: remainingItems.length
           })
+          
+          itemsDelivered = itemsToSend
+        }
 
-          let successText = `✅ *PEMBAYARAN BERHASIL*\n\n`
-          successText += `📦 *Produk:* ${order.productName}\n`
-          successText += `💰 *Total Bayar:* Rp ${toRupiah(order.totalPrice)}\n`
-          successText += `💳 *Metode:* Midtrans QRIS\n\n`
-          successText += `━━━━━━━━━━━━━━━━━━━━━\n`
-          successText += `📋 *Detail Pesanan:*\n\n`
-          itemsToSend.forEach((item, i) => {
+        // Generate unique code
+        const uniqueCode = `${product?.code || 'TRX'}-${Math.random().toString(36).substring(2, 15)}`
+        const transactionDate = new Date().toLocaleString('id-ID', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+
+        // New format for success message
+        let successText = `╭────〔 TRANSAKSI SUKSES 〕─\n`
+        successText += `┊\n`
+        successText += `┊・Pay ID : ${payment.transactionId}\n`
+        successText += `┊・Kode Unik : ${uniqueCode}\n`
+        successText += `┊・Nama Produk : ${order.productName}\n`
+        successText += `┊・ID Buyer : ${order.buyerId || chatId}\n`
+        successText += `┊・Nomor Buyer : ${chatId}\n`
+        successText += `┊・Jumlah Beli : ${order.quantity}\n`
+        successText += `┊・Berhasil Dipenuhi : ${itemsDelivered.length} akun\n`
+        successText += `┊・Harga Terpakai : ${toRupiah(order.totalPrice)}\n`
+        successText += `┊・Fee : ${toRupiah(payment.amount - order.totalPrice)}\n`
+        successText += `┊・Total Dibayar : ${toRupiah(payment.amount)}\n`
+        successText += `┊・Methode Pay : Midtrans QRIS\n`
+        successText += `┊・Tanggal/Jam Transaksi : ${transactionDate}\n`
+        successText += `╰┈┈┈┈┈┈┈┈\n\n`
+        
+        if (itemsDelivered.length > 0) {
+          successText += `〔 *PRODUCT DETAIL* 〕\n`
+          itemsDelivered.forEach((item, i) => {
             successText += `${i + 1}. \`${item}\`\n`
           })
-          successText += `\n━━━━━━━━━━━━━━━━━━━━━\n`
-          successText += `\n_Terima kasih telah berbelanja!_`
-
-          await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran berhasil!', false)
-          await sendMessage(botToken, chatId, successText)
         } else {
-          let successText = `✅ *PEMBAYARAN BERHASIL*\n\n`
-          successText += `📦 *Produk:* ${order.productName}\n`
-          successText += `💰 *Total Bayar:* Rp ${toRupiah(order.totalPrice)}\n\n`
-          successText += `_Pesanan Anda sedang diproses._`
-
-          await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran berhasil!', false)
-          await sendMessage(botToken, chatId, successText)
+          successText += `_Produk akan dikirim oleh admin._`
         }
+
+        await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran berhasil!', false)
+        await sendMessage(botToken, chatId, successText)
       } else {
         let pendingText = `⏳ *PEMBAYARAN BELUM DIKONFIRMASI*\n\n`
         pendingText += `🆔 *ID Transaksi:* \`${payment.transactionId}\`\n`
@@ -1412,14 +1474,66 @@ async function handleCallbackQuery(
         await updateOrder(orderId, { paymentStatus: 'paid', status: 'completed' })
         await updatePaymentByOrderId(orderId, { status: 'paid' })
 
-        let statusText = `✅ *PEMBAYARAN BERHASIL*\n\n`
-        statusText += `📦 *Produk:* ${order.productName}\n`
-        statusText += `💰 *Jumlah Bayar:* Rp ${toRupiah(payments.amount)}\n`
-        statusText += `🏦 *Via:* ${statusCheck.brand || 'QRIS'}\n`
-        statusText += `📝 *Ket:* ${statusCheck.description || '-'}\n\n`
-        statusText += `🆔 *ID Transaksi:* \`${statusCheck.transactionId}\`\n`
-        statusText += `⏰ *Waktu:* ${new Date().toLocaleString('id-ID')}\n\n`
-        statusText += `_Pesanan selesai. Terima kasih!_`
+        // Delete QRIS message if exists
+        if (payments.qrisMessageId && payments.qrisChatId) {
+          try {
+            await deleteMessage(botToken, payments.qrisChatId, payments.qrisMessageId)
+          } catch (deleteErr) {
+            // Ignore delete errors
+          }
+        }
+
+        // Deliver product
+        const product = await getProductById(order.productId)
+        let itemsDelivered: string[] = []
+        
+        if (product && product.items && product.items.length > 0) {
+          const itemsToSend = product.items.slice(0, order.quantity)
+          const remainingItems = product.items.slice(order.quantity)
+          
+          await updateProduct(product.id, {
+            items: remainingItems,
+            stock: remainingItems.length
+          })
+          
+          itemsDelivered = itemsToSend
+        }
+
+        // Generate unique code
+        const uniqueCode = `${product?.code || 'TRX'}-${Math.random().toString(36).substring(2, 15)}`
+        const transactionDate = new Date().toLocaleString('id-ID', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })
+
+        // New format for success message
+        let statusText = `╭────〔 TRANSAKSI SUKSES 〕─\n`
+        statusText += `┊\n`
+        statusText += `┊・Pay ID : ${payments.transactionId}\n`
+        statusText += `┊・Kode Unik : ${uniqueCode}\n`
+        statusText += `┊・Nama Produk : ${order.productName}\n`
+        statusText += `┊・ID Buyer : ${order.buyerId || chatId}\n`
+        statusText += `┊・Nomor Buyer : ${chatId}\n`
+        statusText += `┊・Jumlah Beli : ${order.quantity}\n`
+        statusText += `┊・Berhasil Dipenuhi : ${itemsDelivered.length} akun\n`
+        statusText += `┊・Harga Terpakai : ${toRupiah(order.totalPrice)}\n`
+        statusText += `┊・Fee : ${toRupiah(payments.amount - order.totalPrice)}\n`
+        statusText += `┊・Total Dibayar : ${toRupiah(payments.amount)}\n`
+        statusText += `┊・Methode Pay : ${statusCheck.brand || 'QRIS auto'}\n`
+        statusText += `┊・Tanggal/Jam Transaksi : ${transactionDate}\n`
+        statusText += `╰┈┈┈┈┈┈┈┈\n\n`
+        
+        if (itemsDelivered.length > 0) {
+          statusText += `〔 *PRODUCT DETAIL* 〕\n`
+          itemsDelivered.forEach((item, i) => {
+            statusText += `${i + 1}. \`${item}\`\n`
+          })
+        } else {
+          statusText += `_Produk akan dikirim oleh admin._`
+        }
 
         await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran terkonfirmasi!', false)
         await sendMessage(botToken, chatId, statusText)
