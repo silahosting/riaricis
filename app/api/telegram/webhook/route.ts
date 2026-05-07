@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBotSettingsByToken, getAllProducts, getProductsByUserId, getProductCategories, getAllOrders, getOrdersByUserId, getOrderById, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder, getPaymentSettings } from '@/lib/github-db'
+import { getBotSettingsByToken, getAllProducts, getProductsByUserId, getProductCategories, getAllOrders, getOrdersByUserId, getOrderById, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder, getPaymentSettings, createBotActivityLog, createAdminFeeIncome, detectSpamActivity } from '@/lib/github-db'
 import { createOrkutQrisPayment, checkOrkutPaymentStatus } from '@/lib/orkut'
 import { createMidtransQrisPayment, checkMidtransPaymentStatus, isMidtransPaymentPaid } from '@/lib/midtrans'
 import type { Product, ProductCategory, PaymentSettings } from '@/types'
@@ -1104,7 +1104,7 @@ async function handleCallbackQuery(
       qrisText += `📊 *Jumlah:* ${quantity}x\n`
       qrisText += `💰 *Harga:* Rp ${toRupiah(qrisResult.originalAmount)}\n`
       qrisText += `💸 *Admin Fee:* Rp ${toRupiah(qrisResult.fee)}\n`
-      qrisText += `━━━━━━━━━━━━���━━━━━━━━\n`
+      qrisText += `━━━━━━━━━━━━�����━━━━━━━━\n`
       qrisText += `💵 *Total Bayar:* Rp ${toRupiah(qrisResult.amount)}\n\n`
       qrisText += `🆔 *ID Transaksi:* \`${qrisResult.transactionId}\`\n\n`
       qrisText += `📌 *Instruksi Pembayaran:*\n`
@@ -1375,6 +1375,33 @@ async function handleCallbackQuery(
         // Update order and payment status to completed
         await updateOrder(orderId, { paymentStatus: 'paid', status: 'completed' })
         await updatePaymentByOrderId(orderId, { status: 'paid' })
+
+        // Calculate and save admin fee income
+        const feeAmount = payment.amount - order.totalPrice
+        if (feeAmount > 0) {
+          await createAdminFeeIncome({
+            orderId: order.id,
+            buyerName: order.buyerName,
+            productName: order.productName,
+            originalAmount: order.totalPrice,
+            baseFee: Math.floor(feeAmount * 0.8), // Estimate base fee as 80%
+            randomFee: Math.ceil(feeAmount * 0.2), // Estimate random fee as 20%
+            totalFee: feeAmount,
+            paymentMethod: 'midtrans',
+          })
+        }
+
+        // Log payment completion
+        await createBotActivityLog({
+          botToken,
+          botName: botSettings?.botName || 'Unknown Bot',
+          userId: botSettings?.userId || '',
+          userName: botSettings?.ownerId || '',
+          action: 'complete',
+          telegramUserId: String(chatId),
+          telegramUsername: user.username,
+          message: `Payment completed: ${order.productName} - Rp ${order.totalPrice}`,
+        })
 
         // Delete QRIS message if exists
         if (payment.qrisMessageId && payment.qrisChatId) {
@@ -1742,8 +1769,38 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
     balance: 0
   }
 
+  // Check for spam activity
+  const isSpam = await detectSpamActivity(String(user.id))
+  if (isSpam) {
+    // Log spam detection
+    await createBotActivityLog({
+      botToken,
+      botName: botSettings.botName || 'Unknown Bot',
+      userId: botSettings.userId,
+      userName: botSettings.ownerId,
+      action: 'spam_detected',
+      telegramUserId: String(user.id),
+      telegramUsername: user.username,
+      message: `Spam detected from ${user.first_name}`,
+    })
+    await sendMessage(botToken, chatId, 'Terlalu banyak request. Mohon tunggu beberapa menit.', {})
+    return
+  }
+
   // Handle /start command
   if (text.startsWith('/start')) {
+    // Log start action
+    await createBotActivityLog({
+      botToken,
+      botName: botSettings.botName || 'Unknown Bot',
+      userId: botSettings.userId,
+      userName: botSettings.ownerId,
+      action: 'start',
+      telegramUserId: String(user.id),
+      telegramUsername: user.username,
+      message: `/start from ${user.first_name}`,
+    })
+
     const menuText = generateStartMenuText(user, { totalSold, totalRevenue, totalUsers }, userStats)
     const startMenuPhoto = botSettings.botPhotoUrl || 'https://files.catbox.moe/992896.jpg'
     await sendPhoto(botToken, chatId, startMenuPhoto, {

@@ -1,5 +1,5 @@
 import { GITHUB_CONFIG } from './constants'
-import type { Database, User, BotSettings, ProductCategory, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal, BalanceAdjustment, BotSubscription } from '@/types'
+import type { Database, User, BotSettings, ProductCategory, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal, BalanceAdjustment, BotSubscription, AdminFeeIncome, BotActivityLog } from '@/types'
 
 const defaultDatabase: Database = {
   users: [],
@@ -13,6 +13,8 @@ const defaultDatabase: Database = {
   withdrawals: [],
   balanceAdjustments: [],
   botSubscriptions: [],
+  adminFeeIncomes: [],
+  botActivityLogs: [],
 }
 
 const API_BASE = "https://api-orkut-iota-seven.vercel.app" // ganti dengan URL API kamu
@@ -53,6 +55,8 @@ async function getFileContent(): Promise<{ content: Database; sha: string | null
       withdrawals: Array.isArray(data.content?.withdrawals) ? data.content.withdrawals : [],
       balanceAdjustments: Array.isArray(data.content?.balanceAdjustments) ? data.content.balanceAdjustments : [],
       botSubscriptions: Array.isArray(data.content?.botSubscriptions) ? data.content.botSubscriptions : [],
+      adminFeeIncomes: Array.isArray(data.content?.adminFeeIncomes) ? data.content.adminFeeIncomes : [],
+      botActivityLogs: Array.isArray(data.content?.botActivityLogs) ? data.content.botActivityLogs : [],
     }
     
     return { content, sha: data.sha || null }
@@ -846,4 +850,142 @@ export async function activateSubscription(subscriptionId: string): Promise<BotS
 export async function getAllSubscriptions(): Promise<BotSubscription[]> {
   const { content } = await getFileContent()
   return content.botSubscriptions || []
+}
+
+// Get all bot settings (for admin monitoring)
+export async function getAllBotSettings(): Promise<BotSettings[]> {
+  const { content } = await getFileContent()
+  return content.botSettings || []
+}
+
+// Admin Fee Income operations
+export async function createAdminFeeIncome(
+  data: Omit<AdminFeeIncome, 'id' | 'createdAt'>
+): Promise<AdminFeeIncome | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  const newFeeIncome: AdminFeeIncome = {
+    ...data,
+    id: generateId(),
+    createdAt: now,
+  }
+
+  content.adminFeeIncomes = content.adminFeeIncomes || []
+  content.adminFeeIncomes.push(newFeeIncome)
+  const success = await updateFile(content, sha)
+  return success ? newFeeIncome : null
+}
+
+export async function getAdminFeeIncomes(): Promise<AdminFeeIncome[]> {
+  const { content } = await getFileContent()
+  return content.adminFeeIncomes || []
+}
+
+export async function getAdminTotalFeeBalance(): Promise<number> {
+  const { content } = await getFileContent()
+  const feeIncomes = content.adminFeeIncomes || []
+  return feeIncomes.reduce((sum, f) => sum + f.totalFee, 0)
+}
+
+// Bot Activity Log operations
+export async function createBotActivityLog(
+  data: Omit<BotActivityLog, 'id' | 'createdAt'>
+): Promise<BotActivityLog | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  const newLog: BotActivityLog = {
+    ...data,
+    id: generateId(),
+    createdAt: now,
+  }
+
+  content.botActivityLogs = content.botActivityLogs || []
+  // Keep only last 500 logs to prevent database bloat
+  if (content.botActivityLogs.length >= 500) {
+    content.botActivityLogs = content.botActivityLogs.slice(-499)
+  }
+  content.botActivityLogs.push(newLog)
+  const success = await updateFile(content, sha)
+  return success ? newLog : null
+}
+
+export async function getBotActivityLogs(limit: number = 100): Promise<BotActivityLog[]> {
+  const { content } = await getFileContent()
+  const logs = content.botActivityLogs || []
+  // Return latest logs first
+  return logs.slice(-limit).reverse()
+}
+
+// Get order stats by date for charts
+export async function getOrderStatsForChart(days: number = 7): Promise<{ date: string; orders: number; revenue: number }[]> {
+  const { content } = await getFileContent()
+  const orders = content.orders || []
+  
+  const result: { date: string; orders: number; revenue: number }[] = []
+  const now = new Date()
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(now)
+    date.setDate(date.getDate() - i)
+    const dateStr = date.toISOString().split('T')[0]
+    
+    const dayOrders = orders.filter(o => {
+      const orderDate = o.createdAt.split('T')[0]
+      return orderDate === dateStr && o.status === 'completed' && !o.isSandbox
+    })
+    
+    result.push({
+      date: dateStr,
+      orders: dayOrders.length,
+      revenue: dayOrders.reduce((sum, o) => sum + o.totalPrice, 0),
+    })
+  }
+  
+  return result
+}
+
+// Get fee income stats by date for charts
+export async function getFeeStatsForChart(days: number = 7): Promise<{ date: string; fees: number; count: number }[]> {
+  const { content } = await getFileContent()
+  const feeIncomes = content.adminFeeIncomes || []
+  
+  const result: { date: string; fees: number; count: number }[] = []
+  const now = new Date()
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(now)
+    date.setDate(date.getDate() - i)
+    const dateStr = date.toISOString().split('T')[0]
+    
+    const dayFees = feeIncomes.filter(f => {
+      const feeDate = f.createdAt.split('T')[0]
+      return feeDate === dateStr
+    })
+    
+    result.push({
+      date: dateStr,
+      fees: dayFees.reduce((sum, f) => sum + f.totalFee, 0),
+      count: dayFees.length,
+    })
+  }
+  
+  return result
+}
+
+// Detect potential spam bots based on activity
+export async function detectSpamActivity(telegramUserId: string): Promise<boolean> {
+  const { content } = await getFileContent()
+  const logs = content.botActivityLogs || []
+  
+  // Check for suspicious activity in last 5 minutes
+  const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
+  const recentLogs = logs.filter(l => 
+    l.telegramUserId === telegramUserId && 
+    l.createdAt > fiveMinutesAgo
+  )
+  
+  // If more than 20 actions in 5 minutes, consider it spam
+  return recentLogs.length > 20
 }

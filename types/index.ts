@@ -203,6 +203,34 @@ export interface BalanceAdjustment {
   createdAt: string
 }
 
+// Admin fee income from Midtrans payments
+export interface AdminFeeIncome {
+  id: string
+  orderId: string
+  buyerName: string
+  productName: string
+  originalAmount: number
+  baseFee: number
+  randomFee: number
+  totalFee: number
+  paymentMethod: 'midtrans'
+  createdAt: string
+}
+
+// Bot activity log for real-time monitoring
+export interface BotActivityLog {
+  id: string
+  botToken: string
+  botName: string
+  userId: string
+  userName: string
+  action: 'start' | 'menu' | 'order' | 'payment' | 'complete' | 'error' | 'spam_detected'
+  telegramUserId: string
+  telegramUsername?: string
+  message?: string
+  createdAt: string
+}
+
 export interface Database {
   users: User[]
   botSettings: BotSettings[]
@@ -215,6 +243,8 @@ export interface Database {
   withdrawals: Withdrawal[]
   balanceAdjustments: BalanceAdjustment[]
   botSubscriptions: BotSubscription[]
+  adminFeeIncomes: AdminFeeIncome[]
+  botActivityLogs: BotActivityLog[]
 }
 
 export type SessionUser = Omit<User, 'password'>

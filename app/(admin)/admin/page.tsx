@@ -1,39 +1,163 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { NeoCard, NeoCardHeader, NeoCardTitle, NeoCardContent } from '@/components/ui/neo-card'
 import { NeoBadge } from '@/components/ui/neo-badge'
-import { CreditCard, Users, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { CreditCard, Users, ShoppingCart, TrendingUp, ArrowUpRight, ArrowDownRight, Bot, Terminal, Wallet, Activity, RefreshCw, AlertTriangle, CheckCircle, Clock, XCircle } from 'lucide-react'
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { Button } from '@/components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
+
+interface BotInfo {
+  id: string
+  userId: string
+  botName: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+interface BotActivityLog {
+  id: string
+  botToken: string
+  botName: string
+  userId: string
+  userName: string
+  action: 'start' | 'menu' | 'order' | 'payment' | 'complete' | 'error' | 'spam_detected'
+  telegramUserId: string
+  telegramUsername?: string
+  message?: string
+  createdAt: string
+}
+
+interface ChartData {
+  date: string
+  orders: number
+  revenue: number
+}
+
+interface FeeChartData {
+  date: string
+  fees: number
+  count: number
+}
 
 interface AdminStats {
   totalUsers: number
   totalOrders: number
+  completedOrders: number
   totalRevenue: number
   activePaymentMethods: number
   orkutEnabled: boolean
   midtransEnabled: boolean
+  adminFeeBalance: number
+  totalBots: number
+  activeBots: number
+  botList: BotInfo[]
+  orderStats: ChartData[]
+  feeStats: FeeChartData[]
+}
+
+const toRupiah = (num: number) => num.toLocaleString('id-ID')
+
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })
+}
+
+const formatTime = (dateStr: string) => {
+  const date = new Date(dateStr)
+  return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+}
+
+const getActionIcon = (action: string) => {
+  switch (action) {
+    case 'start':
+      return <Activity className="w-3 h-3 text-cyan-400" />
+    case 'complete':
+      return <CheckCircle className="w-3 h-3 text-emerald-400" />
+    case 'error':
+      return <XCircle className="w-3 h-3 text-red-400" />
+    case 'spam_detected':
+      return <AlertTriangle className="w-3 h-3 text-amber-400" />
+    case 'payment':
+      return <CreditCard className="w-3 h-3 text-violet-400" />
+    case 'order':
+      return <ShoppingCart className="w-3 h-3 text-blue-400" />
+    default:
+      return <Clock className="w-3 h-3 text-white/40" />
+  }
+}
+
+const getActionColor = (action: string) => {
+  switch (action) {
+    case 'start':
+      return 'text-cyan-400'
+    case 'complete':
+      return 'text-emerald-400'
+    case 'error':
+      return 'text-red-400'
+    case 'spam_detected':
+      return 'text-amber-400'
+    case 'payment':
+      return 'text-violet-400'
+    case 'order':
+      return 'text-blue-400'
+    default:
+      return 'text-white/60'
+  }
 }
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [logs, setLogs] = useState<BotActivityLog[]>([])
+  const [logsLoading, setLogsLoading] = useState(false)
+  const [autoRefresh, setAutoRefresh] = useState(false)
+  const logsEndRef = useRef<HTMLDivElement>(null)
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch('/api/admin/stats')
+      if (res.ok) {
+        const data = await res.json()
+        setStats(data)
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchLogs = async () => {
+    setLogsLoading(true)
+    try {
+      const res = await fetch('/api/admin/bot-logs?limit=100')
+      if (res.ok) {
+        const data = await res.json()
+        setLogs(data.logs || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch logs:', error)
+    } finally {
+      setLogsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    async function fetchStats() {
-      try {
-        const res = await fetch('/api/admin/stats')
-        if (res.ok) {
-          const data = await res.json()
-          setStats(data)
-        }
-      } catch (error) {
-        console.error('Failed to fetch stats:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchStats()
+    fetchLogs()
   }, [])
+
+  useEffect(() => {
+    if (autoRefresh) {
+      const interval = setInterval(() => {
+        fetchLogs()
+      }, 5000) // Refresh every 5 seconds
+      return () => clearInterval(interval)
+    }
+  }, [autoRefresh])
 
   const statsCards = [
     {
@@ -45,28 +169,28 @@ export default function AdminDashboard() {
       gradient: 'from-cyan-500 to-blue-600',
     },
     {
-      title: 'Total Orders',
-      value: stats?.totalOrders || 0,
+      title: 'Completed Orders',
+      value: stats?.completedOrders || 0,
       icon: ShoppingCart,
-      change: '+8%',
-      trend: 'up',
+      change: `${stats?.totalOrders || 0} total`,
+      trend: 'neutral',
       gradient: 'from-violet-500 to-purple-600',
     },
     {
       title: 'Total Revenue',
-      value: `Rp ${(stats?.totalRevenue || 0).toLocaleString('id-ID')}`,
+      value: `Rp ${toRupiah(stats?.totalRevenue || 0)}`,
       icon: TrendingUp,
       change: '+23%',
       trend: 'up',
       gradient: 'from-emerald-500 to-green-600',
     },
     {
-      title: 'Payment Methods',
-      value: stats?.activePaymentMethods || 0,
-      icon: CreditCard,
-      change: 'Active',
-      trend: 'neutral',
-      gradient: 'from-orange-500 to-amber-600',
+      title: 'Admin Fee Balance',
+      value: `Rp ${toRupiah(stats?.adminFeeBalance || 0)}`,
+      icon: Wallet,
+      change: 'From Midtrans',
+      trend: 'up',
+      gradient: 'from-amber-500 to-orange-600',
     },
   ]
 
@@ -116,6 +240,208 @@ export default function AdminDashboard() {
             </NeoCard>
           </div>
         ))}
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Orders Chart */}
+        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCardHeader>
+            <NeoCardTitle className="text-white flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+              </div>
+              Orders (7 Days)
+            </NeoCardTitle>
+          </NeoCardHeader>
+          <NeoCardContent>
+            <div className="h-[200px]">
+              {loading ? (
+                <div className="w-full h-full bg-white/5 rounded animate-pulse" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={stats?.orderStats || []}>
+                    <defs>
+                      <linearGradient id="colorOrders" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                    <XAxis dataKey="date" tickFormatter={formatDate} stroke="#ffffff40" fontSize={12} />
+                    <YAxis stroke="#ffffff40" fontSize={12} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
+                      labelStyle={{ color: '#fff' }}
+                      itemStyle={{ color: '#10b981' }}
+                      formatter={(value: number) => [`${value} orders`, 'Orders']}
+                      labelFormatter={(label) => formatDate(label)}
+                    />
+                    <Area type="monotone" dataKey="orders" stroke="#10b981" fillOpacity={1} fill="url(#colorOrders)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </NeoCardContent>
+        </NeoCard>
+
+        {/* Fee Income Chart */}
+        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCardHeader>
+            <NeoCardTitle className="text-white flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                <Wallet className="w-4 h-4 text-amber-400" />
+              </div>
+              Fee Income (7 Days)
+            </NeoCardTitle>
+          </NeoCardHeader>
+          <NeoCardContent>
+            <div className="h-[200px]">
+              {loading ? (
+                <div className="w-full h-full bg-white/5 rounded animate-pulse" />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={stats?.feeStats || []}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                    <XAxis dataKey="date" tickFormatter={formatDate} stroke="#ffffff40" fontSize={12} />
+                    <YAxis stroke="#ffffff40" fontSize={12} tickFormatter={(v) => `${(v/1000).toFixed(0)}k`} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
+                      labelStyle={{ color: '#fff' }}
+                      itemStyle={{ color: '#f59e0b' }}
+                      formatter={(value: number) => [`Rp ${toRupiah(value)}`, 'Fee']}
+                      labelFormatter={(label) => formatDate(label)}
+                    />
+                    <Bar dataKey="fees" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </NeoCardContent>
+        </NeoCard>
+      </div>
+
+      {/* Bot Terminal & Active Bots */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Terminal Console */}
+        <NeoCard className="lg:col-span-2 bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCardHeader className="flex flex-row items-center justify-between">
+            <NeoCardTitle className="text-white flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
+                <Terminal className="w-4 h-4 text-violet-400" />
+              </div>
+              Bot Activity Terminal
+            </NeoCardTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setAutoRefresh(!autoRefresh)}
+                className={`text-xs ${autoRefresh ? 'text-emerald-400' : 'text-white/60'}`}
+              >
+                <RefreshCw className={`w-3 h-3 mr-1 ${autoRefresh ? 'animate-spin' : ''}`} />
+                {autoRefresh ? 'Live' : 'Auto'}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={fetchLogs}
+                disabled={logsLoading}
+                className="text-xs text-white/60"
+              >
+                <RefreshCw className={`w-3 h-3 mr-1 ${logsLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            </div>
+          </NeoCardHeader>
+          <NeoCardContent>
+            <div className="bg-black/50 rounded-lg border border-white/5 font-mono text-xs">
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 bg-white/5">
+                <div className="w-3 h-3 rounded-full bg-red-500" />
+                <div className="w-3 h-3 rounded-full bg-yellow-500" />
+                <div className="w-3 h-3 rounded-full bg-green-500" />
+                <span className="ml-2 text-white/40">bot-monitor@admin ~ </span>
+              </div>
+              <ScrollArea className="h-[300px] p-3">
+                {logs.length === 0 ? (
+                  <div className="text-white/40 text-center py-8">
+                    No activity logs yet. Bot activities will appear here.
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {logs.map((log) => (
+                      <div key={log.id} className="flex items-start gap-2 text-[11px] leading-relaxed">
+                        <span className="text-white/30 shrink-0">[{formatTime(log.createdAt)}]</span>
+                        <span className="shrink-0">{getActionIcon(log.action)}</span>
+                        <span className={`shrink-0 uppercase font-semibold ${getActionColor(log.action)}`}>
+                          {log.action}
+                        </span>
+                        <span className="text-cyan-400 shrink-0">{log.botName}</span>
+                        <span className="text-white/60">-</span>
+                        <span className="text-white/80 break-all">{log.message}</span>
+                        {log.telegramUsername && (
+                          <span className="text-violet-400">@{log.telegramUsername}</span>
+                        )}
+                      </div>
+                    ))}
+                    <div ref={logsEndRef} />
+                  </div>
+                )}
+              </ScrollArea>
+            </div>
+          </NeoCardContent>
+        </NeoCard>
+
+        {/* Active Bots */}
+        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCardHeader>
+            <NeoCardTitle className="text-white flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-cyan-400" />
+              </div>
+              Active Bots
+            </NeoCardTitle>
+          </NeoCardHeader>
+          <NeoCardContent>
+            <div className="flex items-center justify-between mb-4 p-3 rounded-lg bg-white/5 border border-white/5">
+              <div>
+                <p className="text-white/60 text-sm">Total Bots</p>
+                <p className="text-2xl font-bold text-white">{stats?.totalBots || 0}</p>
+              </div>
+              <div>
+                <p className="text-white/60 text-sm">Active</p>
+                <p className="text-2xl font-bold text-emerald-400">{stats?.activeBots || 0}</p>
+              </div>
+            </div>
+            <ScrollArea className="h-[240px]">
+              <div className="space-y-2">
+                {(stats?.botList || []).length === 0 ? (
+                  <div className="text-white/40 text-center py-8 text-sm">
+                    No bots registered yet.
+                  </div>
+                ) : (
+                  (stats?.botList || []).map((bot) => (
+                    <div
+                      key={bot.id}
+                      className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2 h-2 rounded-full ${bot.isActive ? 'bg-emerald-400' : 'bg-white/20'}`} />
+                        <div>
+                          <p className="text-white font-medium text-sm">{bot.botName}</p>
+                          <p className="text-white/40 text-xs">ID: {bot.userId.slice(0, 8)}...</p>
+                        </div>
+                      </div>
+                      <NeoBadge variant={bot.isActive ? 'success' : 'secondary'} className="text-xs">
+                        {bot.isActive ? 'Active' : 'Inactive'}
+                      </NeoBadge>
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+          </NeoCardContent>
+        </NeoCard>
       </div>
 
       {/* Payment Methods Status */}
@@ -190,6 +516,16 @@ export default function AdminDashboard() {
               <div className="flex items-center gap-3">
                 <Users className="w-5 h-5 text-violet-400" />
                 <span className="text-white font-medium">Manage Users</span>
+              </div>
+              <ArrowUpRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+            </a>
+            <a 
+              href="/admin/withdrawals"
+              className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <Wallet className="w-5 h-5 text-amber-400" />
+                <span className="text-white font-medium">Manage Withdrawals</span>
               </div>
               <ArrowUpRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
             </a>
