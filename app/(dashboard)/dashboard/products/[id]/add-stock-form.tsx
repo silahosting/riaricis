@@ -82,7 +82,7 @@ export function AddStockForm({ productId, productName, currentStock }: AddStockF
         {StatusModalComponent}
         <button
           onClick={() => setIsOpen(true)}
-          className="w-full p-4 rounded-xl border-2 border-dashed border-border hover:border-primary/50 hover:bg-primary/5 transition-all flex items-center justify-center gap-3 text-muted-foreground hover:text-primary group hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full p-4 rounded-2xl border-2 border-dashed border-white/20 hover:border-primary/50 hover:bg-primary/5 transition-all flex items-center justify-center gap-3 text-white/50 hover:text-primary group hover:scale-[1.02] active:scale-[0.98]"
         >
           <Package className="w-5 h-5 group-hover:animate-wiggle" />
           <span className="font-medium">Tambah Stock</span>
@@ -95,7 +95,7 @@ export function AddStockForm({ productId, productName, currentStock }: AddStockF
   return (
     <>
       {StatusModalComponent}
-      <div className="p-5 rounded-xl bg-card border border-border animate-scale-in">
+      <div className="glass-card p-5 rounded-3xl animate-scale-in">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="font-semibold flex items-center gap-2">
@@ -113,7 +113,7 @@ export function AddStockForm({ productId, productName, currentStock }: AddStockF
               setMessage(null)
               setLoadingState('idle')
             }}
-            className="text-muted-foreground hover:text-foreground text-sm hover:bg-muted px-2 py-1 rounded transition-all"
+            className="text-white/50 hover:text-white text-sm hover:bg-white/10 px-2 py-1 rounded-lg transition-all"
           >
             Batal
           </button>
@@ -139,30 +139,30 @@ export function AddStockForm({ productId, productName, currentStock }: AddStockF
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label htmlFor="newItems" className="text-sm font-medium text-muted-foreground">
-                Item Baru
+              <label htmlFor="newItems" className="text-sm font-medium text-white/60">
+                Item Baru (format: email:password)
               </label>
               <span className={`text-xs font-semibold px-2 py-1 rounded-full transition-all ${
                 itemCount > 0 
                   ? 'bg-success/20 text-success animate-pop' 
-                  : 'bg-muted text-muted-foreground'
+                  : 'bg-white/10 text-white/40'
               }`}>
                 +{itemCount} item
               </span>
             </div>
             <div className="relative">
-              <Database className="absolute left-3 top-4 w-5 h-5 text-muted-foreground" />
+              <Database className="absolute left-3 top-4 w-5 h-5 text-white/40" />
               <textarea
                 id="newItems"
                 value={items}
                 onChange={(e) => setItems(e.target.value)}
                 placeholder={`Masukkan item baru (1 item per baris):\nuser4:pass4\nuser5:pass5\nuser6:pass6`}
-                className="flex w-full bg-input px-4 py-3 pl-11 text-sm rounded-lg border border-border transition-all placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 resize-none font-mono min-h-[120px]"
+                className="flex w-full glass-input px-4 py-3 pl-11 text-sm rounded-2xl transition-all duration-300 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 resize-none font-mono min-h-[140px]"
                 required
               />
             </div>
-            <p className="text-xs text-muted-foreground">
-              Stock saat ini: <span className="font-semibold text-foreground">{currentStock}</span> item
+            <p className="text-xs text-white/40">
+              Stock saat ini: <span className="font-semibold text-white">{currentStock}</span> item
             </p>
           </div>
 

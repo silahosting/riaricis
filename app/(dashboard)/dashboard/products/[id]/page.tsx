@@ -1,8 +1,8 @@
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Edit, Package, Calendar, Tag, Hash, DollarSign, Database, Plus } from 'lucide-react'
+import { ArrowLeft, Edit, Package, Calendar, Hash, DollarSign, FolderOpen } from 'lucide-react'
 import { getSession } from '@/lib/auth'
-import { getProductById } from '@/lib/github-db'
+import { getProductById, getProductCategoryByCode } from '@/lib/github-db'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoBadge } from '@/components/ui/neo-badge'
 import { AddStockForm } from './add-stock-form'
@@ -43,18 +43,29 @@ export default async function ProductDetailPage({
     notFound()
   }
 
+  const category = await getProductCategoryByCode(session.id, product.categoryCode)
+
   return (
     <div className="max-w-2xl flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
         <Link href="/dashboard/products">
-          <button className="p-2 hover:bg-muted rounded-lg transition-colors">
+          <button className="p-2 hover:bg-white/10 rounded-xl transition-colors">
             <ArrowLeft className="w-5 h-5" />
           </button>
         </Link>
         <div className="flex-1">
-          <h1 className="text-xl font-bold tracking-tight">{product.name}</h1>
-          <div className="flex items-center gap-2 mt-1">
-            <NeoBadge variant="secondary">{product.category}</NeoBadge>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-xl font-bold tracking-tight">{product.name}</h1>
+            <NeoBadge variant="outline" className="font-mono text-xs">
+              <Hash className="w-3 h-3" />
+              {product.code}
+            </NeoBadge>
+          </div>
+          <div className="flex items-center gap-2">
+            <NeoBadge variant="secondary">
+              <FolderOpen className="w-3 h-3" />
+              {category?.name || product.categoryCode}
+            </NeoBadge>
             <NeoBadge variant={product.isActive ? 'success' : 'warning'}>
               {product.isActive ? 'Aktif' : 'Nonaktif'}
             </NeoBadge>
@@ -69,45 +80,33 @@ export default async function ProductDetailPage({
       </div>
 
       {/* Product Info Card */}
-      <div className="p-5 rounded-xl bg-card border border-border">
+      <div className="glass-card p-5 rounded-3xl">
         <div className="flex flex-col gap-5">
           {/* Image */}
-          <div className="w-full h-40 bg-gradient-to-br from-primary/20 to-primary/5 rounded-xl border border-primary/20 flex items-center justify-center">
-            {product.imageUrl ? (
-              <img
-                src={product.imageUrl}
-                alt={product.name}
-                className="w-full h-full object-cover rounded-xl"
-              />
-            ) : (
-              <Package className="w-12 h-12 text-primary/50" />
-            )}
+          <div className="w-full h-40 bg-gradient-to-br from-secondary/20 to-primary/20 rounded-2xl flex items-center justify-center">
+            <Package className="w-12 h-12 text-secondary/50" />
           </div>
 
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl border border-primary/20">
-              <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center">
+            <div className="flex items-center gap-3 p-4 glass rounded-2xl">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
                 <DollarSign className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Harga</p>
+                <p className="text-xs text-white/50 font-medium">Harga</p>
                 <p className="font-semibold">{formatCurrency(product.price)}</p>
               </div>
             </div>
             
-            <div className={`flex items-center gap-3 p-4 rounded-xl border ${
-              product.stock > 0 
-                ? 'bg-gradient-to-br from-success/10 to-success/5 border-success/20' 
-                : 'bg-gradient-to-br from-destructive/10 to-destructive/5 border-destructive/20'
-            }`}>
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+            <div className={`flex items-center gap-3 p-4 glass rounded-2xl`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
                 product.stock > 0 ? 'bg-success/20' : 'bg-destructive/20'
               }`}>
                 <Hash className={`w-5 h-5 ${product.stock > 0 ? 'text-success' : 'text-destructive'}`} />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground font-medium">Stok</p>
+                <p className="text-xs text-white/50 font-medium">Stok</p>
                 <p className={`font-semibold ${product.stock > 0 ? 'text-success' : 'text-destructive'}`}>
                   {product.stock} item
                 </p>
@@ -116,27 +115,30 @@ export default async function ProductDetailPage({
           </div>
 
           {/* Description */}
-          <div>
-            <h3 className="font-medium text-sm text-muted-foreground mb-2">Deskripsi</h3>
-            <p className="text-sm whitespace-pre-wrap">{product.description}</p>
-          </div>
+          {product.description && (
+            <div>
+              <h3 className="font-medium text-sm text-white/50 mb-2">Deskripsi</h3>
+              <p className="text-sm whitespace-pre-wrap">{product.description}</p>
+            </div>
+          )}
 
           {/* Stock Items Preview */}
           {product.items && product.items.length > 0 && (
             <div>
-              <h3 className="font-medium text-sm text-muted-foreground mb-2">
-                Stock Items ({product.items.length})
+              <h3 className="font-medium text-sm text-white/50 mb-2">
+                Stok Items ({product.items.length})
               </h3>
-              <div className="bg-muted/50 rounded-lg p-3 max-h-32 overflow-y-auto">
+              <div className="glass rounded-2xl p-3 max-h-40 overflow-y-auto">
                 <ul className="text-xs font-mono flex flex-col gap-1">
-                  {product.items.slice(0, 5).map((item, idx) => (
-                    <li key={idx} className="text-muted-foreground truncate">
-                      {idx + 1}. {item.substring(0, 30)}{item.length > 30 ? '...' : ''}
+                  {product.items.slice(0, 10).map((item, idx) => (
+                    <li key={idx} className="text-white/60 truncate flex items-center gap-2">
+                      <span className="text-white/30">{idx + 1}.</span>
+                      <span>{item.length > 40 ? item.substring(0, 40) + '...' : item}</span>
                     </li>
                   ))}
-                  {product.items.length > 5 && (
-                    <li className="text-primary text-xs mt-1">
-                      +{product.items.length - 5} item lainnya...
+                  {product.items.length > 10 && (
+                    <li className="text-primary text-xs mt-2">
+                      +{product.items.length - 10} item lainnya...
                     </li>
                   )}
                 </ul>
@@ -145,7 +147,7 @@ export default async function ProductDetailPage({
           )}
 
           {/* Meta */}
-          <div className="flex flex-col gap-1 text-xs text-muted-foreground border-t border-border pt-4">
+          <div className="flex flex-col gap-1 text-xs text-white/40 border-t border-white/10 pt-4">
             <div className="flex items-center gap-2">
               <Calendar className="w-3 h-3" />
               <span>Dibuat: {formatDate(product.createdAt)}</span>

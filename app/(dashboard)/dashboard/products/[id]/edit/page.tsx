@@ -1,6 +1,6 @@
 import { redirect, notFound } from 'next/navigation'
 import { getSession } from '@/lib/auth'
-import { getProductById } from '@/lib/github-db'
+import { getProductById, getProductCategories } from '@/lib/github-db'
 import { ProductForm } from '@/components/products/ProductForm'
 import { updateProductAction } from '@/actions/product.actions'
 
@@ -16,7 +16,10 @@ export default async function EditProductPage({
     redirect('/login')
   }
 
-  const product = await getProductById(id)
+  const [product, categories] = await Promise.all([
+    getProductById(id),
+    getProductCategories(session.id)
+  ])
 
   if (!product || product.userId !== session.id) {
     notFound()
@@ -31,6 +34,7 @@ export default async function EditProductPage({
     <div className="max-w-2xl">
       <ProductForm 
         product={product}
+        categories={categories}
         onSubmit={handleUpdate} 
         submitLabel="Simpan Perubahan" 
       />

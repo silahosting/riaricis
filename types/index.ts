@@ -20,17 +20,30 @@ export interface BotSettings {
   updatedAt: string
 }
 
+// Kategori Produk (Parent) - e.g., "Alight Motion", "Canva Pro"
+export interface ProductCategory {
+  id: string
+  userId: string
+  code: string // Unique code like "AM", "CP" - used to link products
+  name: string // e.g., "Alight Motion", "Canva Pro"
+  description: string
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// Produk/Variasi - e.g., "1 Tahun - 1 Akun", "30 Hari"
 export interface Product {
   id: string
   userId: string
-  name: string
+  categoryCode: string // References ProductCategory.code
+  code: string // Unique product code for this variant
+  name: string // e.g., "1 Tahun - 1 Akun", "AI Bot 30hari"
   description: string
   price: number
-  stock: number
-  category: string
-  imageUrl?: string
+  stock: number // Auto-calculated from items.length
   isActive: boolean
-  items?: string[] // Stock items (akun, voucher, dll)
+  items: string[] // Stock items in email:password format
   createdAt: string
   updatedAt: string
 }
@@ -182,6 +195,7 @@ export interface BalanceAdjustment {
 export interface Database {
   users: User[]
   botSettings: BotSettings[]
+  productCategories: ProductCategory[]
   products: Product[]
   orders: Order[]
   qrisSettings: QrisSettings[]

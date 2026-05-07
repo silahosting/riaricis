@@ -3,7 +3,19 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
-import { createProduct, updateProduct, deleteProduct, getProductById } from '@/lib/github-db'
+import { 
+  createProduct, 
+  updateProduct, 
+  deleteProduct, 
+  getProductById,
+  getProductByCode,
+  createProductCategory,
+  updateProductCategory,
+  deleteProductCategory,
+  getProductCategoryById,
+  getProductCategoryByCode,
+  getProductsByCategoryCode
+} from '@/lib/github-db'
 
 // Parse stock items from input (supports newline and comma separated)
 function parseStockItems(input: string): string[] {
@@ -22,16 +34,140 @@ function parseStockItems(input: string): string[] {
     .filter(item => item.length > 0)
 }
 
+// ============ PRODUCT CATEGORY ACTIONS ============
+
+export async function createCategoryAction(formData: FormData) {
+  const session = await getSession()
+  if (!session) {
+    return { error: 'Unauthorized' }
+  }
+
+  const code = formData.get('code') as string
+  const name = formData.get('name') as string
+  const description = formData.get('description') as string
+  const isActive = formData.get('isActive') === 'on'
+
+  if (!code || !name) {
+    return { error: 'Code dan nama kategori harus diisi' }
+  }
+
+  // Check if code already exists
+  const existing = await getProductCategoryByCode(session.id, code)
+  if (existing) {
+    return { error: 'Code kategori sudah digunakan' }
+  }
+
+  const category = await createProductCategory({
+    userId: session.id,
+    code: code.toUpperCase(),
+    name,
+    description: description || '',
+    isActive,
+  })
+
+  if (!category) {
+    return { error: 'Gagal membuat kategori produk' }
+  }
+
+  revalidatePath('/dashboard/products', 'max')
+  return { success: true, category }
+}
+
+export async function updateCategoryAction(id: string, formData: FormData) {
+  const session = await getSession()
+  if (!session) {
+    return { error: 'Unauthorized' }
+  }
+
+  const existingCategory = await getProductCategoryById(id)
+  if (!existingCategory || existingCategory.userId !== session.id) {
+    return { error: 'Kategori tidak ditemukan' }
+  }
+
+  const name = formData.get('name') as string
+  const description = formData.get('description') as string
+  const isActive = formData.get('isActive') === 'on'
+
+  if (!name) {
+    return { error: 'Nama kategori harus diisi' }
+  }
+
+  const category = await updateProductCategory(id, {
+    name,
+    description: description || '',
+    isActive,
+  })
+
+  if (!category) {
+    return { error: 'Gagal mengupdate kategori' }
+  }
+
+  revalidatePath('/dashboard/products', 'max')
+  return { success: true, category }
+}
+
+export async function deleteCategoryAction(id: string) {
+  const session = await getSession()
+  if (!session) {
+    return { error: 'Unauthorized' }
+  }
+
+  const existingCategory = await getProductCategoryById(id)
+  if (!existingCategory || existingCategory.userId !== session.id) {
+    return { error: 'Kategori tidak ditemukan' }
+  }
+
+  // Check if category has products
+  const products = await getProductsByCategoryCode(session.id, existingCategory.code)
+  if (products.length > 0) {
+    return { error: `Tidak dapat menghapus kategori. Masih ada ${products.length} produk dalam kategori ini.` }
+  }
+
+  const success = await deleteProductCategory(id)
+  if (!success) {
+    return { error: 'Gagal menghapus kategori' }
+  }
+
+  revalidatePath('/dashboard/products', 'max')
+  return { success: true }
+}
+
+export async function toggleCategoryStatusAction(id: string) {
+  const session = await getSession()
+  if (!session) {
+    return { error: 'Unauthorized' }
+  }
+
+  const existingCategory = await getProductCategoryById(id)
+  if (!existingCategory || existingCategory.userId !== session.id) {
+    return { error: 'Kategori tidak ditemukan' }
+  }
+
+  const category = await updateProductCategory(id, {
+    isActive: !existingCategory.isActive,
+  })
+
+  if (!category) {
+    return { error: 'Gagal mengubah status kategori' }
+  }
+
+  revalidatePath('/dashboard/products', 'max')
+  return { success: true }
+}
+
+// ============ PRODUCT ACTIONS ============
+
 export async function createProductAction(formData: FormData) {
   const session = await getSession()
   if (!session) {
     return { error: 'Unauthorized' }
   }
 
+  const categoryCode = formData.get('categoryCode') as string
+  const code = formData.get('code') as string
   const name = formData.get('name') as string
   const description = formData.get('description') as string
   const price = parseFloat(formData.get('price') as string)
-  const category = formData.get('category') as string
   const itemsInput = formData.get('items') as string
   const isActive = formData.get('isActive') === 'on'
 
@@ -39,21 +175,30 @@ export async function createProductAction(formData: FormData) {
   const items = parseStockItems(itemsInput)
   const stock = items.length
 
-  if (!name || !description || isNaN(price) || !category) {
+  if (!categoryCode || !code || !name || isNaN(price)) {
     return { error: 'Semua field harus diisi dengan benar' }
   }
 
-  if (stock === 0) {
-    return { error: 'Minimal harus ada 1 item stock' }
+  // Verify category exists
+  const category = await getProductCategoryByCode(session.id, categoryCode)
+  if (!category) {
+    return { error: 'Kategori produk tidak ditemukan' }
+  }
+
+  // Check if product code already exists
+  const existingProduct = await getProductByCode(session.id, code)
+  if (existingProduct) {
+    return { error: 'Code produk sudah digunakan' }
   }
 
   const product = await createProduct({
     userId: session.id,
+    categoryCode: categoryCode.toUpperCase(),
+    code: code.toUpperCase(),
     name,
-    description,
+    description: description || '',
     price,
     stock,
-    category,
     items,
     isActive,
   })
@@ -80,7 +225,6 @@ export async function updateProductAction(id: string, formData: FormData) {
   const name = formData.get('name') as string
   const description = formData.get('description') as string
   const price = parseFloat(formData.get('price') as string)
-  const category = formData.get('category') as string
   const itemsInput = formData.get('items') as string
   const isActive = formData.get('isActive') === 'on'
 
@@ -88,20 +232,15 @@ export async function updateProductAction(id: string, formData: FormData) {
   const items = parseStockItems(itemsInput)
   const stock = items.length
 
-  if (!name || !description || isNaN(price) || !category) {
+  if (!name || isNaN(price)) {
     return { error: 'Semua field harus diisi dengan benar' }
-  }
-
-  if (stock === 0) {
-    return { error: 'Minimal harus ada 1 item stock' }
   }
 
   const product = await updateProduct(id, {
     name,
-    description,
+    description: description || '',
     price,
     stock,
-    category,
     items,
     isActive,
   })

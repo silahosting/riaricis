@@ -1,9 +1,10 @@
 import { GITHUB_CONFIG } from './constants'
-import type { Database, User, BotSettings, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal, BalanceAdjustment, BotSubscription } from '@/types'
+import type { Database, User, BotSettings, ProductCategory, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal, BalanceAdjustment, BotSubscription } from '@/types'
 
 const defaultDatabase: Database = {
   users: [],
   botSettings: [],
+  productCategories: [],
   products: [],
   orders: [],
   qrisSettings: [],
@@ -43,6 +44,7 @@ async function getFileContent(): Promise<{ content: Database; sha: string | null
     const content: Database = {
       users: Array.isArray(data.content?.users) ? data.content.users : [],
       botSettings: Array.isArray(data.content?.botSettings) ? data.content.botSettings : [],
+      productCategories: Array.isArray(data.content?.productCategories) ? data.content.productCategories : [],
       products: Array.isArray(data.content?.products) ? data.content.products : [],
       orders: Array.isArray(data.content?.orders) ? data.content.orders : [],
       qrisSettings: Array.isArray(data.content?.qrisSettings) ? data.content.qrisSettings : [],
@@ -214,10 +216,95 @@ export async function createOrUpdateBotSettings(
   }
 }
 
+// Product Category operations
+export async function getProductCategories(userId: string): Promise<ProductCategory[]> {
+  const { content } = await getFileContent()
+  return content.productCategories.filter((c) => c.userId === userId)
+}
+
+export async function getProductCategoryById(id: string): Promise<ProductCategory | null> {
+  const { content } = await getFileContent()
+  return content.productCategories.find((c) => c.id === id) || null
+}
+
+export async function getProductCategoryByCode(userId: string, code: string): Promise<ProductCategory | null> {
+  const { content } = await getFileContent()
+  return content.productCategories.find((c) => c.userId === userId && c.code === code) || null
+}
+
+export async function createProductCategory(
+  categoryData: Omit<ProductCategory, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<ProductCategory | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  // Check if code already exists for this user
+  const existing = content.productCategories.find(
+    (c) => c.userId === categoryData.userId && c.code.toUpperCase() === categoryData.code.toUpperCase()
+  )
+  if (existing) {
+    return null // Code already exists
+  }
+
+  const newCategory: ProductCategory = {
+    ...categoryData,
+    code: categoryData.code.toUpperCase(),
+    id: generateId(),
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  content.productCategories.push(newCategory)
+  const success = await updateFile(content, sha)
+  return success ? newCategory : null
+}
+
+export async function updateProductCategory(id: string, data: Partial<ProductCategory>): Promise<ProductCategory | null> {
+  const { content, sha } = await getFileContent()
+  const index = content.productCategories.findIndex((c) => c.id === id)
+
+  if (index === -1) return null
+
+  content.productCategories[index] = {
+    ...content.productCategories[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  }
+
+  const success = await updateFile(content, sha)
+  return success ? content.productCategories[index] : null
+}
+
+export async function deleteProductCategory(id: string): Promise<boolean> {
+  const { content, sha } = await getFileContent()
+  const index = content.productCategories.findIndex((c) => c.id === id)
+
+  if (index === -1) return false
+
+  // Also delete all products in this category
+  const category = content.productCategories[index]
+  content.products = content.products.filter(
+    (p) => !(p.userId === category.userId && p.categoryCode === category.code)
+  )
+
+  content.productCategories.splice(index, 1)
+  return await updateFile(content, sha)
+}
+
 // Product operations
 export async function getProducts(userId: string): Promise<Product[]> {
   const { content } = await getFileContent()
   return content.products.filter((p) => p.userId === userId)
+}
+
+export async function getProductsByCategoryCode(userId: string, categoryCode: string): Promise<Product[]> {
+  const { content } = await getFileContent()
+  return content.products.filter((p) => p.userId === userId && p.categoryCode === categoryCode)
+}
+
+export async function getProductByCode(userId: string, code: string): Promise<Product | null> {
+  const { content } = await getFileContent()
+  return content.products.find((p) => p.userId === userId && p.code === code) || null
 }
 
 export async function getProductById(id: string): Promise<Product | null> {

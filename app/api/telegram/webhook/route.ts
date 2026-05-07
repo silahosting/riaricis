@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBotSettingsByToken, getAllProducts, getProductsByUserId, getAllOrders, getOrdersByUserId, getOrderById, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder, getPaymentSettings } from '@/lib/github-db'
+import { getBotSettingsByToken, getAllProducts, getProductsByUserId, getProductCategories, getAllOrders, getOrdersByUserId, getOrderById, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder, getPaymentSettings } from '@/lib/github-db'
 import { createOrkutQrisPayment, checkOrkutPaymentStatus } from '@/lib/orkut'
 import { createMidtransQrisPayment, checkMidtransPaymentStatus, isMidtransPaymentPaid } from '@/lib/midtrans'
-import type { Product, PaymentSettings } from '@/types'
+import type { Product, ProductCategory, PaymentSettings } from '@/types'
 
 // Telegram API base URL
 const TELEGRAM_API = 'https://api.telegram.org/bot'
@@ -253,11 +253,14 @@ function generateProductListKeyboard(products: Product[], page: number, totalPag
 }
 
 // Generate product info text
-function generateProductInfoText(product: Product): string {
+function generateProductInfoText(product: Product, categoryName?: string): string {
   let teks = '┌─────────────────────────────┐\n'
   teks += `│ • Produk : ${product.name.toUpperCase()}\n`
-  teks += `│ • Deskripsi : ${product.description}\n`
-  teks += `│ • Kategori : ${product.category}\n`
+  teks += `│ • Code : ${product.code}\n`
+  if (product.description) {
+    teks += `│ • Deskripsi : ${product.description}\n`
+  }
+  teks += `│ • Kategori : ${categoryName || product.categoryCode}\n`
   teks += '└─────────────────────────────┘\n\n'
   
   teks += '┌─────────────────────────────┐\n'

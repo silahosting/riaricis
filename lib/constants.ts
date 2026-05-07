@@ -15,12 +15,5 @@ export const ORDER_STATUS = {
   cancelled: { label: 'Cancelled', color: 'bg-destructive' },
 } as const
 
-export const PRODUCT_CATEGORIES = [
-  'Bot Telegram',
-  'Bot Discord',
-  'Bot WhatsApp',
-  'Script Auto Order',
-  'Panel Admin',
-  'Custom Bot',
-  'Lainnya',
-] as const
+// Product categories are now user-defined via ProductCategory entities
+// No longer using static category list

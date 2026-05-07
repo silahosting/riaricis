@@ -1,46 +1,40 @@
 'use client'
 
 import { useState } from 'react'
-import { Package, DollarSign, Hash, FileText, Save, ArrowLeft, Database, CheckCircle2, XCircle, Sparkles, FolderOpen } from 'lucide-react'
+import { FolderOpen, Hash, FileText, Save, ArrowLeft, CheckCircle2, XCircle, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoInput } from '@/components/ui/neo-input'
 import { NeoTextarea } from '@/components/ui/neo-textarea'
-import { NeoSelect } from '@/components/ui/neo-select'
 import { LoadingButton } from '@/components/ui/loading-button'
-import type { Product, ProductCategory } from '@/types'
+import { createCategoryAction, updateCategoryAction } from '@/actions/product.actions'
+import type { ProductCategory } from '@/types'
 
-interface ProductFormProps {
-  product?: Product
-  categories: ProductCategory[]
-  onSubmit: (formData: FormData) => Promise<{ error?: string } | void>
-  submitLabel?: string
+interface CategoryFormProps {
+  category?: ProductCategory
 }
 
-export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simpan Produk' }: ProductFormProps) {
+export function CategoryForm({ category }: CategoryFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [loadingState, setLoadingState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [error, setError] = useState<string | null>(null)
-  const [stockItems, setStockItems] = useState<string>(product?.items?.join('\n') || '')
   const [showSuccess, setShowSuccess] = useState(false)
-
-  // Calculate stock count from items
-  const stockCount = stockItems.split('\n').filter(item => item.trim().length > 0).length
 
   async function handleSubmit(formData: FormData) {
     setLoading(true)
     setLoadingState('loading')
     setError(null)
     
-    // Add items to formData
-    formData.set('items', stockItems)
-    formData.set('stock', stockCount.toString())
-    
     try {
-      const result = await onSubmit(formData)
+      let result
+      if (category) {
+        result = await updateCategoryAction(category.id, formData)
+      } else {
+        result = await createCategoryAction(formData)
+      }
       
       if (result?.error) {
         setError(result.error)
@@ -53,12 +47,12 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
       } else {
         setLoadingState('success')
         setShowSuccess(true)
-        toast.success(product ? 'Produk berhasil diperbarui!' : 'Produk berhasil ditambahkan!', {
+        toast.success(category ? 'Kategori berhasil diperbarui!' : 'Kategori berhasil ditambahkan!', {
           icon: <CheckCircle2 className="w-5 h-5" />,
         })
         setTimeout(() => {
           router.push('/dashboard/products')
-        }, 3000)
+        }, 2000)
       }
     } catch {
       setLoading(false)
@@ -70,7 +64,6 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
     }
   }
 
-  // Success overlay
   if (showSuccess) {
     return (
       <div className="glass-card p-5 rounded-3xl relative overflow-hidden">
@@ -83,19 +76,12 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
           </div>
           
           <h3 className="text-2xl font-bold text-success mb-2">
-            {product ? 'Produk Diperbarui!' : 'Produk Ditambahkan!'}
+            {category ? 'Kategori Diperbarui!' : 'Kategori Ditambahkan!'}
           </h3>
           <p className="text-white/60 text-sm flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-success animate-pulse" />
             Mengalihkan ke halaman produk...
           </p>
-          
-          <div className="w-48 h-1 bg-white/10 rounded-full mt-6 overflow-hidden">
-            <div 
-              className="h-full bg-gradient-to-r from-success to-primary rounded-full transition-all duration-[3000ms] ease-linear"
-              style={{ width: '100%' }}
-            />
-          </div>
         </div>
       </div>
     )
@@ -110,9 +96,9 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
           </button>
         </Link>
         <div>
-          <h2 className="font-semibold text-lg">{product ? 'Edit Produk' : 'Tambah Produk Baru'}</h2>
+          <h2 className="font-semibold text-lg">{category ? 'Edit Kategori' : 'Tambah Kategori Baru'}</h2>
           <p className="text-sm text-white/60">
-            {product ? 'Perbarui informasi produk' : 'Tambah variasi produk dengan stok'}
+            {category ? 'Perbarui informasi kategori' : 'Buat kategori produk (contoh: Alight Motion, Canva Pro)'}
           </p>
         </div>
       </div>
@@ -125,40 +111,10 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
             </div>
           )}
 
-          {/* Category Selection */}
-          <div className="flex flex-col gap-2">
-            <label htmlFor="categoryCode" className="text-sm font-medium text-white/60">
-              Kategori Produk
-            </label>
-            <div className="relative">
-              <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none z-10" />
-              <NeoSelect
-                id="categoryCode"
-                name="categoryCode"
-                className="pl-11"
-                defaultValue={product?.categoryCode || ''}
-                disabled={!!product}
-                required
-              >
-                <option value="">Pilih Kategori</option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.code}>
-                    [{cat.code}] {cat.name}
-                  </option>
-                ))}
-              </NeoSelect>
-            </div>
-            {!product && (
-              <p className="text-xs text-white/40">
-                Pilih kategori produk (tidak bisa diubah setelah dibuat)
-              </p>
-            )}
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="code" className="text-sm font-medium text-white/60">
-                Code Produk
+                Code Kategori
               </label>
               <div className="relative">
                 <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
@@ -166,32 +122,32 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
                   id="code"
                   name="code"
                   type="text"
-                  placeholder="AM30, AM1Y"
+                  placeholder="AM, CP, NF"
                   className="pl-11 font-mono uppercase"
-                  defaultValue={product?.code || ''}
-                  disabled={!!product}
+                  defaultValue={category?.code || ''}
+                  disabled={!!category}
                   required
-                  maxLength={20}
+                  maxLength={10}
                 />
               </div>
               <p className="text-xs text-white/40">
-                Code unik untuk produk ini
+                Code unik untuk kategori (tidak bisa diubah)
               </p>
             </div>
 
             <div className="flex flex-col gap-2">
               <label htmlFor="name" className="text-sm font-medium text-white/60">
-                Nama Produk
+                Nama Kategori
               </label>
               <div className="relative">
-                <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
                 <NeoInput
                   id="name"
                   name="name"
                   type="text"
-                  placeholder="1 Tahun - 1 Akun"
+                  placeholder="Alight Motion"
                   className="pl-11"
-                  defaultValue={product?.name || ''}
+                  defaultValue={category?.name || ''}
                   required
                 />
               </div>
@@ -207,66 +163,11 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
               <NeoTextarea
                 id="description"
                 name="description"
-                placeholder="Deskripsi produk..."
+                placeholder="Deskripsi kategori produk..."
                 className="pl-11 min-h-[80px]"
-                defaultValue={product?.description || ''}
+                defaultValue={category?.description || ''}
               />
             </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label htmlFor="price" className="text-sm font-medium text-white/60">
-              Harga (Rp)
-            </label>
-            <div className="relative">
-              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
-              <NeoInput
-                id="price"
-                name="price"
-                type="number"
-                min="0"
-                step="1000"
-                placeholder="50000"
-                className="pl-11"
-                defaultValue={product?.price || ''}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Stock Items Input */}
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-              <label htmlFor="stockItems" className="text-sm font-medium text-white/60">
-                Stok (Format: email:password)
-              </label>
-              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                stockCount > 0 
-                  ? 'bg-success/20 text-success' 
-                  : 'bg-white/10 text-white/40'
-              }`}>
-                {stockCount} item
-              </span>
-            </div>
-            <div className="relative">
-              <Database className="absolute left-3 top-4 w-5 h-5 text-white/40" />
-              <textarea
-                id="stockItems"
-                value={stockItems}
-                onChange={(e) => setStockItems(e.target.value)}
-                placeholder={`Masukkan stok (1 item per baris):
-user1@gmail.com:password123
-user2@gmail.com:password456
-user3@gmail.com:password789
-
-Atau pisahkan dengan koma:
-user1@gmail.com:pass1, user2@gmail.com:pass2`}
-                className="flex w-full glass-input px-4 py-3 pl-11 text-sm rounded-2xl transition-all duration-300 placeholder:text-white/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 resize-none font-mono min-h-[180px]"
-              />
-            </div>
-            <p className="text-xs text-white/40">
-              Masukkan akun dalam format email:password. Setiap baris = 1 stok yang akan dikirim ke pembeli.
-            </p>
           </div>
 
           <label className="flex items-center gap-3 p-4 glass rounded-xl cursor-pointer hover:bg-white/10 transition-colors">
@@ -274,11 +175,11 @@ user1@gmail.com:pass1, user2@gmail.com:pass2`}
               type="checkbox"
               id="isActive"
               name="isActive"
-              defaultChecked={product?.isActive ?? true}
+              defaultChecked={category?.isActive ?? true}
               className="w-5 h-5 rounded accent-primary cursor-pointer"
             />
             <span className="font-medium text-sm">
-              Aktifkan produk (tampil di katalog)
+              Aktifkan kategori (tampil di katalog)
             </span>
           </label>
 
@@ -295,7 +196,7 @@ user1@gmail.com:pass1, user2@gmail.com:pass2`}
               className="flex-1 sm:flex-none"
             >
               <Save className="w-4 h-4" />
-              {submitLabel}
+              {category ? 'Simpan Perubahan' : 'Tambah Kategori'}
             </LoadingButton>
             <Link href="/dashboard/products">
               <NeoButton type="button" variant="outline" className="w-full sm:w-auto">

@@ -1,10 +1,12 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { Plus, Package } from 'lucide-react'
+import { Plus, Package, FolderOpen, Layers } from 'lucide-react'
 import { getSession } from '@/lib/auth'
-import { getProducts } from '@/lib/github-db'
+import { getProducts, getProductCategories } from '@/lib/github-db'
 import { NeoButton } from '@/components/ui/neo-button'
+import { ProductCategoryCard } from '@/components/products/ProductCategoryCard'
 import { ProductCard } from '@/components/products/ProductCard'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default async function ProductsPage() {
   const session = await getSession()
@@ -13,6 +15,7 @@ export default async function ProductsPage() {
     redirect('/login')
   }
 
+  const categories = await getProductCategories(session.id)
   const products = await getProducts(session.id)
   const totalStock = products.reduce((sum, p) => sum + (p.items?.length || p.stock || 0), 0)
 
@@ -21,53 +24,149 @@ export default async function ProductsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Produk</h1>
-          <p className="text-muted-foreground text-sm">Kelola produk yang dijual melalui bot</p>
+          <p className="text-white/60 text-sm">Kelola kategori dan produk yang dijual melalui bot</p>
         </div>
-        
-        <Link href="/dashboard/products/new">
-          <NeoButton className="w-full sm:w-auto">
-            <Plus className="w-4 h-4" />
-            Tambah Produk
-          </NeoButton>
-        </Link>
       </div>
 
-      {products.length === 0 ? (
-        <div className="p-8 rounded-xl bg-card border border-border flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/5 rounded-2xl border border-primary/20 flex items-center justify-center mb-4">
-            <Package className="w-8 h-8 text-primary" />
-          </div>
-          <h3 className="font-semibold text-lg mb-2">Belum Ada Produk</h3>
-          <p className="text-muted-foreground text-sm mb-4 max-w-sm">
-            Mulai tambahkan produk untuk dijual melalui bot Anda
-          </p>
-          <Link href="/dashboard/products/new">
-            <NeoButton>
-              <Plus className="w-4 h-4" />
-              Tambah Produk Pertama
-            </NeoButton>
-          </Link>
+      {/* Stats */}
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
+          <FolderOpen className="w-4 h-4 text-primary" />
+          <span className="text-white/60">Kategori:</span>
+          <span className="font-semibold">{categories.length}</span>
         </div>
-      ) : (
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-lg text-sm">
-              <span className="text-muted-foreground">Total Produk:</span>
-              <span className="font-semibold">{products.length}</span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-success/10 text-success rounded-lg text-sm border border-success/20">
-              <span>Total Stock:</span>
-              <span className="font-semibold">{totalStock} item</span>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-3">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+        <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
+          <Layers className="w-4 h-4 text-secondary" />
+          <span className="text-white/60">Produk:</span>
+          <span className="font-semibold">{products.length}</span>
         </div>
-      )}
+        <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
+          <Package className="w-4 h-4 text-success" />
+          <span className="text-white/60">Total Stock:</span>
+          <span className="font-semibold text-success">{totalStock} item</span>
+        </div>
+      </div>
+
+      <Tabs defaultValue="categories" className="w-full">
+        <TabsList className="glass w-full sm:w-auto mb-4">
+          <TabsTrigger value="categories" className="flex-1 sm:flex-none gap-2">
+            <FolderOpen className="w-4 h-4" />
+            Kategori Produk
+          </TabsTrigger>
+          <TabsTrigger value="products" className="flex-1 sm:flex-none gap-2">
+            <Layers className="w-4 h-4" />
+            Daftar Produk
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Categories Tab */}
+        <TabsContent value="categories" className="mt-0">
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-end">
+              <Link href="/dashboard/products/categories/new">
+                <NeoButton>
+                  <Plus className="w-4 h-4" />
+                  Tambah Kategori
+                </NeoButton>
+              </Link>
+            </div>
+
+            {categories.length === 0 ? (
+              <div className="glass-card p-8 rounded-3xl flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
+                  <FolderOpen className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Belum Ada Kategori</h3>
+                <p className="text-white/60 text-sm mb-4 max-w-sm">
+                  Buat kategori produk terlebih dahulu (contoh: Alight Motion, Canva Pro)
+                </p>
+                <Link href="/dashboard/products/categories/new">
+                  <NeoButton>
+                    <Plus className="w-4 h-4" />
+                    Tambah Kategori Pertama
+                  </NeoButton>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3">
+                {categories.map((category) => {
+                  const categoryProducts = products.filter(p => p.categoryCode === category.code)
+                  const categoryStock = categoryProducts.reduce((sum, p) => sum + (p.items?.length || p.stock || 0), 0)
+                  return (
+                    <ProductCategoryCard 
+                      key={category.id} 
+                      category={category}
+                      productCount={categoryProducts.length}
+                      stockCount={categoryStock}
+                    />
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+
+        {/* Products Tab */}
+        <TabsContent value="products" className="mt-0">
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-end">
+              <Link href="/dashboard/products/new">
+                <NeoButton disabled={categories.length === 0}>
+                  <Plus className="w-4 h-4" />
+                  Tambah Produk
+                </NeoButton>
+              </Link>
+            </div>
+
+            {categories.length === 0 ? (
+              <div className="glass-card p-8 rounded-3xl flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-warning/20 to-warning/5 rounded-3xl flex items-center justify-center mb-4">
+                  <FolderOpen className="w-8 h-8 text-warning" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Buat Kategori Dulu</h3>
+                <p className="text-white/60 text-sm mb-4 max-w-sm">
+                  Anda harus membuat kategori produk terlebih dahulu sebelum menambahkan produk
+                </p>
+                <Link href="/dashboard/products/categories/new">
+                  <NeoButton>
+                    <Plus className="w-4 h-4" />
+                    Tambah Kategori
+                  </NeoButton>
+                </Link>
+              </div>
+            ) : products.length === 0 ? (
+              <div className="glass-card p-8 rounded-3xl flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
+                  <Package className="w-8 h-8 text-primary" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">Belum Ada Produk</h3>
+                <p className="text-white/60 text-sm mb-4 max-w-sm">
+                  Mulai tambahkan produk untuk dijual melalui bot Anda
+                </p>
+                <Link href="/dashboard/products/new">
+                  <NeoButton>
+                    <Plus className="w-4 h-4" />
+                    Tambah Produk Pertama
+                  </NeoButton>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-3">
+                {products.map((product) => {
+                  const category = categories.find(c => c.code === product.categoryCode)
+                  return (
+                    <ProductCard 
+                      key={product.id} 
+                      product={product}
+                      categoryName={category?.name || product.categoryCode}
+                    />
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
