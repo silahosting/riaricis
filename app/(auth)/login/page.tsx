@@ -29,14 +29,14 @@ export default function LoginPage() {
   }, [state?.error])
 
   return (
-    <NeoCard className="bg-card/80 backdrop-blur-xl animate-scale-in">
+    <NeoCard className="liquid-glass rounded-[32px] animate-scale-in">
       <NeoCardHeader className="text-center">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mb-4 shadow-lg animate-float relative">
-          <Bot className="w-8 h-8 text-primary-foreground" />
+        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-primary/30 animate-float relative">
+          <Bot className="w-8 h-8 text-white" />
           <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-warning animate-pulse" />
         </div>
         <NeoCardTitle className="text-xl font-bold normal-case animate-slide-down">Selamat Datang Kembali</NeoCardTitle>
-        <NeoCardDescription className="animate-slide-down stagger-1">
+        <NeoCardDescription className="animate-slide-down stagger-1 text-white/60">
           Masuk ke dashboard untuk mengelola bot Anda
         </NeoCardDescription>
       </NeoCardHeader>
@@ -51,7 +51,7 @@ export default function LoginPage() {
           )}
           
           <div className="flex flex-col gap-2 animate-slide-up stagger-1">
-            <label htmlFor="email" className="text-sm font-medium text-muted-foreground">
+            <label htmlFor="email" className="text-sm font-medium text-white/60">
               Email
             </label>
             <div className="relative group">
@@ -68,7 +68,7 @@ export default function LoginPage() {
           </div>
           
           <div className="flex flex-col gap-2 animate-slide-up stagger-2">
-            <label htmlFor="password" className="text-sm font-medium text-muted-foreground">
+            <label htmlFor="password" className="text-sm font-medium text-white/60">
               Password
             </label>
             <div className="relative group">
@@ -105,9 +105,9 @@ export default function LoginPage() {
       </NeoCardContent>
       
       <NeoCardFooter className="justify-center animate-fade-in stagger-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-white/60">
           Belum punya akun?{' '}
-          <Link href="/register" className="font-semibold text-primary hover:underline hover:text-primary/80 transition-colors">
+          <Link href="/register" className="font-semibold text-primary hover:underline transition-colors">
             Daftar Sekarang
           </Link>
         </p>

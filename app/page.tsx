@@ -1,7 +1,7 @@
 import Link from 'next/link'
-import { Bot, Zap, Shield, ShoppingCart, Settings, ArrowRight, Check, Github, Sparkles } from 'lucide-react'
+import { Bot, Zap, Shield, ShoppingCart, Settings, ArrowRight, Check, Github, Sparkles, LayoutDashboard } from 'lucide-react'
 import { NeoButton } from '@/components/ui/neo-button'
-import { NeoCard, NeoCardContent } from '@/components/ui/neo-card'
+import { getSession } from '@/lib/auth'
 
 const features = [
   {
@@ -41,7 +41,10 @@ const steps = [
   { number: '04', title: 'Mulai Jualan', description: 'Bot siap menerima pesanan otomatis', color: 'success' },
 ]
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const session = await getSession()
+  const isLoggedIn = !!session
+
   return (
     <div className="min-h-screen dev-bg relative overflow-hidden">
       {/* Ambient background */}
@@ -52,22 +55,33 @@ export default function LandingPage() {
       </div>
 
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 bg-card/50 backdrop-blur-xl border-b border-border">
+      <nav className="sticky top-0 z-50 glass-nav">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg">
-              <Bot className="w-5 h-5 text-primary-foreground" />
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
+              <Bot className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-xl tracking-tight">SewaBot</span>
           </Link>
           
           <div className="flex items-center gap-3">
-            <Link href="/login">
-              <NeoButton variant="ghost">Masuk</NeoButton>
-            </Link>
-            <Link href="/register">
-              <NeoButton>Daftar</NeoButton>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard">
+                <NeoButton>
+                  <LayoutDashboard className="w-4 h-4" />
+                  Dashboard
+                </NeoButton>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <NeoButton variant="ghost">Masuk</NeoButton>
+                </Link>
+                <Link href="/register">
+                  <NeoButton>Daftar</NeoButton>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -77,9 +91,9 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-2 mb-6">
+              <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-primary">
+                <span className="text-sm font-medium text-white/90">
                   Platform Bot Auto Order #1
                 </span>
               </div>
@@ -94,29 +108,40 @@ export default function LandingPage() {
               </p>
               
               <div className="flex flex-wrap gap-4">
-                <Link href="/register">
-                  <NeoButton size="lg">
-                    Mulai Gratis
-                    <ArrowRight className="w-5 h-5" />
-                  </NeoButton>
-                </Link>
-                <Link href="/login">
-                  <NeoButton variant="outline" size="lg">
-                    Lihat Demo
-                  </NeoButton>
-                </Link>
+                {isLoggedIn ? (
+                  <Link href="/dashboard">
+                    <NeoButton size="lg">
+                      Buka Dashboard
+                      <ArrowRight className="w-5 h-5" />
+                    </NeoButton>
+                  </Link>
+                ) : (
+                  <>
+                    <Link href="/register">
+                      <NeoButton size="lg">
+                        Mulai Gratis
+                        <ArrowRight className="w-5 h-5" />
+                      </NeoButton>
+                    </Link>
+                    <Link href="/login">
+                      <NeoButton variant="outline" size="lg">
+                        Lihat Demo
+                      </NeoButton>
+                    </Link>
+                  </>
+                )}
               </div>
               
-              <div className="flex items-center gap-6 mt-8 text-sm text-muted-foreground">
+              <div className="flex items-center gap-6 mt-8 text-sm text-white/70">
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 bg-success/20 rounded-full flex items-center justify-center">
-                    <Check className="w-3 h-3 text-success" />
+                  <div className="w-5 h-5 bg-success rounded-full flex items-center justify-center shadow-lg shadow-success/40">
+                    <Check className="w-3 h-3 text-black" />
                   </div>
                   <span>Gratis Selamanya</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 bg-success/20 rounded-full flex items-center justify-center">
-                    <Check className="w-3 h-3 text-success" />
+                  <div className="w-5 h-5 bg-success rounded-full flex items-center justify-center shadow-lg shadow-success/40">
+                    <Check className="w-3 h-3 text-black" />
                   </div>
                   <span>Tanpa Kartu Kredit</span>
                 </div>
@@ -124,28 +149,28 @@ export default function LandingPage() {
             </div>
             
             <div className="relative">
-              <div className="bg-gradient-to-br from-card to-card/80 rounded-2xl border border-border p-6 shadow-2xl backdrop-blur-sm">
-                <div className="bg-muted/50 rounded-xl p-4 mb-4 border border-border/50">
+              <div className="liquid-glass rounded-3xl p-6">
+                <div className="glass rounded-2xl p-4 mb-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-secondary to-secondary/70 rounded-xl flex items-center justify-center">
-                      <Bot className="w-5 h-5 text-secondary-foreground" />
+                    <div className="w-10 h-10 bg-gradient-to-br from-secondary to-primary rounded-2xl flex items-center justify-center shadow-lg shadow-secondary/30">
+                      <Bot className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <p className="font-semibold">AutoOrderBot</p>
                       <p className="text-xs text-muted-foreground">Online</p>
                     </div>
                   </div>
-                  <div className="bg-card rounded-lg p-3 text-sm border border-border/50">
+                  <div className="glass rounded-2xl p-3 text-sm">
                     Halo! Selamat datang di toko kami. Ketik /menu untuk melihat produk.
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gradient-to-br from-accent/20 to-accent/5 rounded-xl p-4 text-center border border-accent/20">
+                  <div className="glass rounded-2xl p-4 text-center">
                     <p className="text-2xl font-bold text-accent">1,234</p>
                     <p className="text-xs text-muted-foreground">Pesanan</p>
                   </div>
-                  <div className="bg-gradient-to-br from-success/20 to-success/5 rounded-xl p-4 text-center border border-success/20">
+                  <div className="glass rounded-2xl p-4 text-center">
                     <p className="text-2xl font-bold text-success">Rp 50M</p>
                     <p className="text-xs text-muted-foreground">Omset</p>
                   </div>
@@ -153,8 +178,8 @@ export default function LandingPage() {
               </div>
               
               {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-secondary/30 to-secondary/10 rounded-2xl blur-sm" />
-              <div className="absolute -bottom-4 -left-4 w-16 h-16 bg-gradient-to-br from-accent/30 to-accent/10 rounded-2xl blur-sm" />
+              <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-secondary/40 to-primary/20 rounded-3xl blur-xl animate-pulse" />
+              <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-gradient-to-br from-accent/40 to-success/20 rounded-3xl blur-xl animate-pulse" />
             </div>
           </div>
         </div>
@@ -176,9 +201,9 @@ export default function LandingPage() {
             {features.map((feature, index) => (
               <div 
                 key={index} 
-                className={`bg-gradient-to-br ${feature.gradient} rounded-2xl p-6 border border-border/50 hover:border-border transition-all hover:-translate-y-1 cursor-pointer`}
+                className="glass-card rounded-3xl p-6 hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
               >
-                <div className={`w-14 h-14 ${feature.iconBg} rounded-xl flex items-center justify-center mb-4`}>
+                <div className={`w-14 h-14 ${feature.iconBg} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
                   <feature.icon className="w-7 h-7" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
@@ -204,15 +229,15 @@ export default function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {steps.map((step, index) => (
               <div key={index} className="relative">
-                <div className={`bg-gradient-to-br from-${step.color}/20 to-${step.color}/5 rounded-2xl p-6 border border-${step.color}/20 h-full`}>
-                  <span className={`text-5xl font-bold text-${step.color}/30`}>{step.number}</span>
+                <div className="glass-card rounded-3xl p-6 h-full hover:scale-[1.02] transition-all duration-300">
+                  <span className={`text-5xl font-bold text-${step.color}/40`}>{step.number}</span>
                   <h3 className="font-semibold text-lg mt-2">{step.title}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{step.description}</p>
                 </div>
                 
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:flex absolute top-1/2 -right-2 transform -translate-y-1/2 z-10 w-4 h-4 items-center justify-center">
-                    <ArrowRight className="w-4 h-4 text-muted-foreground" />
+                  <div className="hidden lg:flex absolute top-1/2 -right-2 transform -translate-y-1/2 z-10 w-6 h-6 items-center justify-center glass rounded-full">
+                    <ArrowRight className="w-3 h-3 text-muted-foreground" />
                   </div>
                 )}
               </div>
@@ -224,21 +249,22 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 relative">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="bg-gradient-to-br from-primary/20 via-accent/10 to-secondary/20 rounded-3xl p-8 lg:p-12 border border-border text-center relative overflow-hidden">
-            <div className="absolute inset-0 bg-card/50 backdrop-blur-sm" />
+          <div className="liquid-glass rounded-[32px] p-8 lg:p-12 text-center relative overflow-hidden">
             <div className="relative z-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/40">
                 <Zap className="w-8 h-8 text-primary-foreground" />
               </div>
               <h2 className="text-3xl lg:text-4xl font-bold mb-4">
-                Siap Mulai Jualan?
+                {isLoggedIn ? 'Kelola Bisnis Anda' : 'Siap Mulai Jualan?'}
               </h2>
               <p className="text-muted-foreground mb-8 max-w-xl mx-auto">
-                Daftar sekarang dan buat bot auto order pertama Anda dalam hitungan menit!
+                {isLoggedIn 
+                  ? 'Akses dashboard untuk mengelola produk dan melihat pesanan Anda.'
+                  : 'Daftar sekarang dan buat bot auto order pertama Anda dalam hitungan menit!'}
               </p>
-              <Link href="/register">
+              <Link href={isLoggedIn ? '/dashboard' : '/register'}>
                 <NeoButton size="lg">
-                  Daftar Gratis
+                  {isLoggedIn ? 'Buka Dashboard' : 'Daftar Gratis'}
                   <ArrowRight className="w-5 h-5" />
                 </NeoButton>
               </Link>
@@ -248,12 +274,12 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-border relative">
+      <footer className="py-8 border-t border-white/10 relative">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center">
-                <Bot className="w-4 h-4 text-primary-foreground" />
+              <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center shadow-lg shadow-primary/30">
+                <Bot className="w-4 h-4 text-white" />
               </div>
               <span className="font-semibold">SewaBot</span>
             </div>

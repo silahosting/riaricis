@@ -8,7 +8,7 @@ const NeoCard = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      'bg-card text-card-foreground neo-border neo-shadow p-6 rounded-xl',
+      'glass-card text-card-foreground p-6 rounded-3xl transition-all duration-300',
       className
     )}
     {...props}

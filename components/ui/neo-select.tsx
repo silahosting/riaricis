@@ -9,7 +9,7 @@ const NeoSelect = React.forwardRef<HTMLSelectElement, NeoSelectProps>(
     return (
       <select
         className={cn(
-          'flex h-11 w-full bg-input px-4 py-2 text-sm rounded-lg border border-border transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 appearance-none cursor-pointer',
+          'flex h-12 w-full glass-input px-4 py-2 text-sm rounded-2xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 appearance-none cursor-pointer',
           className
         )}
         ref={ref}

@@ -29,14 +29,14 @@ export default function RegisterPage() {
   }, [state?.error])
 
   return (
-    <NeoCard className="bg-card/80 backdrop-blur-xl animate-scale-in">
+    <NeoCard className="liquid-glass rounded-[32px] animate-scale-in">
       <NeoCardHeader className="text-center">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-2xl flex items-center justify-center mb-4 shadow-lg animate-float relative">
-          <UserPlus className="w-8 h-8 text-secondary-foreground" />
+        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-secondary/30 animate-float relative">
+          <UserPlus className="w-8 h-8 text-white" />
           <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-warning animate-pulse" />
         </div>
         <NeoCardTitle className="text-xl font-bold normal-case animate-slide-down">Buat Akun Baru</NeoCardTitle>
-        <NeoCardDescription className="animate-slide-down stagger-1">
+        <NeoCardDescription className="animate-slide-down stagger-1 text-white/60">
           Daftar untuk mulai sewa dan kelola bot Anda
         </NeoCardDescription>
       </NeoCardHeader>
@@ -51,7 +51,7 @@ export default function RegisterPage() {
           )}
           
           <div className="flex flex-col gap-2 animate-slide-up stagger-1">
-            <label htmlFor="name" className="text-sm font-medium text-muted-foreground">
+            <label htmlFor="name" className="text-sm font-medium text-white/60">
               Nama Lengkap
             </label>
             <div className="relative group">
@@ -68,7 +68,7 @@ export default function RegisterPage() {
           </div>
           
           <div className="flex flex-col gap-2 animate-slide-up stagger-2">
-            <label htmlFor="email" className="text-sm font-medium text-muted-foreground">
+            <label htmlFor="email" className="text-sm font-medium text-white/60">
               Email
             </label>
             <div className="relative group">
@@ -85,7 +85,7 @@ export default function RegisterPage() {
           </div>
           
           <div className="flex flex-col gap-2 animate-slide-up stagger-3">
-            <label htmlFor="password" className="text-sm font-medium text-muted-foreground">
+            <label htmlFor="password" className="text-sm font-medium text-white/60">
               Password
             </label>
             <div className="relative group">
@@ -103,7 +103,7 @@ export default function RegisterPage() {
           </div>
           
           <div className="flex flex-col gap-2 animate-slide-up stagger-4">
-            <label htmlFor="confirmPassword" className="text-sm font-medium text-muted-foreground">
+            <label htmlFor="confirmPassword" className="text-sm font-medium text-white/60">
               Konfirmasi Password
             </label>
             <div className="relative group">
@@ -142,9 +142,9 @@ export default function RegisterPage() {
       </NeoCardContent>
       
       <NeoCardFooter className="justify-center animate-fade-in stagger-6">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-white/60">
           Sudah punya akun?{' '}
-          <Link href="/login" className="font-semibold text-primary hover:underline hover:text-primary/80 transition-colors">
+          <Link href="/login" className="font-semibold text-primary hover:underline transition-colors">
             Masuk
           </Link>
         </p>
