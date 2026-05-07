@@ -157,7 +157,8 @@ export async function checkOrkutPaymentStatus(
   transactionId: string,
   qrisType: 'admin' | 'user',
   userId?: string,
-  amount?: number
+  amount?: number,
+  codeQr?: string
 ): Promise<OrkutCheckPaymentResponse> {
   try {
     // Set default admin credentials
@@ -165,6 +166,7 @@ export async function checkOrkutPaymentStatus(
     let apiKey = ORKUT_ADMIN_API_KEY
     let authToken = ORKUT_ADMIN_AUTH_TOKEN
     let merchantId = ORKUT_ADMIN_MERCHANT_ID
+    let qrCode = codeQr || ORKUT_ADMIN_CODE_QR
 
     // Try to override with user QRIS if requested
     if (qrisType === 'user' && userId) {
@@ -174,11 +176,12 @@ export async function checkOrkutPaymentStatus(
         apiKey = qrisSettings.apiKey
         authToken = qrisSettings.token
         merchantId = qrisSettings.merchantId || qrisSettings.username
+        qrCode = qrisSettings.codeQr || qrCode
       }
       // If user QRIS not found, just use admin QRIS (no error)
     }
 
-    if (!username || !apiKey || !authToken) {
+    if (!username || !apiKey || !authToken || !qrCode) {
       return {
         success: false,
         status: 'failed',
@@ -187,13 +190,14 @@ export async function checkOrkutPaymentStatus(
       }
     }
 
-    // Check status with Orkut API - use same endpoint with transactionId and amount
+    // Check status with Orkut API - use same endpoint with transactionId, amount and codeqr
     const params = new URLSearchParams({
       apikey: apiKey,
       username,
       authToken,
       merchantid: merchantId,
       transactionId,
+      codeqr: qrCode,
     })
     
     // Add amount if provided (required by Orkut API for status check)

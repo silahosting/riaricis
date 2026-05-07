@@ -15,21 +15,23 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { subscriptionId, transactionId, amount } = body
+    const { subscriptionId, transactionId, amount, qrString } = body
 
     if (!subscriptionId || !transactionId) {
       return NextResponse.json({ error: 'Missing subscriptionId or transactionId' }, { status: 400 })
     }
 
-    // Get payment amount from payment record if not provided
+    // Get payment details from payment record if not provided
     let paymentAmount = amount
-    if (!paymentAmount) {
+    let paymentQrString = qrString
+    if (!paymentAmount || !paymentQrString) {
       const paymentRecord = await getPaymentByOrderId(`subscription_${subscriptionId}`)
-      paymentAmount = paymentRecord?.amount
+      paymentAmount = paymentAmount || paymentRecord?.amount
+      paymentQrString = paymentQrString || paymentRecord?.qrString
     }
 
-    // Check payment status from Orkut (now with amount)
-    const paymentStatus = await checkOrkutPaymentStatus(transactionId, 'admin', undefined, paymentAmount)
+    // Check payment status from Orkut (with amount and codeqr)
+    const paymentStatus = await checkOrkutPaymentStatus(transactionId, 'admin', undefined, paymentAmount, paymentQrString)
 
     console.log('[v0] Subscription check-payment result:', {
       subscriptionId,

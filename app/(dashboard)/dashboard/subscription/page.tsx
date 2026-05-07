@@ -61,17 +61,18 @@ export default function SubscriptionPage() {
   // QRIS payment state
   const [showQrisPayment, setShowQrisPayment] = useState(false)
   const [qrisData, setQrisData] = useState<{
-    qrisUrl: string
-    transactionId: string
-    subscriptionId: string
-    amount: number
-    originalAmount: number
-    fee: number
-    expiresAt: string
-    merchantName?: string
-    merchantId?: string
-    qrisId?: string
-    issuedBy?: string
+  qrisUrl: string
+  transactionId: string
+  subscriptionId: string
+  amount: number
+  originalAmount: number
+  fee: number
+  expiresAt: string
+  qrString?: string
+  merchantName?: string
+  merchantId?: string
+  qrisId?: string
+  issuedBy?: string
   } | null>(null)
   const [checkingPayment, setCheckingPayment] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -178,15 +179,16 @@ export default function SubscriptionPage() {
       const data = await res.json()
 
       if (res.ok && data.success) {
-        setQrisData({
-          qrisUrl: data.qrisUrl,
-          transactionId: data.transactionId,
-          subscriptionId: data.subscription.id,
-          amount: data.amount,
-          originalAmount: data.originalAmount,
-          fee: data.fee,
-          expiresAt: data.expiresAt,
-        })
+setQrisData({
+  qrisUrl: data.qrisUrl,
+  transactionId: data.transactionId,
+  subscriptionId: data.subscription.id,
+  amount: data.amount,
+  originalAmount: data.originalAmount,
+  fee: data.fee,
+  expiresAt: data.expiresAt,
+  qrString: data.qrString,
+  })
         setShowQrisPayment(true)
       } else {
         setError(data.error || 'Gagal membuat pembayaran QRIS')
@@ -211,6 +213,7 @@ export default function SubscriptionPage() {
           subscriptionId: qrisData.subscriptionId,
           transactionId: qrisData.transactionId,
           amount: qrisData.amount,
+          qrString: qrisData.qrString,
         }),
       })
 
@@ -296,6 +299,7 @@ export default function SubscriptionPage() {
           subscriptionId: pendingPayment.subscriptionId,
           transactionId: pendingPayment.transactionId,
           amount: pendingPayment.amount,
+          qrString: pendingPayment.qrString,
         }),
       })
 

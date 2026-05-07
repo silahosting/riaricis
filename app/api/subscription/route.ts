@@ -116,6 +116,7 @@ export async function POST(request: Request) {
         userId: session.id,
         amount: qrisResult.amount,
         qrisUrl: qrisResult.qrsImageUrl,
+        qrString: qrisResult.qrString,
         transactionId: qrisResult.transactionId,
         status: 'pending',
         paymentMethod: 'qris',
