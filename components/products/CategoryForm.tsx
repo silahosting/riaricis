@@ -47,7 +47,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
       } else {
         setLoadingState('success')
         setShowSuccess(true)
-        toast.success(category ? 'Kategori berhasil diperbarui!' : 'Kategori berhasil ditambahkan!', {
+        toast.success(category ? 'Produk berhasil diperbarui!' : 'Produk berhasil ditambahkan!', {
           icon: <CheckCircle2 className="w-5 h-5" />,
         })
         setTimeout(() => {
@@ -76,7 +76,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
           </div>
           
           <h3 className="text-2xl font-bold text-success mb-2">
-            {category ? 'Kategori Diperbarui!' : 'Kategori Ditambahkan!'}
+            {category ? 'Produk Diperbarui!' : 'Produk Ditambahkan!'}
           </h3>
           <p className="text-white/60 text-sm flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-success animate-pulse" />
@@ -96,9 +96,9 @@ export function CategoryForm({ category }: CategoryFormProps) {
           </button>
         </Link>
         <div>
-          <h2 className="font-semibold text-lg">{category ? 'Edit Kategori' : 'Tambah Kategori Baru'}</h2>
+          <h2 className="font-semibold text-lg">{category ? 'Edit Produk' : 'Tambah Produk Baru'}</h2>
           <p className="text-sm text-white/60">
-            {category ? 'Perbarui informasi kategori' : 'Buat kategori produk (contoh: Alight Motion, Canva Pro)'}
+            {category ? 'Perbarui informasi produk' : 'Buat produk utama (contoh: AI Pro, Canva Pro, Netflix Premium)'}
           </p>
         </div>
       </div>
@@ -114,7 +114,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="code" className="text-sm font-medium text-white/60">
-                Code Kategori
+                Kode Produk
               </label>
               <div className="relative">
                 <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
@@ -122,7 +122,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
                   id="code"
                   name="code"
                   type="text"
-                  placeholder="AM, CP, NF"
+                  placeholder="AIPRO, CANVA, NETFLIX"
                   className="pl-11 font-mono uppercase"
                   defaultValue={category?.code || ''}
                   disabled={!!category}
@@ -131,13 +131,13 @@ export function CategoryForm({ category }: CategoryFormProps) {
                 />
               </div>
               <p className="text-xs text-white/40">
-                Code unik untuk kategori (tidak bisa diubah)
+                Kode unik untuk produk (tidak bisa diubah)
               </p>
             </div>
 
             <div className="flex flex-col gap-2">
               <label htmlFor="name" className="text-sm font-medium text-white/60">
-                Nama Kategori
+                Nama Produk
               </label>
               <div className="relative">
                 <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
@@ -145,7 +145,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
                   id="name"
                   name="name"
                   type="text"
-                  placeholder="Alight Motion"
+                  placeholder="AI Pro"
                   className="pl-11"
                   defaultValue={category?.name || ''}
                   required
@@ -156,14 +156,14 @@ export function CategoryForm({ category }: CategoryFormProps) {
 
           <div className="flex flex-col gap-2">
             <label htmlFor="description" className="text-sm font-medium text-white/60">
-              Deskripsi (Opsional)
+              Deskripsi Produk (Opsional)
             </label>
             <div className="relative">
               <FileText className="absolute left-3 top-4 w-5 h-5 text-white/40" />
               <NeoTextarea
                 id="description"
                 name="description"
-                placeholder="Deskripsi kategori produk..."
+                placeholder="Deskripsi produk, fitur unggulan, dll..."
                 className="pl-11 min-h-[80px]"
                 defaultValue={category?.description || ''}
               />
@@ -179,7 +179,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
               className="w-5 h-5 rounded accent-primary cursor-pointer"
             />
             <span className="font-medium text-sm">
-              Aktifkan kategori (tampil di katalog)
+              Aktifkan produk (tampil di bot)
             </span>
           </label>
 
@@ -196,7 +196,7 @@ export function CategoryForm({ category }: CategoryFormProps) {
               className="flex-1 sm:flex-none"
             >
               <Save className="w-4 h-4" />
-              {category ? 'Simpan Perubahan' : 'Tambah Kategori'}
+              {category ? 'Simpan Perubahan' : 'Tambah Produk'}
             </LoadingButton>
             <Link href="/dashboard/products">
               <NeoButton type="button" variant="outline" className="w-full sm:w-auto">

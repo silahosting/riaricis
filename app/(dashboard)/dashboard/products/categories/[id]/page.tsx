@@ -51,7 +51,7 @@ export default async function CategoryDetailPage({
         <Link href={`/dashboard/products/categories/${category.id}/edit`}>
           <NeoButton variant="outline">
             <Edit className="w-4 h-4" />
-            Edit Kategori
+            Edit Produk
           </NeoButton>
         </Link>
       </div>
@@ -67,7 +67,7 @@ export default async function CategoryDetailPage({
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
           <Package className="w-4 h-4 text-secondary" />
-          <span className="text-white/60">Produk:</span>
+          <span className="text-white/60">Varian:</span>
           <span className="font-semibold">{products.length}</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
@@ -79,11 +79,11 @@ export default async function CategoryDetailPage({
       {/* Products in this category */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold">Produk dalam Kategori Ini</h2>
+          <h2 className="font-semibold">Varian Produk</h2>
           <Link href={`/dashboard/products/new?category=${category.code}`}>
             <NeoButton size="sm">
               <Plus className="w-4 h-4" />
-              Tambah Produk
+              Tambah Varian
             </NeoButton>
           </Link>
         </div>
@@ -93,14 +93,14 @@ export default async function CategoryDetailPage({
             <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mb-4">
               <Package className="w-8 h-8 text-primary" />
             </div>
-            <h3 className="font-semibold text-lg mb-2">Belum Ada Produk</h3>
+            <h3 className="font-semibold text-lg mb-2">Belum Ada Varian</h3>
             <p className="text-white/60 text-sm mb-4 max-w-sm">
-              Tambahkan produk pertama untuk kategori ini
+              Tambahkan varian pertama untuk produk ini (contoh: 1 Bulan, 3 Bulan, 1 Tahun)
             </p>
             <Link href={`/dashboard/products/new?category=${category.code}`}>
               <NeoButton>
                 <Plus className="w-4 h-4" />
-                Tambah Produk
+                Tambah Varian
               </NeoButton>
             </Link>
           </div>

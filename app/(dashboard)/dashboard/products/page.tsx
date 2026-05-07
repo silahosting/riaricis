@@ -32,17 +32,17 @@ export default async function ProductsPage() {
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
           <FolderOpen className="w-4 h-4 text-primary" />
-          <span className="text-white/60">Kategori:</span>
+          <span className="text-white/60">Produk:</span>
           <span className="font-semibold">{categories.length}</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
           <Layers className="w-4 h-4 text-secondary" />
-          <span className="text-white/60">Produk:</span>
+          <span className="text-white/60">Varian:</span>
           <span className="font-semibold">{products.length}</span>
         </div>
         <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
           <Package className="w-4 h-4 text-success" />
-          <span className="text-white/60">Total Stock:</span>
+          <span className="text-white/60">Total Stok:</span>
           <span className="font-semibold text-success">{totalStock} item</span>
         </div>
       </div>
@@ -51,22 +51,22 @@ export default async function ProductsPage() {
         <TabsList className="glass w-full sm:w-auto mb-4">
           <TabsTrigger value="categories" className="flex-1 sm:flex-none gap-2">
             <FolderOpen className="w-4 h-4" />
-            Kategori Produk
+            Produk
           </TabsTrigger>
           <TabsTrigger value="products" className="flex-1 sm:flex-none gap-2">
             <Layers className="w-4 h-4" />
-            Daftar Produk
+            Varian & Stok
           </TabsTrigger>
         </TabsList>
 
-        {/* Categories Tab */}
+        {/* Categories Tab - Now labeled as "Produk" */}
         <TabsContent value="categories" className="mt-0">
           <div className="flex flex-col gap-4">
             <div className="flex justify-end">
               <Link href="/dashboard/products/categories/new">
                 <NeoButton>
                   <Plus className="w-4 h-4" />
-                  Tambah Kategori
+                  Tambah Produk Baru
                 </NeoButton>
               </Link>
             </div>
@@ -76,14 +76,14 @@ export default async function ProductsPage() {
                 <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
                   <FolderOpen className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Belum Ada Kategori</h3>
+                <h3 className="font-semibold text-lg mb-2">Belum Ada Produk</h3>
                 <p className="text-white/60 text-sm mb-4 max-w-sm">
-                  Buat kategori produk terlebih dahulu (contoh: Alight Motion, Canva Pro)
+                  Buat produk terlebih dahulu (contoh: AI Pro, Canva Pro, Netflix Premium)
                 </p>
                 <Link href="/dashboard/products/categories/new">
                   <NeoButton>
                     <Plus className="w-4 h-4" />
-                    Tambah Kategori Pertama
+                    Tambah Produk Pertama
                   </NeoButton>
                 </Link>
               </div>
@@ -106,14 +106,14 @@ export default async function ProductsPage() {
           </div>
         </TabsContent>
 
-        {/* Products Tab */}
+        {/* Products Tab - Now labeled as "Varian & Stok" */}
         <TabsContent value="products" className="mt-0">
           <div className="flex flex-col gap-4">
             <div className="flex justify-end">
               <Link href="/dashboard/products/new">
                 <NeoButton disabled={categories.length === 0}>
                   <Plus className="w-4 h-4" />
-                  Tambah Produk
+                  Tambah Varian
                 </NeoButton>
               </Link>
             </div>
@@ -123,14 +123,14 @@ export default async function ProductsPage() {
                 <div className="w-16 h-16 bg-gradient-to-br from-warning/20 to-warning/5 rounded-3xl flex items-center justify-center mb-4">
                   <FolderOpen className="w-8 h-8 text-warning" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Buat Kategori Dulu</h3>
+                <h3 className="font-semibold text-lg mb-2">Buat Produk Dulu</h3>
                 <p className="text-white/60 text-sm mb-4 max-w-sm">
-                  Anda harus membuat kategori produk terlebih dahulu sebelum menambahkan produk
+                  Anda harus membuat produk terlebih dahulu sebelum menambahkan varian
                 </p>
                 <Link href="/dashboard/products/categories/new">
                   <NeoButton>
                     <Plus className="w-4 h-4" />
-                    Tambah Kategori
+                    Tambah Produk
                   </NeoButton>
                 </Link>
               </div>
@@ -139,14 +139,14 @@ export default async function ProductsPage() {
                 <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-primary/5 rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
                   <Package className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Belum Ada Produk</h3>
+                <h3 className="font-semibold text-lg mb-2">Belum Ada Varian</h3>
                 <p className="text-white/60 text-sm mb-4 max-w-sm">
-                  Mulai tambahkan produk untuk dijual melalui bot Anda
+                  Tambahkan varian produk (contoh: 1 Bulan, 3 Bulan, 1 Tahun)
                 </p>
                 <Link href="/dashboard/products/new">
                   <NeoButton>
                     <Plus className="w-4 h-4" />
-                    Tambah Produk Pertama
+                    Tambah Varian Pertama
                   </NeoButton>
                 </Link>
               </div>

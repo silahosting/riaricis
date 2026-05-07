@@ -28,10 +28,10 @@ export function ProductCategoryCard({ category, productCount, stockCount, onUpda
 
   async function handleDelete() {
     if (productCount > 0) {
-      alert(`Tidak dapat menghapus kategori. Masih ada ${productCount} produk dalam kategori ini.`)
+      alert(`Tidak dapat menghapus produk. Masih ada ${productCount} varian dalam produk ini.`)
       return
     }
-    if (!confirm('Apakah Anda yakin ingin menghapus kategori ini?')) return
+    if (!confirm('Apakah Anda yakin ingin menghapus produk ini?')) return
     
     setDeleting(true)
     const result = await deleteCategoryAction(category.id)
@@ -86,7 +86,7 @@ export function ProductCategoryCard({ category, productCount, stockCount, onUpda
               <div className="flex items-center gap-1.5">
                 <Package className="w-4 h-4 text-white/40" />
                 <span className="text-sm font-medium text-white/70">
-                  {productCount} produk
+                  {productCount} varian
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -124,7 +124,7 @@ export function ProductCategoryCard({ category, productCount, stockCount, onUpda
                 onClick={handleDelete}
                 disabled={deleting || productCount > 0}
                 className="rounded-xl"
-                title={productCount > 0 ? 'Hapus semua produk terlebih dahulu' : 'Hapus kategori'}
+                title={productCount > 0 ? 'Hapus semua varian terlebih dahulu' : 'Hapus produk'}
               >
                 <Trash2 className="w-4 h-4" />
               </NeoButton>

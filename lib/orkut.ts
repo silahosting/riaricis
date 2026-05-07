@@ -104,12 +104,6 @@ export async function createOrkutQrisPayment(
 
     const data = await response.json()
 
-    console.log('[v0] Orkut API Response:', {
-      status: data.status,
-      transactionId: data.result?.transactionId,
-      hasQrImage: !!data.result?.qrImageUrl,
-    })
-
     if (!data.status || !data.result) {
       return {
         success: false,
@@ -214,15 +208,12 @@ export async function checkOrkutPaymentStatus(
 
     const data = await response.json()
 
-    console.log('[v0] Check Payment Status Response:', JSON.stringify(data, null, 2))
-
     // Get payment status - handle different response structures
     const paymentStatus = data.paymentStatus || data.result?.paymentStatus
     const transaction = paymentStatus?.transaction || data.result?.paymentStatus?.transaction
 
     // Check payment status - handle both 'success' and 'paid' status
     if (paymentStatus?.status === 'success' || paymentStatus?.status === 'paid') {
-      console.log('[v0] Payment SUCCESS detected!', { transactionId, status: paymentStatus?.status })
       return {
         success: true,
         status: 'paid',
@@ -232,7 +223,6 @@ export async function checkOrkutPaymentStatus(
         description: transaction?.keterangan,
       }
     } else if (paymentStatus?.status === 'pending' || !paymentStatus) {
-      console.log('[v0] Payment PENDING or no status', { transactionId, status: paymentStatus?.status })
       return {
         success: true,
         status: 'pending',
@@ -240,7 +230,6 @@ export async function checkOrkutPaymentStatus(
         error: paymentStatus?.message || 'Menunggu konfirmasi pembayaran',
       }
     } else {
-      console.log('[v0] Payment FAILED or other status', { transactionId, status: paymentStatus?.status })
       return {
         success: false,
         status: 'failed',

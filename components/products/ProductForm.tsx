@@ -53,7 +53,7 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
       } else {
         setLoadingState('success')
         setShowSuccess(true)
-        toast.success(product ? 'Produk berhasil diperbarui!' : 'Produk berhasil ditambahkan!', {
+        toast.success(product ? 'Varian berhasil diperbarui!' : 'Varian berhasil ditambahkan!', {
           icon: <CheckCircle2 className="w-5 h-5" />,
         })
         setTimeout(() => {
@@ -83,7 +83,7 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
           </div>
           
           <h3 className="text-2xl font-bold text-success mb-2">
-            {product ? 'Produk Diperbarui!' : 'Produk Ditambahkan!'}
+            {product ? 'Varian Diperbarui!' : 'Varian Ditambahkan!'}
           </h3>
           <p className="text-white/60 text-sm flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-success animate-pulse" />
@@ -110,9 +110,9 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
           </button>
         </Link>
         <div>
-          <h2 className="font-semibold text-lg">{product ? 'Edit Produk' : 'Tambah Produk Baru'}</h2>
+          <h2 className="font-semibold text-lg">{product ? 'Edit Varian' : 'Tambah Varian Baru'}</h2>
           <p className="text-sm text-white/60">
-            {product ? 'Perbarui informasi produk' : 'Tambah variasi produk dengan stok'}
+            {product ? 'Perbarui informasi varian' : 'Tambah varian produk dengan harga & stok berbeda (contoh: 1 Bulan, 3 Bulan)'}
           </p>
         </div>
       </div>
@@ -128,7 +128,7 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
           {/* Category Selection */}
           <div className="flex flex-col gap-2">
             <label htmlFor="categoryCode" className="text-sm font-medium text-white/60">
-              Kategori Produk
+              Produk Utama
             </label>
             <div className="relative">
               <FolderOpen className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40 pointer-events-none z-10" />
@@ -140,7 +140,7 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
                 disabled={!!product}
                 required
               >
-                <option value="">Pilih Kategori</option>
+                <option value="">Pilih Produk</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.code}>
                     [{cat.code}] {cat.name}
@@ -150,7 +150,7 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
             </div>
             {!product && (
               <p className="text-xs text-white/40">
-                Pilih kategori produk (tidak bisa diubah setelah dibuat)
+                Pilih produk utama untuk varian ini (tidak bisa diubah setelah dibuat)
               </p>
             )}
           </div>
@@ -158,7 +158,7 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="code" className="text-sm font-medium text-white/60">
-                Code Produk
+                Kode Varian
               </label>
               <div className="relative">
                 <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
@@ -166,7 +166,7 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
                   id="code"
                   name="code"
                   type="text"
-                  placeholder="AM30, AM1Y"
+                  placeholder="1BLN, 3BLN, 1THN"
                   className="pl-11 font-mono uppercase"
                   defaultValue={product?.code || ''}
                   disabled={!!product}
@@ -175,13 +175,13 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
                 />
               </div>
               <p className="text-xs text-white/40">
-                Code unik untuk produk ini
+                Kode unik untuk varian ini
               </p>
             </div>
 
             <div className="flex flex-col gap-2">
               <label htmlFor="name" className="text-sm font-medium text-white/60">
-                Nama Produk
+                Nama Varian
               </label>
               <div className="relative">
                 <Package className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
@@ -189,7 +189,7 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
                   id="name"
                   name="name"
                   type="text"
-                  placeholder="1 Tahun - 1 Akun"
+                  placeholder="1 Bulan, 3 Bulan, 1 Tahun"
                   className="pl-11"
                   defaultValue={product?.name || ''}
                   required
@@ -200,14 +200,14 @@ export function ProductForm({ product, categories, onSubmit, submitLabel = 'Simp
 
           <div className="flex flex-col gap-2">
             <label htmlFor="description" className="text-sm font-medium text-white/60">
-              Deskripsi (Opsional)
+              Deskripsi Varian (Opsional)
             </label>
             <div className="relative">
               <FileText className="absolute left-3 top-4 w-5 h-5 text-white/40" />
               <NeoTextarea
                 id="description"
                 name="description"
-                placeholder="Deskripsi produk..."
+                placeholder="Deskripsi varian, masa aktif, fitur, dll..."
                 className="pl-11 min-h-[80px]"
                 defaultValue={product?.description || ''}
               />
@@ -278,7 +278,7 @@ user1@gmail.com:pass1, user2@gmail.com:pass2`}
               className="w-5 h-5 rounded accent-primary cursor-pointer"
             />
             <span className="font-medium text-sm">
-              Aktifkan produk (tampil di katalog)
+              Aktifkan varian (tampil di bot)
             </span>
           </label>
 

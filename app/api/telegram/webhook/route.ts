@@ -189,7 +189,145 @@ async function replaceWithMessage(
   return sendMessage(botToken, chatId, text, options)
 }
 
-// Generate paginated product list text
+// Generate paginated category list text (Produk Utama)
+function generateCategoryListText(categories: ProductCategory[], products: Product[], page: number, totalPages: number): string {
+  if (!categories || categories.length === 0) {
+    return '┌─────────────────────────────┐\n│  Belum ada produk tersedia  │\n└─────────────────────────────┘'
+  }
+
+  let teks = '┌─────────────────────────────┐\n'
+  teks += `   DAFTAR PRODUK\n`
+  teks += `   Pilih produk yang kamu mau\n`
+  teks += `   page ${page} / ${totalPages}\n`
+  teks += '└─────────────────────────────┘\n\n'
+  
+  const startIndex = (page - 1) * ITEMS_PER_PAGE
+  categories.forEach((category, index) => {
+    // Count total stock for this category
+    const categoryProducts = products.filter(p => p.categoryCode === category.code)
+    const totalStock = categoryProducts.reduce((sum, p) => sum + (p.items?.length || p.stock || 0), 0)
+    teks += `│ [${startIndex + index + 1}] ${category.name} (${totalStock} stok)\n`
+  })
+  
+  teks += '└─────────────────────────────┘'
+  
+  return teks
+}
+
+// Generate keyboard for paginated category list
+function generateCategoryListKeyboard(categories: ProductCategory[], page: number, totalPages: number) {
+  const keyboard: { text: string; callback_data: string }[][] = []
+  
+  // Number buttons in 2 columns
+  for (let i = 0; i < categories.length; i += 2) {
+    const row: { text: string; callback_data: string }[] = []
+    const startIndex = (page - 1) * ITEMS_PER_PAGE
+    
+    row.push({
+      text: `${startIndex + i + 1}`,
+      callback_data: `select_cat_${categories[i].code}`
+    })
+    
+    if (categories[i + 1]) {
+      row.push({
+        text: `${startIndex + i + 2}`,
+        callback_data: `select_cat_${categories[i + 1].code}`
+      })
+    }
+    
+    keyboard.push(row)
+  }
+  
+  // Pagination buttons
+  if (totalPages > 1) {
+    const navRow: { text: string; callback_data: string }[] = []
+    if (page > 1) {
+      navRow.push({ text: `Sebelumnya ${page - 1}`, callback_data: `cat_page_${page - 1}` })
+    }
+    if (page < totalPages) {
+      navRow.push({ text: `Selanjutnya ${page + 1}`, callback_data: `cat_page_${page + 1}` })
+    }
+    if (navRow.length > 0) keyboard.push(navRow)
+  }
+  
+  // Main menu button
+  keyboard.push([{ text: '🏠 Main Menu', callback_data: 'menu_main' }])
+  
+  return { inline_keyboard: keyboard }
+}
+
+// Generate variant list text (Varian dalam Produk)
+function generateVariantListText(category: ProductCategory, variants: Product[], page: number, totalPages: number): string {
+  if (!variants || variants.length === 0) {
+    return `┌─────────────────────────────┐\n│  Belum ada varian untuk\n│  ${category.name}\n└─────────────────────────────┘`
+  }
+
+  let teks = '┌─────────────────────────────┐\n'
+  teks += `   ${category.name.toUpperCase()}\n`
+  teks += `   Pilih paket yang kamu mau\n`
+  if (totalPages > 1) {
+    teks += `   page ${page} / ${totalPages}\n`
+  }
+  teks += '└─────────────────────────────┘\n\n'
+  
+  const startIndex = (page - 1) * ITEMS_PER_PAGE
+  variants.forEach((variant, index) => {
+    const stock = variant.items?.length || variant.stock || 0
+    teks += `│ [${startIndex + index + 1}] ${variant.name}\n`
+    teks += `│     Rp ${toRupiah(variant.price)} (${stock} stok)\n`
+  })
+  
+  teks += '└─────────────────────────────┘'
+  
+  return teks
+}
+
+// Generate keyboard for variant list
+function generateVariantListKeyboard(categoryCode: string, variants: Product[], page: number, totalPages: number) {
+  const keyboard: { text: string; callback_data: string }[][] = []
+  
+  // Number buttons in 2 columns
+  for (let i = 0; i < variants.length; i += 2) {
+    const row: { text: string; callback_data: string }[] = []
+    const startIndex = (page - 1) * ITEMS_PER_PAGE
+    
+    row.push({
+      text: `${startIndex + i + 1}`,
+      callback_data: `select_${variants[i].id}`
+    })
+    
+    if (variants[i + 1]) {
+      row.push({
+        text: `${startIndex + i + 2}`,
+        callback_data: `select_${variants[i + 1].id}`
+      })
+    }
+    
+    keyboard.push(row)
+  }
+  
+  // Pagination buttons
+  if (totalPages > 1) {
+    const navRow: { text: string; callback_data: string }[] = []
+    if (page > 1) {
+      navRow.push({ text: `Sebelumnya`, callback_data: `var_page_${categoryCode}_${page - 1}` })
+    }
+    if (page < totalPages) {
+      navRow.push({ text: `Selanjutnya`, callback_data: `var_page_${categoryCode}_${page + 1}` })
+    }
+    if (navRow.length > 0) keyboard.push(navRow)
+  }
+  
+  // Back and main menu buttons
+  keyboard.push([
+    { text: '⬅️ Kembali', callback_data: 'list_products_1' },
+    { text: '🏠 Main Menu', callback_data: 'menu_main' }
+  ])
+  
+  return { inline_keyboard: keyboard }
+}
+
+// Generate paginated product list text (legacy - kept for backward compatibility)
 function generateProductListText(products: Product[], page: number, totalPages: number): string {
   if (!products || products.length === 0) {
     return '┌─────────────────────────────┐\n│  Belum ada produk tersedia  │\n└─────────────────────────────┘'
@@ -398,23 +536,79 @@ async function handleCallbackQuery(
     return
   }
   
-  // Handle product list pages
-  if (data.startsWith('list_products_') || data.startsWith('page_')) {
+  // Get categories for this bot owner
+  const allCategories = await getProductCategories(botOwnerId)
+  const categories = allCategories?.filter(c => c.isActive) || []
+  
+  // Handle product list pages (now shows categories/products first)
+  if (data.startsWith('list_products_') || data.startsWith('cat_page_')) {
     const page = parseInt(data.split('_').pop() || '1')
-    const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE)
+    const totalPages = Math.ceil(categories.length / ITEMS_PER_PAGE)
     const startIndex = (page - 1) * ITEMS_PER_PAGE
-    const pageProducts = products.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+    const pageCategories = categories.slice(startIndex, startIndex + ITEMS_PER_PAGE)
     
     await answerCallbackQuery(botToken, callbackQuery.id)
     
-    const listText = generateProductListText(pageProducts, page, totalPages)
-    const keyboard = generateProductListKeyboard(pageProducts, page, totalPages)
+    const listText = generateCategoryListText(pageCategories, products, page, totalPages)
+    const keyboard = generateCategoryListKeyboard(pageCategories, page, totalPages)
     
     await replaceWithMessage(botToken, chatId, messageId, listText, { replyMarkup: keyboard })
     return
   }
   
-  // Handle product selection (show info)
+  // Handle category selection (show variants/products in category)
+  if (data.startsWith('select_cat_')) {
+    const categoryCode = data.replace('select_cat_', '')
+    const category = categories.find(c => c.code === categoryCode)
+    
+    if (!category) {
+      await answerCallbackQuery(botToken, callbackQuery.id, 'Produk tidak ditemukan', true)
+      return
+    }
+    
+    // Get variants (products) in this category
+    const variants = products.filter(p => p.categoryCode === categoryCode && p.isActive)
+    const page = 1
+    const totalPages = Math.ceil(variants.length / ITEMS_PER_PAGE)
+    const pageVariants = variants.slice(0, ITEMS_PER_PAGE)
+    
+    await answerCallbackQuery(botToken, callbackQuery.id)
+    
+    const listText = generateVariantListText(category, pageVariants, page, totalPages)
+    const keyboard = generateVariantListKeyboard(categoryCode, pageVariants, page, totalPages)
+    
+    await replaceWithMessage(botToken, chatId, messageId, listText, { replyMarkup: keyboard })
+    return
+  }
+  
+  // Handle variant pagination within category
+  if (data.startsWith('var_page_')) {
+    // Format: var_page_CATCODE_PAGE
+    const parts = data.replace('var_page_', '').split('_')
+    const page = parseInt(parts.pop() || '1')
+    const categoryCode = parts.join('_')
+    
+    const category = categories.find(c => c.code === categoryCode)
+    if (!category) {
+      await answerCallbackQuery(botToken, callbackQuery.id, 'Produk tidak ditemukan', true)
+      return
+    }
+    
+    const variants = products.filter(p => p.categoryCode === categoryCode && p.isActive)
+    const totalPages = Math.ceil(variants.length / ITEMS_PER_PAGE)
+    const startIndex = (page - 1) * ITEMS_PER_PAGE
+    const pageVariants = variants.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+    
+    await answerCallbackQuery(botToken, callbackQuery.id)
+    
+    const listText = generateVariantListText(category, pageVariants, page, totalPages)
+    const keyboard = generateVariantListKeyboard(categoryCode, pageVariants, page, totalPages)
+    
+    await replaceWithMessage(botToken, chatId, messageId, listText, { replyMarkup: keyboard })
+    return
+  }
+  
+  // Handle product/variant selection (show info)
   if (data.startsWith('select_')) {
     const productId = data.replace('select_', '')
     const product = await getProductById(productId)
@@ -424,15 +618,18 @@ async function handleCallbackQuery(
       return
     }
     
+    // Find category for back button
+    const category = categories.find(c => c.code === product.categoryCode)
+    
     await answerCallbackQuery(botToken, callbackQuery.id)
     
-    const infoText = generateProductInfoText(product)
+    const infoText = generateProductInfoText(product, category?.name)
     const keyboard = {
       inline_keyboard: [
         [{ text: `🛒 Beli - Rp ${toRupiah(product.price)}`, callback_data: `buy_${product.id}` }],
         [{ text: '🔄 Refresh', callback_data: `refresh_${product.id}` }],
         [
-          { text: '⬅️ Kembali', callback_data: 'list_products_1' },
+          { text: '⬅️ Kembali', callback_data: `select_cat_${product.categoryCode}` },
           { text: '🏠 Main Menu', callback_data: 'menu_main' }
         ]
       ]
@@ -452,15 +649,18 @@ async function handleCallbackQuery(
       return
     }
     
+    // Find category for back button
+    const category = categories.find(c => c.code === product.categoryCode)
+    
     await answerCallbackQuery(botToken, callbackQuery.id, 'Data diperbarui!')
     
-    const infoText = generateProductInfoText(product)
+    const infoText = generateProductInfoText(product, category?.name)
     const keyboard = {
       inline_keyboard: [
         [{ text: `🛒 Beli - Rp ${toRupiah(product.price)}`, callback_data: `buy_${product.id}` }],
         [{ text: '🔄 Refresh', callback_data: `refresh_${product.id}` }],
         [
-          { text: '⬅️ Kembali', callback_data: 'list_products_1' },
+          { text: '⬅️ Kembali', callback_data: `select_cat_${product.categoryCode}` },
           { text: '🏠 Main Menu', callback_data: 'menu_main' }
         ]
       ]
