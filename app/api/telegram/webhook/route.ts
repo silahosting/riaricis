@@ -890,13 +890,13 @@ async function handleCallbackQuery(
     
     // Show QRIS button based on user's preferred method
     if (userPreferredMethod3 === 'midtrans' && midtransEnabled3) {
-      paymentButtons3.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
+      paymentButtons3.push([{ text: '✅️ Bayar dengan QRIS [ MIDTRANS ]', callback_data: `pay_qris_midtrans_${productId}` }])
     } else if (userPreferredMethod3 === 'orkut' && orkutEnabled3) {
-      paymentButtons3.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
+      paymentButtons3.push([{ text: '✅️ Bayar dengan QRIS [ ORKUT ]', callback_data: `pay_qris_orkut_${productId}` }])
     } else if (midtransEnabled3) {
-      paymentButtons3.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
+      paymentButtons3.push([{ text: '✅️ Bayar dengan QRIS [ MIDTRANS ]', callback_data: `pay_qris_midtrans_${productId}` }])
     } else if (orkutEnabled3) {
-      paymentButtons3.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
+      paymentButtons3.push([{ text: '✅️ Bayar dengan QRIS [ ORKUT ]', callback_data: `pay_qris_orkut_${productId}` }])
     }
     
     const keyboard3 = {
