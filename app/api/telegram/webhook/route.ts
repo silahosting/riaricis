@@ -257,7 +257,12 @@ function generateCategoryListKeyboard(categories: ProductCategory[], page: numbe
 }
 
 // Generate variant list text (Varian dalam Produk)
-function generateVariantListText(category: ProductCategory, variants: Product[], page: number, totalPages: number): string {
+function generateVariantListText(
+  category: ProductCategory,
+  variants: Product[],
+  page: number,
+  totalPages: number
+): string {
   if (!variants || variants.length === 0) {
     return `┌---------------------\n│  Belum ada varian untuk\n│  ${category.name}\n└---------------------`
   }
@@ -265,20 +270,26 @@ function generateVariantListText(category: ProductCategory, variants: Product[],
   let teks = '┌---------------------\n'
   teks += `   ${category.name.toUpperCase()}\n`
   teks += `   Pilih paket yang kamu mau\n`
+
   if (totalPages > 1) {
     teks += `   page ${page} / ${totalPages}\n`
   }
+
   teks += '└---------------------\n\n'
-  
+
+  teks += '┌-------------------------------\n'
+
   const startIndex = (page - 1) * ITEMS_PER_PAGE
+
   variants.forEach((variant, index) => {
     const stock = variant.items?.length || variant.stock || 0
+
     teks += `│ [${startIndex + index + 1}] ${variant.name}\n`
     teks += `│     Rp ${toRupiah(variant.price)} (${stock} stok)\n`
   })
-  
-    teks += '└-------------------------------'
-  
+
+  teks += '└-------------------------------'
+
   return teks
 }
 
@@ -338,12 +349,14 @@ function generateProductListText(products: Product[], page: number, totalPages: 
   teks += `   page ${page} / ${totalPages}\n`
   teks += '└---------------------\n\n'
   
+  teks += '┌-------------------------------\n'
+
   const startIndex = (page - 1) * ITEMS_PER_PAGE
   products.forEach((product, index) => {
     teks += `│ [${startIndex + index + 1}] ${product.name}\n`
   })
   
-  teks += '└---------------------'
+  teks += '└-------------------------------'
   
   return teks
 }
@@ -552,7 +565,14 @@ async function handleCallbackQuery(
     const listText = generateCategoryListText(pageCategories, products, page, totalPages)
     const keyboard = generateCategoryListKeyboard(pageCategories, page, totalPages)
     
-    await replaceWithMessage(botToken, chatId, messageId, listText, { replyMarkup: keyboard })
+    await replaceWithPhoto(
+  botToken,
+  chatId,
+  messageId,
+  'https://files.catbox.moe/992896.jpg',
+  listText,
+  keyboard
+)
     return
   }
   
