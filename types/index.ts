@@ -244,6 +244,16 @@ export interface AccountActivity {
   createdAt: string
 }
 
+// OTP Email Settings for registration verification
+export interface OtpSettings {
+  id: string
+  fromEmail: string // Gmail address to send OTP from
+  fromPass: string // Gmail App Password
+  isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
 export interface Database {
   users: User[]
   botSettings: BotSettings[]
@@ -253,6 +263,7 @@ export interface Database {
   qrisSettings: QrisSettings[]
   payments: Payment[]
   paymentSettings: PaymentSettings | null
+  otpSettings: OtpSettings | null
   withdrawals: Withdrawal[]
   balanceAdjustments: BalanceAdjustment[]
   botSubscriptions: BotSubscription[]

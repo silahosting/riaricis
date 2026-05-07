@@ -1,5 +1,5 @@
 import { GITHUB_CONFIG } from './constants'
-import type { Database, User, BotSettings, ProductCategory, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal, BalanceAdjustment, BotSubscription, AdminFeeIncome, BotActivityLog, AccountActivity } from '@/types'
+import type { Database, User, BotSettings, ProductCategory, Product, Order, QrisSettings, Payment, PaymentSettings, OtpSettings, Withdrawal, BalanceAdjustment, BotSubscription, AdminFeeIncome, BotActivityLog, AccountActivity } from '@/types'
 
 const defaultDatabase: Database = {
   users: [],
@@ -10,6 +10,7 @@ const defaultDatabase: Database = {
   qrisSettings: [],
   payments: [],
   paymentSettings: null,
+  otpSettings: null,
   withdrawals: [],
   balanceAdjustments: [],
   botSubscriptions: [],
@@ -53,6 +54,7 @@ async function getFileContent(): Promise<{ content: Database; sha: string | null
       qrisSettings: Array.isArray(data.content?.qrisSettings) ? data.content.qrisSettings : [],
       payments: Array.isArray(data.content?.payments) ? data.content.payments : [],
       paymentSettings: data.content?.paymentSettings || null,
+      otpSettings: data.content?.otpSettings || null,
       withdrawals: Array.isArray(data.content?.withdrawals) ? data.content.withdrawals : [],
       balanceAdjustments: Array.isArray(data.content?.balanceAdjustments) ? data.content.balanceAdjustments : [],
       botSubscriptions: Array.isArray(data.content?.botSubscriptions) ? data.content.botSubscriptions : [],
@@ -621,6 +623,42 @@ export async function savePaymentSettings(
 
   const success = await updateFile(content, sha)
   return success ? content.paymentSettings : null
+}
+
+// OTP Settings operations (Admin)
+export async function getOtpSettings(): Promise<OtpSettings | null> {
+  const { content } = await getFileContent()
+  return content.otpSettings
+}
+
+export async function saveOtpSettings(
+  settings: Partial<Omit<OtpSettings, 'id' | 'createdAt' | 'updatedAt'>>
+): Promise<OtpSettings | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  if (content.otpSettings) {
+    // Update existing
+    content.otpSettings = {
+      ...content.otpSettings,
+      ...settings,
+      updatedAt: now,
+    }
+  } else {
+    // Create new
+    content.otpSettings = {
+      id: generateId(),
+      fromEmail: '',
+      fromPass: '',
+      isActive: false,
+      ...settings,
+      createdAt: now,
+      updatedAt: now,
+    }
+  }
+
+  const success = await updateFile(content, sha)
+  return success ? content.otpSettings : null
 }
 
 // Admin check
