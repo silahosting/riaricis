@@ -14,6 +14,7 @@ export async function saveBotSettingsAction(formData: FormData) {
   const botToken = formData.get('botToken') as string
   const ownerId = formData.get('ownerId') as string
   const botName = formData.get('botName') as string
+  const botPhotoUrl = formData.get('botPhotoUrl') as string
   const isActive = formData.get('isActive') === 'on'
 
   if (!botToken || !ownerId) {
@@ -24,6 +25,7 @@ export async function saveBotSettingsAction(formData: FormData) {
     botToken,
     ownerId,
     botName: botName || undefined,
+    botPhotoUrl: botPhotoUrl || undefined,
     isActive,
   })
 
@@ -68,12 +70,17 @@ export async function updateProfileAction(formData: FormData) {
 
   const name = formData.get('name') as string
   const email = formData.get('email') as string
+  const profilePhotoUrl = formData.get('profilePhotoUrl') as string
 
   if (!name || !email) {
     return { error: 'Nama dan email harus diisi' }
   }
 
-  const user = await updateUser(session.id, { name, email })
+  const user = await updateUser(session.id, { 
+    name, 
+    email,
+    profilePhotoUrl: profilePhotoUrl || undefined
+  })
 
   if (!user) {
     return { error: 'Gagal mengupdate profil' }

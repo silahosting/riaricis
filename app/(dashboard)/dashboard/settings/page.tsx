@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bot, Key, Power, Save, Eye, EyeOff, AlertCircle, CheckCircle, Webhook, Trash2, RefreshCw, CreditCard, User } from 'lucide-react'
+import { Bot, Key, Power, Save, Eye, EyeOff, AlertCircle, CheckCircle, Webhook, Trash2, RefreshCw, CreditCard, User, Image } from 'lucide-react'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoInput } from '@/components/ui/neo-input'
 import { NeoBadge } from '@/components/ui/neo-badge'
@@ -500,6 +500,39 @@ export default function SettingsPage() {
               <p className="text-xs text-muted-foreground">
                 Username bot tanpa @ (untuk referensi)
               </p>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="botPhotoUrl" className="text-sm font-medium text-muted-foreground">
+                URL Foto Bot (Opsional)
+              </label>
+              <div className="relative">
+                <Image className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <NeoInput
+                  id="botPhotoUrl"
+                  name="botPhotoUrl"
+                  type="url"
+                  placeholder="https://example.com/photo.jpg"
+                  className="pl-11"
+                  defaultValue={settings?.botPhotoUrl || ''}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                URL gambar untuk tampilan bot (menu utama, list produk, dll). Gunakan link dari Catbox, Imgur, atau hosting lainnya.
+              </p>
+              {settings?.botPhotoUrl && (
+                <div className="mt-2 p-3 bg-muted/50 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                  <img 
+                    src={settings.botPhotoUrl} 
+                    alt="Bot photo preview" 
+                    className="max-w-[200px] max-h-[150px] rounded-lg object-cover border border-border"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
+                </div>
+              )}
             </div>
 
             <label className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg cursor-pointer hover:bg-muted/70 transition-colors">

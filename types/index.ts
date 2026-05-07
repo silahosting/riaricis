@@ -4,6 +4,7 @@ export interface User {
   name: string
   password: string
   role: 'user' | 'admin'
+  profilePhotoUrl?: string // URL foto profil user
   createdAt: string
   updatedAt: string
 }
@@ -16,6 +17,7 @@ export interface BotSettings {
   botName?: string
   isActive: boolean
   preferredPaymentMethod?: 'orkut' | 'midtrans' // User's preferred payment method
+  botPhotoUrl?: string // URL foto untuk sendPhoto di bot (menu, list produk, dll)
   createdAt: string
   updatedAt: string
 }

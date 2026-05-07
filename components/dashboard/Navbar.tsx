@@ -32,7 +32,19 @@ export function Navbar({ user, onMenuClick }: NavbarProps) {
           <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full animate-pulse shadow-lg shadow-primary/50" />
         </button>
         
-        <div className="w-10 h-10 bg-gradient-to-br from-secondary to-primary rounded-2xl flex items-center justify-center font-semibold text-white shadow-lg shadow-secondary/30">
+        {user.profilePhotoUrl ? (
+          <img 
+            src={user.profilePhotoUrl} 
+            alt={user.name}
+            className="w-10 h-10 rounded-2xl object-cover shadow-lg shadow-secondary/30"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement
+              target.style.display = 'none'
+              target.nextElementSibling?.classList.remove('hidden')
+            }}
+          />
+        ) : null}
+        <div className={`w-10 h-10 bg-gradient-to-br from-secondary to-primary rounded-2xl flex items-center justify-center font-semibold text-white shadow-lg shadow-secondary/30 ${user.profilePhotoUrl ? 'hidden' : ''}`}>
           {user.name.charAt(0).toUpperCase()}
         </div>
       </div>

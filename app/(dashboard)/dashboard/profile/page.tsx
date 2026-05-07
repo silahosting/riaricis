@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { User, Mail, Calendar, Save, Lock, AlertCircle, CheckCircle } from 'lucide-react'
+import { User, Mail, Calendar, Save, Lock, AlertCircle, CheckCircle, Image, Link } from 'lucide-react'
 import { NeoCard, NeoCardHeader, NeoCardTitle, NeoCardDescription, NeoCardContent, NeoCardFooter } from '@/components/ui/neo-card'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoInput } from '@/components/ui/neo-input'
@@ -99,7 +99,20 @@ export default function ProfilePage() {
       {/* Profile Card */}
       <NeoCard className="bg-secondary text-secondary-foreground">
         <NeoCardContent className="flex items-center gap-6">
-          <div className="w-20 h-20 bg-white neo-border-2 flex items-center justify-center font-black text-3xl text-secondary">
+          {user.profilePhotoUrl ? (
+            <img 
+              src={user.profilePhotoUrl} 
+              alt={user.name}
+              className="w-20 h-20 neo-border-2 object-cover"
+              onError={(e) => {
+                // Fallback to initial if image fails
+                const target = e.target as HTMLImageElement
+                target.style.display = 'none'
+                target.nextElementSibling?.classList.remove('hidden')
+              }}
+            />
+          ) : null}
+          <div className={`w-20 h-20 bg-white neo-border-2 flex items-center justify-center font-black text-3xl text-secondary ${user.profilePhotoUrl ? 'hidden' : ''}`}>
             {user.name.charAt(0).toUpperCase()}
           </div>
           <div>
@@ -160,6 +173,39 @@ export default function ProfilePage() {
                   required
                 />
               </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label htmlFor="profilePhotoUrl" className="text-sm font-bold uppercase tracking-wide">
+                URL Foto Profil (Opsional)
+              </label>
+              <div className="relative">
+                <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                <NeoInput
+                  id="profilePhotoUrl"
+                  name="profilePhotoUrl"
+                  type="url"
+                  placeholder="https://example.com/photo.jpg"
+                  defaultValue={user.profilePhotoUrl || ''}
+                  className="pl-11"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Masukkan URL gambar dari Catbox, Imgur, atau hosting lainnya
+              </p>
+              {user.profilePhotoUrl && (
+                <div className="mt-2">
+                  <p className="text-xs text-muted-foreground mb-2">Preview:</p>
+                  <img 
+                    src={user.profilePhotoUrl} 
+                    alt="Profile preview" 
+                    className="w-16 h-16 object-cover neo-border-2"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none'
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </NeoCardContent>
 

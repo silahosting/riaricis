@@ -528,7 +528,7 @@ async function handleCallbackQuery(
   ownerId: string,
   telegramUserId: string,
   botOwnerId: string, // Database user ID of bot owner
-  botSettings: { preferredPaymentMethod?: 'orkut' | 'midtrans' } // Bot settings with payment preference
+  botSettings: { preferredPaymentMethod?: 'orkut' | 'midtrans'; botPhotoUrl?: string } // Bot settings with payment preference and photo
 ) {
   const chatId = callbackQuery.message?.chat.id
   const messageId = callbackQuery.message?.message_id
@@ -561,7 +561,7 @@ async function handleCallbackQuery(
   if (data === 'menu_main') {
     await answerCallbackQuery(botToken, callbackQuery.id)
     const menuText = generateStartMenuText(user, { totalSold, totalRevenue, totalUsers }, userStats)
-    const startMenuPhoto = 'https://files.catbox.moe/992896.jpg'
+    const startMenuPhoto = botSettings.botPhotoUrl || 'https://files.catbox.moe/992896.jpg'
     
     // Delete old message and send new photo message
     try {
@@ -594,11 +594,12 @@ async function handleCallbackQuery(
     const listText = generateCategoryListText(pageCategories, products, page, totalPages)
     const keyboard = generateCategoryListKeyboard(pageCategories, page, totalPages)
     
+    const photoUrl = botSettings.botPhotoUrl || 'https://files.catbox.moe/992896.jpg'
     await replaceWithPhoto(
   botToken,
   chatId,
   messageId,
-  'https://files.catbox.moe/992896.jpg',
+  photoUrl,
   listText,
   keyboard
 )
@@ -1575,7 +1576,7 @@ async function handleCallbackQuery(
 }
 
 // Handle bot commands and messages
-async function handleMessage(botToken: string, message: TelegramMessage, ownerId: string, botOwnerId: string) {
+async function handleMessage(botToken: string, message: TelegramMessage, ownerId: string, botOwnerId: string, botSettings: { botPhotoUrl?: string }) {
   const chatId = message.chat.id
   const text = message.text || ''
   const userId = message.from.id.toString()
@@ -1603,7 +1604,7 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
   // Handle /start command
   if (text.startsWith('/start')) {
     const menuText = generateStartMenuText(user, { totalSold, totalRevenue, totalUsers }, userStats)
-    const startMenuPhoto = 'https://files.catbox.moe/992896.jpg'
+    const startMenuPhoto = botSettings.botPhotoUrl || 'https://files.catbox.moe/992896.jpg'
     await sendPhoto(botToken, chatId, startMenuPhoto, {
       caption: menuText,
       parseMode: 'Markdown',
@@ -1696,7 +1697,7 @@ export async function POST(request: NextRequest) {
 
     // Handle messages
     if (update.message) {
-      await handleMessage(botToken, update.message, settings.ownerId, settings.userId)
+      await handleMessage(botToken, update.message, settings.ownerId, settings.userId, settings)
       return NextResponse.json({ ok: true })
     }
 
