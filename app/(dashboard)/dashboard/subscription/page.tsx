@@ -210,6 +210,7 @@ export default function SubscriptionPage() {
         body: JSON.stringify({
           subscriptionId: qrisData.subscriptionId,
           transactionId: qrisData.transactionId,
+          amount: qrisData.amount,
         }),
       })
 
@@ -294,6 +295,7 @@ export default function SubscriptionPage() {
         body: JSON.stringify({
           subscriptionId: pendingPayment.subscriptionId,
           transactionId: pendingPayment.transactionId,
+          amount: pendingPayment.amount,
         }),
       })
 

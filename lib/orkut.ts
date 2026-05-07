@@ -156,7 +156,8 @@ export async function createOrkutQrisPayment(
 export async function checkOrkutPaymentStatus(
   transactionId: string,
   qrisType: 'admin' | 'user',
-  userId?: string
+  userId?: string,
+  amount?: number
 ): Promise<OrkutCheckPaymentResponse> {
   try {
     // Set default admin credentials
@@ -186,7 +187,7 @@ export async function checkOrkutPaymentStatus(
       }
     }
 
-    // Check status with Orkut API - use same endpoint with transactionId
+    // Check status with Orkut API - use same endpoint with transactionId and amount
     const params = new URLSearchParams({
       apikey: apiKey,
       username,
@@ -194,6 +195,11 @@ export async function checkOrkutPaymentStatus(
       merchantid: merchantId,
       transactionId,
     })
+    
+    // Add amount if provided (required by Orkut API for status check)
+    if (amount) {
+      params.append('amount', String(amount))
+    }
 
     const response = await fetch(`${ORKUT_API_BASE}/orderkuota?${params.toString()}`, {
       method: 'GET',

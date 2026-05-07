@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth'
 import { 
   updatePaymentByOrderId,
-  activateSubscription
+  activateSubscription,
+  getPaymentByOrderId
 } from '@/lib/github-db'
 import { checkOrkutPaymentStatus } from '@/lib/orkut'
 
@@ -14,14 +15,21 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { subscriptionId, transactionId } = body
+    const { subscriptionId, transactionId, amount } = body
 
     if (!subscriptionId || !transactionId) {
       return NextResponse.json({ error: 'Missing subscriptionId or transactionId' }, { status: 400 })
     }
 
-    // Check payment status from Orkut
-    const paymentStatus = await checkOrkutPaymentStatus(transactionId, 'admin')
+    // Get payment amount from payment record if not provided
+    let paymentAmount = amount
+    if (!paymentAmount) {
+      const paymentRecord = await getPaymentByOrderId(`subscription_${subscriptionId}`)
+      paymentAmount = paymentRecord?.amount
+    }
+
+    // Check payment status from Orkut (now with amount)
+    const paymentStatus = await checkOrkutPaymentStatus(transactionId, 'admin', undefined, paymentAmount)
 
     console.log('[v0] Subscription check-payment result:', {
       subscriptionId,

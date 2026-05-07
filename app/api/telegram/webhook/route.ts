@@ -1148,11 +1148,12 @@ async function handleCallbackQuery(
         return
       }
 
-      // Check status real-time from Orkut
+      // Check status real-time from Orkut (include amount for API)
       const statusCheck = await checkOrkutPaymentStatus(
         payments.transactionId,
         'user',
-        order.buyerId
+        order.buyerId,
+        payments.amount
       )
 
       if (statusCheck.status === 'paid') {
