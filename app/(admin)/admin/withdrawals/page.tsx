@@ -23,14 +23,13 @@ import {
   Wallet,
   Users,
   TrendingDown,
-  Building2,
-  Smartphone,
   Eye,
   User,
   ShoppingBag,
   Banknote
 } from 'lucide-react'
 import { BANK_LABELS, type Withdrawal } from '@/types'
+import { PaymentLogo, PAYMENT_BRAND_COLORS } from '@/components/ui/payment-logos'
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat('id-ID', {
@@ -260,7 +259,7 @@ export default function AdminWithdrawalsPage() {
             <div className="space-y-3">
               {filteredWithdrawals.map((w) => {
                 const StatusIcon = STATUS_CONFIG[w.status].icon
-                const isEwallet = ['dana', 'ovo', 'gopay', 'shopeepay'].includes(w.bankType)
+                const brandColor = PAYMENT_BRAND_COLORS[w.bankType]
                 
                 return (
                   <div
@@ -269,14 +268,11 @@ export default function AdminWithdrawalsPage() {
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-start gap-4">
-                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
-                          isEwallet ? 'bg-violet-500/20' : 'bg-cyan-500/20'
-                        }`}>
-                          {isEwallet ? (
-                            <Smartphone className={`w-5 h-5 ${isEwallet ? 'text-violet-400' : 'text-cyan-400'}`} />
-                          ) : (
-                            <Building2 className="w-5 h-5 text-cyan-400" />
-                          )}
+                        <div 
+                          className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg overflow-hidden"
+                          style={{ backgroundColor: brandColor?.bg || '#666' }}
+                        >
+                          <PaymentLogo type={w.bankType} className="w-full h-full" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">

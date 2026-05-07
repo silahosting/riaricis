@@ -30,21 +30,22 @@ import {
   Send
 } from 'lucide-react'
 import { WITHDRAWAL_FEES, BANK_LABELS, type Withdrawal } from '@/types'
+import { PaymentLogo, PAYMENT_BRAND_COLORS } from '@/components/ui/payment-logos'
 
 const MIN_WITHDRAWAL = 10000
 
 const BANK_OPTIONS = [
-  { value: 'bca', label: 'BCA', type: 'bank', icon: Building2, color: 'from-blue-600 to-blue-700' },
-  { value: 'bni', label: 'BNI', type: 'bank', icon: Building2, color: 'from-orange-500 to-orange-600' },
-  { value: 'bri', label: 'BRI', type: 'bank', icon: Building2, color: 'from-blue-500 to-blue-600' },
-  { value: 'mandiri', label: 'Mandiri', type: 'bank', icon: Building2, color: 'from-blue-700 to-blue-800' },
+  { value: 'bca', label: 'BCA', type: 'bank' },
+  { value: 'bni', label: 'BNI', type: 'bank' },
+  { value: 'bri', label: 'BRI', type: 'bank' },
+  { value: 'mandiri', label: 'Mandiri', type: 'bank' },
 ]
 
 const EWALLET_OPTIONS = [
-  { value: 'dana', label: 'DANA', type: 'ewallet', icon: Smartphone, color: 'from-cyan-500 to-blue-500' },
-  { value: 'ovo', label: 'OVO', type: 'ewallet', icon: Smartphone, color: 'from-purple-500 to-purple-600' },
-  { value: 'gopay', label: 'GoPay', type: 'ewallet', icon: Smartphone, color: 'from-green-500 to-green-600' },
-  { value: 'shopeepay', label: 'ShopeePay', type: 'ewallet', icon: Smartphone, color: 'from-orange-500 to-red-500' },
+  { value: 'dana', label: 'DANA', type: 'ewallet' },
+  { value: 'ovo', label: 'OVO', type: 'ewallet' },
+  { value: 'gopay', label: 'GoPay', type: 'ewallet' },
+  { value: 'shopeepay', label: 'ShopeePay', type: 'ewallet' },
 ]
 
 function formatCurrency(amount: number) {
@@ -383,27 +384,33 @@ export default function WithdrawPage() {
                   
                   <TabsContent value="ewallet" className="mt-3">
                     <div className="grid grid-cols-2 gap-2">
-                      {EWALLET_OPTIONS.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => setBankType(option.value)}
-                          disabled={!canWithdraw || submitting}
-                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                            bankType === option.value
-                              ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20'
-                              : 'border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50'
-                          } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${option.color} flex items-center justify-center shadow-md`}>
-                            <option.icon className="w-5 h-5 text-white" />
-                          </div>
-                          <span className="text-sm font-semibold">{option.label}</span>
-                          <span className="text-xs text-emerald-600 font-medium">
-                            Fee: {formatCurrency(WITHDRAWAL_FEES[option.value])}
-                          </span>
-                        </button>
-                      ))}
+                      {EWALLET_OPTIONS.map((option) => {
+                        const brandColor = PAYMENT_BRAND_COLORS[option.value]
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setBankType(option.value)}
+                            disabled={!canWithdraw || submitting}
+                            className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                              bankType === option.value
+                                ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20'
+                                : 'border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            <div 
+                              className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md overflow-hidden"
+                              style={{ backgroundColor: brandColor?.bg || '#666' }}
+                            >
+                              <PaymentLogo type={option.value} className="w-full h-full" />
+                            </div>
+                            <span className="text-sm font-semibold">{option.label}</span>
+                            <span className="text-xs text-emerald-600 font-medium">
+                              Fee: {formatCurrency(WITHDRAWAL_FEES[option.value])}
+                            </span>
+                          </button>
+                        )
+                      })}
                     </div>
                     <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
                       <p className="text-xs text-emerald-600 flex items-center gap-2">
@@ -415,27 +422,33 @@ export default function WithdrawPage() {
                   
                   <TabsContent value="bank" className="mt-3">
                     <div className="grid grid-cols-2 gap-2">
-                      {BANK_OPTIONS.map((option) => (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => setBankType(option.value)}
-                          disabled={!canWithdraw || submitting}
-                          className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
-                            bankType === option.value
-                              ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20'
-                              : 'border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50'
-                          } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                          <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${option.color} flex items-center justify-center shadow-md`}>
-                            <option.icon className="w-5 h-5 text-white" />
-                          </div>
-                          <span className="text-sm font-semibold">{option.label}</span>
-                          <span className="text-xs text-amber-600 font-medium">
-                            Fee: {formatCurrency(WITHDRAWAL_FEES[option.value])}
-                          </span>
-                        </button>
-                      ))}
+                      {BANK_OPTIONS.map((option) => {
+                        const brandColor = PAYMENT_BRAND_COLORS[option.value]
+                        return (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => setBankType(option.value)}
+                            disabled={!canWithdraw || submitting}
+                            className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all ${
+                              bankType === option.value
+                                ? 'border-primary bg-primary/10 shadow-lg shadow-primary/20'
+                                : 'border-border bg-muted/30 hover:border-primary/50 hover:bg-muted/50'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          >
+                            <div 
+                              className="w-12 h-12 rounded-xl flex items-center justify-center shadow-md overflow-hidden"
+                              style={{ backgroundColor: brandColor?.bg || '#666' }}
+                            >
+                              <PaymentLogo type={option.value} className="w-full h-full" />
+                            </div>
+                            <span className="text-sm font-semibold">{option.label}</span>
+                            <span className="text-xs text-amber-600 font-medium">
+                              Fee: {formatCurrency(WITHDRAWAL_FEES[option.value])}
+                            </span>
+                          </button>
+                        )
+                      })}
                     </div>
                     <div className="mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
                       <p className="text-xs text-amber-600 flex items-center gap-2">
@@ -534,28 +547,39 @@ export default function WithdrawPage() {
               <div className="space-y-3">
                 {withdrawals.slice().reverse().map((w) => {
                   const StatusIcon = STATUS_CONFIG[w.status].icon
+                  const brandColor = PAYMENT_BRAND_COLORS[w.bankType]
                   return (
                     <div
                       key={w.id}
                       className="p-4 rounded-lg bg-muted/50 border border-border"
                     >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-medium">{formatCurrency(w.netAmount)}</p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {BANK_LABELS[w.bankType]} - {w.bankAccount}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {formatDate(w.createdAt)}
-                          </p>
+                      <div className="flex items-start gap-3">
+                        <div 
+                          className="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm shrink-0 overflow-hidden"
+                          style={{ backgroundColor: brandColor?.bg || '#666' }}
+                        >
+                          <PaymentLogo type={w.bankType} className="w-full h-full" />
                         </div>
-                        <NeoBadge variant={STATUS_CONFIG[w.status].variant}>
-                          <StatusIcon className="w-3 h-3 mr-1" />
-                          {STATUS_CONFIG[w.status].label}
-                        </NeoBadge>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <p className="font-semibold">{formatCurrency(w.netAmount)}</p>
+                              <p className="text-xs text-muted-foreground mt-0.5">
+                                {BANK_LABELS[w.bankType]} - {w.bankAccount}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {formatDate(w.createdAt)}
+                              </p>
+                            </div>
+                            <NeoBadge variant={STATUS_CONFIG[w.status].variant} className="shrink-0">
+                              <StatusIcon className="w-3 h-3 mr-1" />
+                              {STATUS_CONFIG[w.status].label}
+                            </NeoBadge>
+                          </div>
+                        </div>
                       </div>
                       {w.adminNotes && (
-                        <p className="text-xs text-muted-foreground mt-2 p-2 bg-background rounded">
+                        <p className="text-xs text-muted-foreground mt-2 p-2 bg-background rounded ml-13">
                           Catatan: {w.adminNotes}
                         </p>
                       )}
