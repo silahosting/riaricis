@@ -259,25 +259,26 @@ function generateCategoryListKeyboard(categories: ProductCategory[], page: numbe
 // Generate variant list text (Varian dalam Produk)
 function generateVariantListText(category: ProductCategory, variants: Product[], page: number, totalPages: number): string {
   if (!variants || variants.length === 0) {
-    return `┌─────────────────────────────┐\n│  Belum ada varian untuk\n│  ${category.name}\n└─────────────────────────────┘`
+    return `┌---------------------\n│  Belum ada varian untuk\n│  ${category.name}\n└---------------------`
   }
 
-  let teks = '┌─────────────────────────────┐\n'
+  let teks = '┌---------------------\n'
   teks += `   ${category.name.toUpperCase()}\n`
   teks += `   Pilih paket yang kamu mau\n`
   if (totalPages > 1) {
     teks += `   page ${page} / ${totalPages}\n`
   }
-  teks += '└─────────────────────────────┘\n\n'
+  teks += '└---------------------\n\n'
   
   const startIndex = (page - 1) * ITEMS_PER_PAGE
   variants.forEach((variant, index) => {
     const stock = variant.items?.length || variant.stock || 0
+    teks += `┌-------------------------------\n`
     teks += `│ [${startIndex + index + 1}] ${variant.name}\n`
     teks += `│     Rp ${toRupiah(variant.price)} (${stock} stok)\n`
   })
   
-  teks += '└─────────────────────────────┘'
+    teks += '└-------------------------------'
   
   return teks
 }
