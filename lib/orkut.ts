@@ -204,24 +204,33 @@ export async function checkOrkutPaymentStatus(
 
     const data = await response.json()
 
-    // Check payment status
-    if (data.paymentStatus?.status === 'success') {
+    console.log('[v0] Check Payment Status Response:', JSON.stringify(data, null, 2))
+
+    // Get payment status - handle different response structures
+    const paymentStatus = data.paymentStatus || data.result?.paymentStatus
+    const transaction = paymentStatus?.transaction || data.result?.paymentStatus?.transaction
+
+    // Check payment status - handle both 'success' and 'paid' status
+    if (paymentStatus?.status === 'success' || paymentStatus?.status === 'paid') {
+      console.log('[v0] Payment SUCCESS detected!', { transactionId, status: paymentStatus?.status })
       return {
         success: true,
         status: 'paid',
         transactionId,
-        amount: data.paymentStatus.transaction?.amount,
-        brand: data.paymentStatus.transaction?.brand_name,
-        description: data.paymentStatus.transaction?.keterangan,
+        amount: transaction?.amount,
+        brand: transaction?.brand_name,
+        description: transaction?.keterangan,
       }
-    } else if (data.paymentStatus?.status === 'pending' || !data.paymentStatus) {
+    } else if (paymentStatus?.status === 'pending' || !paymentStatus) {
+      console.log('[v0] Payment PENDING or no status', { transactionId, status: paymentStatus?.status })
       return {
         success: true,
         status: 'pending',
         transactionId,
-        error: data.paymentStatus?.message || 'Menunggu konfirmasi pembayaran',
+        error: paymentStatus?.message || 'Menunggu konfirmasi pembayaran',
       }
     } else {
+      console.log('[v0] Payment FAILED or other status', { transactionId, status: paymentStatus?.status })
       return {
         success: false,
         status: 'failed',

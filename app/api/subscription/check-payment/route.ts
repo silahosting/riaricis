@@ -23,6 +23,13 @@ export async function POST(request: Request) {
     // Check payment status from Orkut
     const paymentStatus = await checkOrkutPaymentStatus(transactionId, 'admin')
 
+    console.log('[v0] Subscription check-payment result:', {
+      subscriptionId,
+      transactionId,
+      paymentStatus: paymentStatus.status,
+      success: paymentStatus.success,
+    })
+
     if (paymentStatus.status === 'paid') {
       // Activate subscription
       const subscription = await activateSubscription(subscriptionId)
