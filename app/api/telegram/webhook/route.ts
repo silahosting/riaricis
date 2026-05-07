@@ -192,14 +192,14 @@ async function replaceWithMessage(
 // Generate paginated category list text (Produk Utama)
 function generateCategoryListText(categories: ProductCategory[], products: Product[], page: number, totalPages: number): string {
   if (!categories || categories.length === 0) {
-    return '┌─────────────────────────────┐\n│  Belum ada produk tersedia  │\n└─────────────────────────────┘'
+    return '┌──────────────────────────\n│  Belum ada produk tersedia  │\n└──────────────────────────'
   }
 
-  let teks = '┌─────────────────────────────┐\n'
+  let teks = '┌──────────────────────────\n'
   teks += `   DAFTAR PRODUK\n`
   teks += `   Pilih produk yang kamu mau\n`
   teks += `   page ${page} / ${totalPages}\n`
-  teks += '└─────────────────────────────┘\n\n'
+  teks += '└───────────────────────────\n\n'
   
   const startIndex = (page - 1) * ITEMS_PER_PAGE
   categories.forEach((category, index) => {
@@ -209,7 +209,7 @@ function generateCategoryListText(categories: ProductCategory[], products: Produ
     teks += `│ [${startIndex + index + 1}] ${category.name} (${totalStock} stok)\n`
   })
   
-  teks += '└─────────────────────────────┘'
+  teks += '└──────────────────────────'
   
   return teks
 }
@@ -273,7 +273,6 @@ function generateVariantListText(category: ProductCategory, variants: Product[],
   const startIndex = (page - 1) * ITEMS_PER_PAGE
   variants.forEach((variant, index) => {
     const stock = variant.items?.length || variant.stock || 0
-    teks += `┌-------------------------------\n`
     teks += `│ [${startIndex + index + 1}] ${variant.name}\n`
     teks += `│     Rp ${toRupiah(variant.price)} (${stock} stok)\n`
   })
@@ -341,7 +340,6 @@ function generateProductListText(products: Product[], page: number, totalPages: 
   
   const startIndex = (page - 1) * ITEMS_PER_PAGE
   products.forEach((product, index) => {
-    teks += `┌---------------------\n`
     teks += `│ [${startIndex + index + 1}] ${product.name}\n`
   })
   
@@ -394,20 +392,20 @@ function generateProductListKeyboard(products: Product[], page: number, totalPag
 
 // Generate product info text
 function generateProductInfoText(product: Product, categoryName?: string): string {
-  let teks = '┌─────────────────────────────┐\n'
+  let teks = '┌────────────────────────\n'
   teks += `│ • Produk : ${product.name.toUpperCase()}\n`
   teks += `│ • Code : ${product.code}\n`
   if (product.description) {
     teks += `│ • Deskripsi : ${product.description}\n`
   }
   teks += `│ • Kategori : ${categoryName || product.categoryCode}\n`
-  teks += '└─────────────────────────────┘\n\n'
+  teks += '└──────────────────────────\n\n'
   
-  teks += '┌─────────────────────────────┐\n'
+  teks += '┌──────────────────────────\n'
   teks += `  Harga & Stok:\n`
   teks += `│ • Harga: Rp ${toRupiah(product.price)}\n`
   teks += `│ • Stok: ${product.stock}\n`
-  teks += '└─────────────────────────────┘\n'
+  teks += '└───────────────────────────\n'
   teks += `➤ Refresh at ${getWIBTime()} WIB`
   
   return teks
