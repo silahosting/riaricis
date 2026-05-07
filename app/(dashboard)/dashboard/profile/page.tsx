@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { User, Mail, Calendar, Save, Lock, AlertCircle, CheckCircle, Image, Link } from 'lucide-react'
+import { User, Mail, Calendar, Save, Lock, AlertCircle, CheckCircle, Link, Activity, LogIn, LogOut, Key, UserCog, Bot, Monitor, Smartphone, Globe } from 'lucide-react'
 import { NeoCard, NeoCardHeader, NeoCardTitle, NeoCardDescription, NeoCardContent, NeoCardFooter } from '@/components/ui/neo-card'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoInput } from '@/components/ui/neo-input'
 import { updateProfileAction, changePasswordAction } from '@/actions/settings.actions'
-import type { SessionUser } from '@/types'
+import type { SessionUser, AccountActivity } from '@/types'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<SessionUser | null>(null)
@@ -14,9 +14,12 @@ export default function ProfilePage() {
   const [savingProfile, setSavingProfile] = useState(false)
   const [savingPassword, setSavingPassword] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [activities, setActivities] = useState<AccountActivity[]>([])
+  const [loadingActivities, setLoadingActivities] = useState(true)
 
   useEffect(() => {
     fetchUser()
+    fetchActivities()
   }, [])
 
   async function fetchUser() {
@@ -30,6 +33,20 @@ export default function ProfilePage() {
       console.error('Error fetching user:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function fetchActivities() {
+    try {
+      const res = await fetch('/api/account/activities')
+      if (res.ok) {
+        const data = await res.json()
+        setActivities(data.activities || [])
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error)
+    } finally {
+      setLoadingActivities(false)
     }
   }
 
@@ -291,6 +308,186 @@ export default function ProfilePage() {
           </NeoCardFooter>
         </form>
       </NeoCard>
+
+      {/* Account Activity */}
+      <NeoCard>
+        <NeoCardHeader>
+          <NeoCardTitle className="flex items-center gap-2">
+            <Activity className="w-5 h-5" />
+            Aktivitas Akun
+          </NeoCardTitle>
+          <NeoCardDescription>
+            Riwayat login dan aktivitas akun Anda
+          </NeoCardDescription>
+        </NeoCardHeader>
+        
+        <NeoCardContent>
+          {loadingActivities ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-8 h-8 bg-primary neo-border animate-pulse" />
+            </div>
+          ) : activities.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              Belum ada aktivitas tercatat
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 max-h-[400px] overflow-y-auto">
+              {activities.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-start gap-3 p-3 neo-border bg-muted/30 hover:bg-muted/50 transition-colors"
+                >
+                  <div className={`p-2 neo-border ${getActivityColor(activity.action)}`}>
+                    {getActivityIcon(activity.action)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-sm">
+                        {getActivityLabel(activity.action)}
+                      </span>
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        {formatActivityDate(activity.createdAt)}
+                      </span>
+                    </div>
+                    {activity.details && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {activity.details}
+                      </p>
+                    )}
+                    {activity.deviceInfo && (
+                      <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                        {activity.deviceInfo.includes('Android') || activity.deviceInfo.includes('iOS') ? (
+                          <Smartphone className="w-3 h-3" />
+                        ) : (
+                          <Monitor className="w-3 h-3" />
+                        )}
+                        <span>{activity.deviceInfo}</span>
+                      </div>
+                    )}
+                    {activity.ipAddress && activity.ipAddress !== 'Unknown' && (
+                      <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+                        <Globe className="w-3 h-3" />
+                        <span>IP: {activity.ipAddress}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </NeoCardContent>
+      </NeoCard>
     </div>
   )
+}
+
+// Helper functions for activity display
+function getActivityIcon(action: string) {
+  switch (action) {
+    case 'login':
+      return <LogIn className="w-4 h-4" />
+    case 'logout':
+      return <LogOut className="w-4 h-4" />
+    case 'register':
+      return <User className="w-4 h-4" />
+    case 'password_change':
+      return <Key className="w-4 h-4" />
+    case 'profile_update':
+      return <UserCog className="w-4 h-4" />
+    case 'bot_activate':
+    case 'bot_deactivate':
+      return <Bot className="w-4 h-4" />
+    default:
+      return <Activity className="w-4 h-4" />
+  }
+}
+
+function getActivityLabel(action: string) {
+  switch (action) {
+    case 'login':
+      return 'Login'
+    case 'logout':
+      return 'Logout'
+    case 'register':
+      return 'Registrasi'
+    case 'password_change':
+      return 'Ubah Password'
+    case 'profile_update':
+      return 'Update Profil'
+    case 'bot_activate':
+      return 'Bot Diaktifkan'
+    case 'bot_deactivate':
+      return 'Bot Dinonaktifkan'
+    case 'product_create':
+      return 'Produk Dibuat'
+    case 'product_update':
+      return 'Produk Diupdate'
+    case 'product_delete':
+      return 'Produk Dihapus'
+    case 'order_complete':
+      return 'Order Selesai'
+    case 'withdrawal_request':
+      return 'Request Withdraw'
+    default:
+      return action
+  }
+}
+
+function getActivityColor(action: string) {
+  switch (action) {
+    case 'login':
+      return 'bg-green-500/20 text-green-500'
+    case 'logout':
+      return 'bg-orange-500/20 text-orange-500'
+    case 'register':
+      return 'bg-blue-500/20 text-blue-500'
+    case 'password_change':
+      return 'bg-yellow-500/20 text-yellow-500'
+    case 'profile_update':
+      return 'bg-purple-500/20 text-purple-500'
+    case 'bot_activate':
+      return 'bg-emerald-500/20 text-emerald-500'
+    case 'bot_deactivate':
+      return 'bg-red-500/20 text-red-500'
+    default:
+      return 'bg-muted text-muted-foreground'
+  }
+}
+
+function formatActivityDate(dateString: string) {
+  const date = new Date(dateString)
+  const now = new Date()
+  const diff = now.getTime() - date.getTime()
+  
+  // Less than 1 minute
+  if (diff < 60000) {
+    return 'Baru saja'
+  }
+  
+  // Less than 1 hour
+  if (diff < 3600000) {
+    const mins = Math.floor(diff / 60000)
+    return `${mins} menit lalu`
+  }
+  
+  // Less than 24 hours
+  if (diff < 86400000) {
+    const hours = Math.floor(diff / 3600000)
+    return `${hours} jam lalu`
+  }
+  
+  // Less than 7 days
+  if (diff < 604800000) {
+    const days = Math.floor(diff / 86400000)
+    return `${days} hari lalu`
+  }
+  
+  // Show full date
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 }

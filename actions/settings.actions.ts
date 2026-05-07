@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { getSession } from '@/lib/auth'
-import { createOrUpdateBotSettings, getBotSettings, updateUser } from '@/lib/github-db'
+import { createOrUpdateBotSettings, getBotSettings, updateUser, isTokenUsedByOtherActiveBot, createBotActivityLog, createAccountActivity } from '@/lib/github-db'
 import { hashPassword, verifyPassword } from '@/lib/auth'
 
 export async function saveBotSettingsAction(formData: FormData) {
@@ -21,6 +21,16 @@ export async function saveBotSettingsAction(formData: FormData) {
     return { error: 'Bot Token dan Owner ID harus diisi' }
   }
 
+  // Check if token is already used by another active bot
+  if (isActive) {
+    const tokenCheck = await isTokenUsedByOtherActiveBot(botToken, session.id)
+    if (tokenCheck.used) {
+      return { 
+        error: `Token bot ini sudah digunakan oleh akun lain (${tokenCheck.ownerName}). Nonaktifkan bot tersebut terlebih dahulu atau gunakan token berbeda.` 
+      }
+    }
+  }
+
   const settings = await createOrUpdateBotSettings(session.id, {
     botToken,
     ownerId,
@@ -32,6 +42,29 @@ export async function saveBotSettingsAction(formData: FormData) {
   if (!settings) {
     return { error: 'Gagal menyimpan pengaturan bot' }
   }
+
+  // Log bot activation/deactivation
+  await createBotActivityLog({
+    botToken,
+    botName: botName || 'Unnamed Bot',
+    userId: session.id,
+    userName: session.name || session.email,
+    action: isActive ? 'start' : 'error',
+    telegramUserId: 'system',
+    telegramUsername: 'system',
+    message: isActive 
+      ? `Bot "${botName || 'Unnamed'}" diaktifkan oleh ${session.name || session.email}`
+      : `Bot "${botName || 'Unnamed'}" dinonaktifkan oleh ${session.name || session.email}`,
+  })
+
+  // Log account activity
+  await createAccountActivity({
+    userId: session.id,
+    action: isActive ? 'bot_activate' : 'bot_deactivate',
+    details: isActive 
+      ? `Bot "${botName || 'Unnamed'}" diaktifkan`
+      : `Bot "${botName || 'Unnamed'}" dinonaktifkan`,
+  })
 
   revalidatePath('/dashboard/settings', 'max')
   return { success: true }
@@ -48,14 +81,40 @@ export async function toggleBotStatusAction() {
     return { error: 'Pengaturan bot belum dikonfigurasi' }
   }
 
+  const newActiveState = !currentSettings.isActive
+
+  // If trying to activate, check if token is used by another active bot
+  if (newActiveState) {
+    const tokenCheck = await isTokenUsedByOtherActiveBot(currentSettings.botToken, session.id)
+    if (tokenCheck.used) {
+      return { 
+        error: `Token bot ini sudah aktif di akun lain (${tokenCheck.ownerName}). Nonaktifkan bot tersebut terlebih dahulu.` 
+      }
+    }
+  }
+
   const settings = await createOrUpdateBotSettings(session.id, {
     ...currentSettings,
-    isActive: !currentSettings.isActive,
+    isActive: newActiveState,
   })
 
   if (!settings) {
     return { error: 'Gagal mengubah status bot' }
   }
+
+  // Log status change
+  await createBotActivityLog({
+    botToken: currentSettings.botToken,
+    botName: currentSettings.botName || 'Unnamed Bot',
+    userId: session.id,
+    userName: session.name || session.email,
+    action: newActiveState ? 'start' : 'error',
+    telegramUserId: 'system',
+    telegramUsername: 'system',
+    message: newActiveState 
+      ? `Bot "${currentSettings.botName || 'Unnamed'}" diaktifkan`
+      : `Bot "${currentSettings.botName || 'Unnamed'}" dinonaktifkan`,
+  })
 
   revalidatePath('/dashboard/settings', 'max')
   revalidatePath('/dashboard', 'max')
@@ -85,6 +144,13 @@ export async function updateProfileAction(formData: FormData) {
   if (!user) {
     return { error: 'Gagal mengupdate profil' }
   }
+
+  // Log profile update
+  await createAccountActivity({
+    userId: session.id,
+    action: 'profile_update',
+    details: `Profil diperbarui: ${name}`,
+  })
 
   revalidatePath('/dashboard/profile', 'max')
   return { success: true }
@@ -130,6 +196,13 @@ export async function changePasswordAction(formData: FormData) {
   if (!updatedUser) {
     return { error: 'Gagal mengubah password' }
   }
+
+  // Log password change
+  await createAccountActivity({
+    userId: session.id,
+    action: 'password_change',
+    details: 'Password berhasil diubah',
+  })
 
   return { success: true }
 }

@@ -1093,6 +1093,18 @@ async function handleCallbackQuery(
         paymentMethod: 'qris',
       })
 
+      // Log order creation
+      await createBotActivityLog({
+        botToken,
+        botName: botSettings?.botName || 'Unknown Bot',
+        userId: botSettings?.userId || '',
+        userName: botSettings?.ownerId || '',
+        action: 'order',
+        telegramUserId: String(user.id),
+        telegramUsername: user.username,
+        message: `Orkut Order: ${product.name} x${quantity} = Rp ${toRupiah(qrisResult.amount)}`,
+      })
+
       // Clean up session
       orderSessions.delete(sessionKey)
 
@@ -1235,6 +1247,18 @@ async function handleCallbackQuery(
         paymentMethod: 'midtrans',
       })
 
+      // Log order creation
+      await createBotActivityLog({
+        botToken,
+        botName: botSettings?.botName || 'Unknown Bot',
+        userId: botSettings?.userId || '',
+        userName: botSettings?.ownerId || '',
+        action: 'order',
+        telegramUserId: String(user.id),
+        telegramUsername: user.username,
+        message: `Order: ${product.name} x${quantity} = Rp ${toRupiah(totalPrice)}`,
+      })
+
       // Clean up session
       orderSessions.delete(sessionKey)
 
@@ -1367,6 +1391,18 @@ async function handleCallbackQuery(
         await answerCallbackQuery(botToken, callbackQuery.id, 'Pembayaran tidak ditemukan', true)
         return
       }
+
+      // Log payment check
+      await createBotActivityLog({
+        botToken,
+        botName: botSettings?.botName || 'Unknown Bot',
+        userId: botSettings?.userId || '',
+        userName: botSettings?.ownerId || '',
+        action: 'payment',
+        telegramUserId: String(user.id),
+        telegramUsername: user.username,
+        message: `Cek status pembayaran: ${order.productName}`,
+      })
 
       // Check status from Midtrans
       const isPaid = await isMidtransPaymentPaid(payment.transactionId)
@@ -1509,6 +1545,18 @@ async function handleCallbackQuery(
         return
       }
 
+      // Log payment check
+      await createBotActivityLog({
+        botToken,
+        botName: botSettings?.botName || 'Unknown Bot',
+        userId: botSettings?.userId || '',
+        userName: botSettings?.ownerId || '',
+        action: 'payment',
+        telegramUserId: String(user.id),
+        telegramUsername: user.username,
+        message: `Cek status Orkut: ${order.productName}`,
+      })
+
       // Check status real-time from Orkut (include amount and codeqr for API)
       const statusCheck = await checkOrkutPaymentStatus(
         payments.transactionId,
@@ -1519,6 +1567,17 @@ async function handleCallbackQuery(
       )
 
       if (statusCheck.status === 'paid') {
+        // Log payment completion
+        await createBotActivityLog({
+          botToken,
+          botName: botSettings?.botName || 'Unknown Bot',
+          userId: botSettings?.userId || '',
+          userName: botSettings?.ownerId || '',
+          action: 'complete',
+          telegramUserId: String(user.id),
+          telegramUsername: user.username,
+          message: `Orkut paid: ${order.productName} - Rp ${toRupiah(order.totalPrice)}`,
+        })
         // Update order and payment status to completed
         await updateOrder(orderId, { paymentStatus: 'paid', status: 'completed' })
         await updatePaymentByOrderId(orderId, { status: 'paid' })

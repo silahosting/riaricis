@@ -1,5 +1,5 @@
 import { GITHUB_CONFIG } from './constants'
-import type { Database, User, BotSettings, ProductCategory, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal, BalanceAdjustment, BotSubscription, AdminFeeIncome, BotActivityLog } from '@/types'
+import type { Database, User, BotSettings, ProductCategory, Product, Order, QrisSettings, Payment, PaymentSettings, Withdrawal, BalanceAdjustment, BotSubscription, AdminFeeIncome, BotActivityLog, AccountActivity } from '@/types'
 
 const defaultDatabase: Database = {
   users: [],
@@ -15,6 +15,7 @@ const defaultDatabase: Database = {
   botSubscriptions: [],
   adminFeeIncomes: [],
   botActivityLogs: [],
+  accountActivities: [],
 }
 
 const API_BASE = "https://api-orkut-iota-seven.vercel.app" // ganti dengan URL API kamu
@@ -57,6 +58,7 @@ async function getFileContent(): Promise<{ content: Database; sha: string | null
       botSubscriptions: Array.isArray(data.content?.botSubscriptions) ? data.content.botSubscriptions : [],
       adminFeeIncomes: Array.isArray(data.content?.adminFeeIncomes) ? data.content.adminFeeIncomes : [],
       botActivityLogs: Array.isArray(data.content?.botActivityLogs) ? data.content.botActivityLogs : [],
+      accountActivities: Array.isArray(data.content?.accountActivities) ? data.content.accountActivities : [],
     }
     
     return { content, sha: data.sha || null }
@@ -170,6 +172,22 @@ export async function getBotSettings(userId: string): Promise<BotSettings | null
 export async function getBotSettingsByToken(botToken: string): Promise<BotSettings | null> {
   const { content } = await getFileContent()
   return content.botSettings.find((s) => s.botToken === botToken) || null
+}
+
+// Check if bot token is already used by another ACTIVE bot (different user)
+export async function isTokenUsedByOtherActiveBot(botToken: string, excludeUserId: string): Promise<{ used: boolean; ownerName?: string }> {
+  const { content } = await getFileContent()
+  const existingBot = content.botSettings.find(
+    (s) => s.botToken === botToken && s.userId !== excludeUserId && s.isActive
+  )
+  
+  if (existingBot) {
+    // Find owner name
+    const owner = content.users.find(u => u.id === existingBot.userId)
+    return { used: true, ownerName: owner?.name || 'Unknown' }
+  }
+  
+  return { used: false }
 }
 
   // Get all products (for bot - no userId filter)
@@ -988,4 +1006,53 @@ export async function detectSpamActivity(telegramUserId: string): Promise<boolea
   
   // If more than 20 actions in 5 minutes, consider it spam
   return recentLogs.length > 20
+}
+
+// Account Activity operations
+export async function createAccountActivity(
+  data: Omit<AccountActivity, 'id' | 'createdAt'>
+): Promise<AccountActivity | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  const newActivity: AccountActivity = {
+    ...data,
+    id: generateId(),
+    createdAt: now,
+  }
+
+  content.accountActivities = content.accountActivities || []
+  // Keep only last 1000 activities per user to prevent database bloat
+  const userActivities = content.accountActivities.filter(a => a.userId === data.userId)
+  if (userActivities.length >= 100) {
+    // Remove oldest activities for this user
+    const oldestIds = userActivities
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      .slice(0, 10)
+      .map(a => a.id)
+    content.accountActivities = content.accountActivities.filter(a => !oldestIds.includes(a.id))
+  }
+  
+  content.accountActivities.push(newActivity)
+  const success = await updateFile(content, sha)
+  return success ? newActivity : null
+}
+
+export async function getAccountActivities(userId: string, limit: number = 50): Promise<AccountActivity[]> {
+  const { content } = await getFileContent()
+  const activities = content.accountActivities || []
+  // Filter by user and return latest first
+  return activities
+    .filter(a => a.userId === userId)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, limit)
+}
+
+export async function getAllAccountActivities(limit: number = 100): Promise<AccountActivity[]> {
+  const { content } = await getFileContent()
+  const activities = content.accountActivities || []
+  // Return latest first
+  return activities
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .slice(0, limit)
 }

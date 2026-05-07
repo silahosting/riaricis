@@ -231,6 +231,19 @@ export interface BotActivityLog {
   createdAt: string
 }
 
+// Account activity log for user login/action tracking
+export interface AccountActivity {
+  id: string
+  userId: string
+  action: 'login' | 'logout' | 'register' | 'password_change' | 'profile_update' | 'bot_activate' | 'bot_deactivate' | 'product_create' | 'product_update' | 'product_delete' | 'order_complete' | 'withdrawal_request'
+  ipAddress?: string
+  userAgent?: string
+  deviceInfo?: string
+  location?: string
+  details?: string
+  createdAt: string
+}
+
 export interface Database {
   users: User[]
   botSettings: BotSettings[]
@@ -245,6 +258,7 @@ export interface Database {
   botSubscriptions: BotSubscription[]
   adminFeeIncomes: AdminFeeIncome[]
   botActivityLogs: BotActivityLog[]
+  accountActivities: AccountActivity[]
 }
 
 export type SessionUser = Omit<User, 'password'>
