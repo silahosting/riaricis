@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createOrUpdateQrisSettings, getQrisSettings, deleteQrisSettings } from '@/lib/github-db'
-import { getCurrentUser } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 
 // GET - Retrieve QRIS settings
 export async function GET(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
 
     // Handle 'me' as current user
     if (userId === 'me') {
-      const user = await getCurrentUser()
+      const user = await getSession()
       if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     // Handle 'me' as current user
     if (userId === 'me') {
-      const user = await getCurrentUser()
+      const user = await getSession()
       if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
@@ -143,7 +143,7 @@ export async function DELETE(request: NextRequest) {
 
     // Handle 'me' as current user
     if (userId === 'me') {
-      const user = await getCurrentUser()
+      const user = await getSession()
       if (!user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
       }
