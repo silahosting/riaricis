@@ -137,6 +137,7 @@ async function sendPhoto(
     replyMarkup?: object
   }
 ) {
+  console.log('[v0] sendPhoto called, chatId:', chatId, 'photo:', photo?.slice(0, 50))
   const response = await fetch(`${TELEGRAM_API}${botToken}/sendPhoto`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -148,7 +149,9 @@ async function sendPhoto(
       reply_markup: options?.replyMarkup,
     }),
   })
-  return response.json()
+  const result = await response.json()
+  console.log('[v0] sendPhoto result:', JSON.stringify(result).slice(0, 200))
+  return result
 }
 
 // Answer callback query
@@ -1856,6 +1859,8 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
 
   // Handle /start command
   if (text.startsWith('/start')) {
+    console.log('[v0] Handling /start command for user:', user.first_name)
+    
     // Log start action
     await createBotActivityLog({
       botToken,
@@ -1869,12 +1874,21 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
     })
 
     const menuText = generateStartMenuText(user, { totalSold, totalRevenue, totalUsers }, userStats)
+    console.log('[v0] Generated menu text length:', menuText?.length)
+    
     const startMenuPhoto = botSettings.botPhotoUrl || 'https://files.catbox.moe/992896.jpg'
-    await sendPhoto(botToken, chatId, startMenuPhoto, {
-      caption: menuText,
-      parseMode: 'Markdown',
-      replyMarkup: generateMainMenuKeyboard(userStats.balance)
-    })
+    console.log('[v0] Using photo URL:', startMenuPhoto)
+    
+    try {
+      const result = await sendPhoto(botToken, chatId, startMenuPhoto, {
+        caption: menuText,
+        parseMode: 'Markdown',
+        replyMarkup: generateMainMenuKeyboard(userStats.balance)
+      })
+      console.log('[v0] /start sendPhoto completed')
+    } catch (err) {
+      console.error('[v0] /start sendPhoto error:', err)
+    }
     return
   }
 
