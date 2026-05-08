@@ -14,34 +14,34 @@ interface StatsCardProps {
 export function StatsCard({ title, value, icon: Icon, variant = 'default', description, className, animationDelay = 0 }: StatsCardProps) {
   const styles = {
     default: {
-      bg: 'bg-white border border-border',
+      bg: 'liquid-glass',
       text: 'text-foreground',
-      icon: 'bg-muted text-muted-foreground',
+      icon: 'bg-muted/50 text-muted-foreground',
     },
     primary: {
-      bg: 'bg-white border border-border',
+      bg: 'liquid-glass',
       text: 'text-foreground',
-      icon: 'bg-primary/10 text-primary',
+      icon: 'bg-primary/15 text-primary',
     },
     secondary: {
-      bg: 'bg-white border border-border',
+      bg: 'liquid-glass',
       text: 'text-foreground',
-      icon: 'bg-secondary/10 text-secondary',
+      icon: 'bg-secondary/15 text-secondary',
     },
     accent: {
-      bg: 'bg-white border border-border',
+      bg: 'liquid-glass',
       text: 'text-foreground',
-      icon: 'bg-accent/10 text-accent',
+      icon: 'bg-accent/15 text-accent',
     },
     success: {
-      bg: 'bg-white border border-border',
+      bg: 'liquid-glass',
       text: 'text-foreground',
-      icon: 'bg-success/10 text-success',
+      icon: 'bg-success/15 text-success',
     },
     warning: {
-      bg: 'bg-white border border-border',
+      bg: 'liquid-glass',
       text: 'text-foreground',
-      icon: 'bg-warning/10 text-warning',
+      icon: 'bg-warning/15 text-warning',
     },
   }
 
@@ -50,7 +50,7 @@ export function StatsCard({ title, value, icon: Icon, variant = 'default', descr
   return (
     <div 
       className={cn(
-        'p-5 rounded-2xl hover:shadow-md transition-all duration-300 animate-slide-up group shadow-sm',
+        'p-5 rounded-3xl hover:shadow-ios-lg transition-all duration-300 animate-slide-up group',
         style.bg, 
         style.text,
         className

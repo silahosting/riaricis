@@ -6,18 +6,18 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const neoButtonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold tracking-wide transition-all duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 rounded-xl active:scale-95',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold tracking-wide transition-all duration-300 ease-out disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 rounded-2xl active:scale-[0.97]',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-sm',
-        accent: 'bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm',
-        success: 'bg-success text-success-foreground hover:bg-success/90 shadow-sm',
-        warning: 'bg-warning text-warning-foreground hover:bg-warning/90 shadow-sm',
-        outline: 'border border-border bg-card text-foreground hover:bg-muted',
-        ghost: 'bg-transparent border-transparent shadow-none hover:bg-muted rounded-xl text-foreground',
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-ios hover:shadow-ios-lg',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-ios',
+        accent: 'bg-accent text-accent-foreground hover:bg-accent/90 shadow-ios',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-ios',
+        success: 'bg-success text-success-foreground hover:bg-success/90 shadow-ios',
+        warning: 'bg-warning text-warning-foreground hover:bg-warning/90 shadow-ios',
+        outline: 'liquid-glass-light border border-border/50 text-foreground hover:bg-muted/50',
+        ghost: 'bg-transparent border-transparent shadow-none hover:bg-muted/50 rounded-2xl text-foreground',
       },
       size: {
         default: 'h-12 px-6 py-2 text-sm',

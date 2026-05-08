@@ -29,9 +29,9 @@ export default function LoginPage() {
   }, [state?.error])
 
   return (
-    <NeoCard className="bg-white border border-border rounded-2xl shadow-lg animate-scale-in">
+    <NeoCard className="liquid-glass-heavy rounded-3xl shadow-ios-xl animate-scale-in">
       <NeoCardHeader className="text-center">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20 animate-float relative">
+        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center mb-4 shadow-ios-lg animate-float relative">
           <Bot className="w-8 h-8 text-white" />
           <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-warning animate-pulse" />
         </div>

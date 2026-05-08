@@ -55,7 +55,7 @@ export default async function LandingPage() {
       </div>
 
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 glass-nav">
+      <nav className="sticky top-0 z-50 liquid-glass-heavy border-b border-border/30">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
@@ -91,7 +91,7 @@ export default async function LandingPage() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
+              <div className="inline-flex items-center gap-2 liquid-glass rounded-full px-4 py-2 mb-6">
                 <Sparkles className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium text-foreground">
                   Platform Bot Auto Order #1
@@ -149,10 +149,10 @@ export default async function LandingPage() {
             </div>
             
             <div className="relative">
-              <div className="liquid-glass rounded-3xl p-6">
-                <div className="glass rounded-2xl p-4 mb-4">
+              <div className="liquid-glass-heavy rounded-[32px] p-6 shadow-ios-xl">
+                <div className="liquid-glass rounded-2xl p-4 mb-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-secondary to-primary rounded-2xl flex items-center justify-center shadow-lg shadow-secondary/30">
+                    <div className="w-10 h-10 bg-gradient-to-br from-secondary to-primary rounded-2xl flex items-center justify-center shadow-ios">
                       <Bot className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -160,17 +160,17 @@ export default async function LandingPage() {
                       <p className="text-xs text-muted-foreground">Online</p>
                     </div>
                   </div>
-                  <div className="glass rounded-2xl p-3 text-sm">
+                  <div className="liquid-glass-light rounded-2xl p-3 text-sm">
                     Halo! Selamat datang di toko kami. Ketik /menu untuk melihat produk.
                   </div>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="glass rounded-2xl p-4 text-center">
-                    <p className="text-2xl font-bold text-accent">1,234</p>
+                  <div className="liquid-glass rounded-2xl p-4 text-center">
+                    <p className="text-2xl font-bold text-primary">1,234</p>
                     <p className="text-xs text-muted-foreground">Pesanan</p>
                   </div>
-                  <div className="glass rounded-2xl p-4 text-center">
+                  <div className="liquid-glass rounded-2xl p-4 text-center">
                     <p className="text-2xl font-bold text-success">Rp 50M</p>
                     <p className="text-xs text-muted-foreground">Omset</p>
                   </div>
@@ -178,8 +178,8 @@ export default async function LandingPage() {
               </div>
               
               {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-20 h-20 bg-gradient-to-br from-secondary/40 to-primary/20 rounded-3xl blur-xl animate-pulse" />
-              <div className="absolute -bottom-4 -left-4 w-20 h-20 bg-gradient-to-br from-accent/40 to-success/20 rounded-3xl blur-xl animate-pulse" />
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-primary/30 to-secondary/20 rounded-full blur-2xl animate-pulse" />
+              <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-gradient-to-br from-accent/30 to-success/20 rounded-full blur-2xl animate-pulse" />
             </div>
           </div>
         </div>
@@ -201,9 +201,9 @@ export default async function LandingPage() {
             {features.map((feature, index) => (
               <div 
                 key={index} 
-                className="glass-card rounded-3xl p-6 hover:scale-[1.02] transition-all duration-300 cursor-pointer group"
+                className="liquid-glass rounded-3xl p-6 hover:scale-[1.02] hover:shadow-ios-lg transition-all duration-300 cursor-pointer group"
               >
-                <div className={`w-14 h-14 ${feature.iconBg} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`w-14 h-14 ${feature.iconBg} rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 shadow-ios`}>
                   <feature.icon className="w-7 h-7" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
@@ -229,14 +229,14 @@ export default async function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {steps.map((step, index) => (
               <div key={index} className="relative">
-                <div className="glass-card rounded-3xl p-6 h-full hover:scale-[1.02] transition-all duration-300">
+                <div className="liquid-glass rounded-3xl p-6 h-full hover:scale-[1.02] hover:shadow-ios-lg transition-all duration-300">
                   <span className={`text-5xl font-bold text-${step.color}/40`}>{step.number}</span>
                   <h3 className="font-semibold text-lg mt-2">{step.title}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{step.description}</p>
                 </div>
                 
                 {index < steps.length - 1 && (
-                  <div className="hidden lg:flex absolute top-1/2 -right-2 transform -translate-y-1/2 z-10 w-6 h-6 items-center justify-center glass rounded-full">
+                  <div className="hidden lg:flex absolute top-1/2 -right-2 transform -translate-y-1/2 z-10 w-6 h-6 items-center justify-center liquid-glass rounded-full shadow-ios">
                     <ArrowRight className="w-3 h-3 text-muted-foreground" />
                   </div>
                 )}
@@ -249,9 +249,9 @@ export default async function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 relative">
         <div className="max-w-4xl mx-auto px-4">
-          <div className="liquid-glass rounded-[32px] p-8 lg:p-12 text-center relative overflow-hidden">
+          <div className="liquid-glass-heavy rounded-[32px] p-8 lg:p-12 text-center relative overflow-hidden shadow-ios-xl">
             <div className="relative z-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary/40">
+              <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-ios-lg">
                 <Zap className="w-8 h-8 text-primary-foreground" />
               </div>
               <h2 className="text-3xl lg:text-4xl font-bold mb-4">

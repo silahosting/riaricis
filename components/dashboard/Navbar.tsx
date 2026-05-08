@@ -11,7 +11,7 @@ interface NavbarProps {
 
 export function Navbar({ user, onMenuClick }: NavbarProps) {
   return (
-    <header className="glass-nav p-4 flex items-center justify-between sticky top-0 z-40">
+    <header className="liquid-glass-heavy border-b border-border/30 p-4 flex items-center justify-between sticky top-0 z-40">
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}

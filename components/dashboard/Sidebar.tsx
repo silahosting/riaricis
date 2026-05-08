@@ -30,7 +30,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/30 backdrop-blur-xl z-40 lg:hidden"
           onClick={onClose}
         />
       )}
@@ -38,7 +38,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-full w-72 bg-white border-r border-border flex flex-col transition-transform duration-300 ease-out lg:translate-x-0 shadow-lg',
+          'fixed left-0 top-0 z-50 h-full w-72 liquid-glass border-r border-border/50 flex flex-col transition-transform duration-300 ease-out lg:translate-x-0',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
@@ -71,8 +71,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     className={cn(
                       'flex items-center gap-3 px-4 py-3 font-medium text-sm tracking-wide transition-all duration-300 rounded-2xl',
                       isActive
-                        ? 'bg-primary text-white shadow-md shadow-primary/20'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                        ? 'liquid-glass-light bg-primary/90 text-white shadow-ios'
+                        : 'text-muted-foreground hover:liquid-glass-light hover:text-foreground'
                     )}
                   >
                     <Icon className="w-5 h-5" />

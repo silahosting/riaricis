@@ -277,7 +277,7 @@ export default function RegisterPage() {
   // Loading state while checking OTP status
   if (checkingOtp) {
     return (
-      <NeoCard className="bg-white border border-border rounded-2xl shadow-lg animate-scale-in">
+      <NeoCard className="liquid-glass-heavy rounded-3xl shadow-ios-xl animate-scale-in">
         <NeoCardContent className="flex flex-col items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
           <p className="text-muted-foreground">Memuat...</p>
@@ -289,9 +289,9 @@ export default function RegisterPage() {
   // Registration Form
   if (step === 'register') {
     return (
-      <NeoCard className="bg-white border border-border rounded-2xl shadow-lg animate-scale-in">
+      <NeoCard className="liquid-glass-heavy rounded-3xl shadow-ios-xl animate-scale-in">
         <NeoCardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-secondary/20 animate-float relative">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-3xl flex items-center justify-center mb-4 shadow-ios-lg animate-float relative">
             <UserPlus className="w-8 h-8 text-white" />
             <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-warning animate-pulse" />
           </div>
@@ -429,9 +429,9 @@ export default function RegisterPage() {
 
   // OTP Verification Form
   return (
-    <NeoCard className="bg-white border border-border rounded-2xl shadow-lg animate-scale-in">
+    <NeoCard className="liquid-glass-heavy rounded-3xl shadow-ios-xl animate-scale-in">
       <NeoCardHeader className="text-center">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20 animate-float relative">
+        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center mb-4 shadow-ios-lg animate-float relative">
           <KeyRound className="w-8 h-8 text-white" />
           <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-warning animate-pulse" />
         </div>
@@ -465,7 +465,7 @@ export default function RegisterPage() {
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                  className="w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-border bg-muted/30 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all disabled:opacity-50"
+                  className="w-12 h-14 text-center text-2xl font-bold rounded-2xl border border-border/50 liquid-glass-light text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30 focus:shadow-ios transition-all disabled:opacity-50"
                   disabled={isLoading}
                 />
               ))}
