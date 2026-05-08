@@ -58,7 +58,8 @@ interface User {
   name: string
   role: 'user' | 'admin'
   createdAt: string
-  lastLogin?: string | null
+  lastActivity?: string | null
+  lastActivityType?: string | null
 }
 
 interface UserBalanceInfo {
@@ -97,12 +98,26 @@ function formatDate(dateString: string) {
   })
 }
 
-function getInactiveDays(lastLogin: string | null, createdAt: string): number {
-  const referenceDate = lastLogin ? new Date(lastLogin) : new Date(createdAt)
+function getInactiveDays(lastActivity: string | null, createdAt: string): number {
+  const referenceDate = lastActivity ? new Date(lastActivity) : new Date(createdAt)
   const now = new Date()
   const diffTime = Math.abs(now.getTime() - referenceDate.getTime())
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
   return diffDays
+}
+
+function getActivityLabel(activityType: string | null | undefined): string {
+  switch (activityType) {
+    case 'login': return 'Login terakhir'
+    case 'logout': return 'Logout terakhir'
+    case 'register': return 'Daftar'
+    case 'profile_update': return 'Update profil'
+    case 'product_create': return 'Buat produk'
+    case 'product_update': return 'Update produk'
+    case 'order_complete': return 'Order selesai'
+    case 'withdrawal_request': return 'Request penarikan'
+    default: return 'Aktivitas terakhir'
+  }
 }
 
 export default function AdminUsersPage() {
@@ -254,7 +269,7 @@ export default function AdminUsersPage() {
   // Filter inactive users based on selected months
   const inactiveUsers = usersWithActivity.filter(user => {
     if (user.role === 'admin') return false // Don't show admins in inactive list
-    const days = getInactiveDays(user.lastLogin || null, user.createdAt)
+    const days = getInactiveDays(user.lastActivity || null, user.createdAt)
     const months = parseInt(inactiveMonths)
     return days >= months * 30
   })
@@ -480,7 +495,7 @@ export default function AdminUsersPage() {
                   </div>
                   
                   {inactiveUsers.map((user) => {
-                    const inactiveDays = getInactiveDays(user.lastLogin || null, user.createdAt)
+                    const inactiveDays = getInactiveDays(user.lastActivity || null, user.createdAt)
                     const inactiveMonthsCount = Math.floor(inactiveDays / 30)
                     
                     return (
@@ -512,9 +527,9 @@ export default function AdminUsersPage() {
                               </span>
                             </div>
                             <span className="text-white/40 text-xs">
-                              {user.lastLogin 
-                                ? `Login terakhir: ${formatDate(user.lastLogin)}`
-                                : `Belum pernah login sejak daftar`
+                              {user.lastActivity 
+                                ? `${getActivityLabel(user.lastActivityType)}: ${formatDate(user.lastActivity)}`
+                                : `Belum ada aktivitas sejak daftar`
                               }
                             </span>
                           </div>

@@ -682,31 +682,43 @@ export async function getAllUsers(): Promise<User[]> {
   return content.users
 }
 
-// Get last login activity for a user
-export async function getLastLoginActivity(userId: string): Promise<string | null> {
+// Get last activity for a user (login, register, or any activity)
+export async function getLastUserActivity(userId: string): Promise<string | null> {
   const { content } = await getFileContent()
   const activities = content.accountActivities || []
   
-  const loginActivities = activities
-    .filter(a => a.userId === userId && a.action === 'login')
+  // Get any activity from user, sorted by newest first
+  const userActivities = activities
+    .filter(a => a.userId === userId)
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   
-  return loginActivities.length > 0 ? loginActivities[0].createdAt : null
+  return userActivities.length > 0 ? userActivities[0].createdAt : null
 }
 
-// Get all users with their last login info
-export async function getAllUsersWithActivity(): Promise<(User & { lastLogin: string | null })[]> {
+// Get all users with their last activity info
+export async function getAllUsersWithActivity(): Promise<(User & { lastActivity: string | null, lastActivityType: string | null })[]> {
   const { content } = await getFileContent()
   const activities = content.accountActivities || []
   
   return content.users.map(user => {
-    const loginActivities = activities
-      .filter(a => a.userId === user.id && a.action === 'login')
+    // Get all activities for this user
+    const userActivities = activities
+      .filter(a => a.userId === user.id)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    
+    // If no activity found, use user creation date
+    if (userActivities.length === 0) {
+      return {
+        ...user,
+        lastActivity: user.createdAt,
+        lastActivityType: 'register'
+      }
+    }
     
     return {
       ...user,
-      lastLogin: loginActivities.length > 0 ? loginActivities[0].createdAt : null
+      lastActivity: userActivities[0].createdAt,
+      lastActivityType: userActivities[0].action
     }
   })
 }
