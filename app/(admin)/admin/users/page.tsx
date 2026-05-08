@@ -14,6 +14,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { 
   Users, 
   Mail, 
@@ -26,8 +43,14 @@ import {
   TrendingUp,
   TrendingDown,
   History,
-  Banknote
+  Banknote,
+  UserX,
+  Trash2,
+  Clock,
+  AlertTriangle,
+  CheckCircle2
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface User {
   id: string
@@ -35,6 +58,7 @@ interface User {
   name: string
   role: 'user' | 'admin'
   createdAt: string
+  lastLogin?: string | null
 }
 
 interface UserBalanceInfo {
@@ -73,14 +97,29 @@ function formatDate(dateString: string) {
   })
 }
 
+function getInactiveDays(lastLogin: string | null, createdAt: string): number {
+  const referenceDate = lastLogin ? new Date(lastLogin) : new Date(createdAt)
+  const now = new Date()
+  const diffTime = Math.abs(now.getTime() - referenceDate.getTime())
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+  return diffDays
+}
+
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<User[]>([])
+  const [usersWithActivity, setUsersWithActivity] = useState<User[]>([])
   const [usersWithBalance, setUsersWithBalance] = useState<UserBalanceInfo[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedUser, setSelectedUser] = useState<UserBalanceInfo | null>(null)
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showHistoryDialog, setShowHistoryDialog] = useState(false)
   const [processing, setProcessing] = useState(false)
+  
+  // Delete user state
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [inactiveMonths, setInactiveMonths] = useState('3')
   
   // Form state
   const [amount, setAmount] = useState('')
@@ -99,6 +138,18 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function fetchUsersWithActivity() {
+    try {
+      const res = await fetch('/api/admin/users?withActivity=true')
+      if (res.ok) {
+        const data = await res.json()
+        setUsersWithActivity(data.users || [])
+      }
+    } catch (error) {
+      console.error('Failed to fetch users with activity:', error)
+    }
+  }
+
   async function fetchBalanceData() {
     try {
       const res = await fetch('/api/admin/balance')
@@ -114,7 +165,7 @@ export default function AdminUsersPage() {
   useEffect(() => {
     async function fetchAll() {
       setLoading(true)
-      await Promise.all([fetchUsers(), fetchBalanceData()])
+      await Promise.all([fetchUsers(), fetchUsersWithActivity(), fetchBalanceData()])
       setLoading(false)
     }
     fetchAll()
@@ -154,6 +205,34 @@ export default function AdminUsersPage() {
     }
   }
 
+  async function handleDeleteUser() {
+    if (!userToDelete) return
+    
+    setDeleting(true)
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: userToDelete.id }),
+      })
+
+      if (res.ok) {
+        toast.success(`User ${userToDelete.name} berhasil dihapus`)
+        await Promise.all([fetchUsers(), fetchUsersWithActivity(), fetchBalanceData()])
+        setShowDeleteDialog(false)
+        setUserToDelete(null)
+      } else {
+        const data = await res.json()
+        toast.error(data.error || 'Gagal menghapus user')
+      }
+    } catch (error) {
+      console.error('Error deleting user:', error)
+      toast.error('Terjadi kesalahan saat menghapus user')
+    } finally {
+      setDeleting(false)
+    }
+  }
+
   function openAddDialog(user: UserBalanceInfo) {
     setSelectedUser(user)
     setAdjustType('add')
@@ -166,6 +245,19 @@ export default function AdminUsersPage() {
     setSelectedUser(user)
     setShowHistoryDialog(true)
   }
+
+  function openDeleteDialog(user: User) {
+    setUserToDelete(user)
+    setShowDeleteDialog(true)
+  }
+
+  // Filter inactive users based on selected months
+  const inactiveUsers = usersWithActivity.filter(user => {
+    if (user.role === 'admin') return false // Don't show admins in inactive list
+    const days = getInactiveDays(user.lastLogin || null, user.createdAt)
+    const months = parseInt(inactiveMonths)
+    return days >= months * 30
+  })
 
   if (loading) {
     return (
@@ -187,7 +279,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
           <NeoCardContent className="p-6">
             <div className="flex items-center gap-4">
@@ -233,6 +325,20 @@ export default function AdminUsersPage() {
         <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
           <NeoCardContent className="p-6">
             <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
+                <UserX className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-white/60 text-sm">Tidak Aktif</p>
+                <p className="text-2xl font-bold text-white">{inactiveUsers.length}</p>
+              </div>
+            </div>
+          </NeoCardContent>
+        </NeoCard>
+
+        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCardContent className="p-6">
+            <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
                 <Wallet className="w-6 h-6 text-white" />
               </div>
@@ -253,6 +359,15 @@ export default function AdminUsersPage() {
           <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Users className="w-4 h-4 mr-2" />
             Daftar User
+          </TabsTrigger>
+          <TabsTrigger value="inactive" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <UserX className="w-4 h-4 mr-2" />
+            Tidak Aktif
+            {inactiveUsers.length > 0 && (
+              <span className="ml-2 px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs">
+                {inactiveUsers.length}
+              </span>
+            )}
           </TabsTrigger>
           <TabsTrigger value="balance" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Wallet className="w-4 h-4 mr-2" />
@@ -309,6 +424,113 @@ export default function AdminUsersPage() {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </NeoCardContent>
+          </NeoCard>
+        </TabsContent>
+
+        {/* Inactive Users Tab */}
+        <TabsContent value="inactive">
+          <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+            <NeoCardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <NeoCardTitle className="text-white flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+                    <UserX className="w-4 h-4 text-red-400" />
+                  </div>
+                  User Tidak Aktif
+                </NeoCardTitle>
+                <div className="flex items-center gap-3">
+                  <Label className="text-white/60 text-sm whitespace-nowrap">Tidak login selama:</Label>
+                  <Select value={inactiveMonths} onValueChange={setInactiveMonths}>
+                    <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-white">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#1a1a1a] border-white/10">
+                      <SelectItem value="1">1 Bulan</SelectItem>
+                      <SelectItem value="2">2 Bulan</SelectItem>
+                      <SelectItem value="3">3 Bulan</SelectItem>
+                      <SelectItem value="6">6 Bulan</SelectItem>
+                      <SelectItem value="12">12 Bulan</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </NeoCardHeader>
+            <NeoCardContent>
+              {inactiveUsers.length === 0 ? (
+                <div className="text-center py-12">
+                  <CheckCircle2 className="w-12 h-12 text-emerald-500/40 mx-auto mb-4" />
+                  <p className="text-white/60">Tidak ada user yang tidak aktif selama {inactiveMonths} bulan</p>
+                  <p className="text-white/40 text-sm mt-1">Semua user aktif menggunakan platform</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mb-4">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-amber-300 text-sm font-medium">Perhatian</p>
+                        <p className="text-amber-200/70 text-sm">
+                          Menghapus user akan menghapus semua data terkait termasuk produk, pesanan, dan saldo. Tindakan ini tidak dapat dibatalkan.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {inactiveUsers.map((user) => {
+                    const inactiveDays = getInactiveDays(user.lastLogin || null, user.createdAt)
+                    const inactiveMonthsCount = Math.floor(inactiveDays / 30)
+                    
+                    return (
+                      <div
+                        key={user.id}
+                        className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:border-red-500/20 transition-colors gap-4"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-500 to-gray-700 flex items-center justify-center text-white font-bold text-sm opacity-50">
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-white font-medium">{user.name}</p>
+                            <div className="flex items-center gap-2 text-white/40 text-sm">
+                              <Mail className="w-3 h-3" />
+                              {user.email}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col items-end gap-1">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-3 h-3 text-red-400" />
+                              <span className="text-red-400 text-sm font-medium">
+                                {inactiveMonthsCount > 0 
+                                  ? `${inactiveMonthsCount} bulan ${inactiveDays % 30} hari`
+                                  : `${inactiveDays} hari`
+                                } tidak aktif
+                              </span>
+                            </div>
+                            <span className="text-white/40 text-xs">
+                              {user.lastLogin 
+                                ? `Login terakhir: ${formatDate(user.lastLogin)}`
+                                : `Belum pernah login sejak daftar`
+                              }
+                            </span>
+                          </div>
+                          <NeoButton
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openDeleteDialog(user)}
+                            className="border-red-500/30 text-red-400 hover:bg-red-500/20 hover:border-red-500"
+                          >
+                            <Trash2 className="w-4 h-4 mr-1" />
+                            Hapus
+                          </NeoButton>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </NeoCardContent>
@@ -529,6 +751,44 @@ export default function AdminUsersPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent className="bg-[#111111] border border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-400" />
+              Hapus User
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-white/60">
+              Apakah Anda yakin ingin menghapus user <span className="text-white font-medium">{userToDelete?.name}</span> ({userToDelete?.email})?
+              <br /><br />
+              <span className="text-red-400">Tindakan ini akan menghapus semua data terkait termasuk:</span>
+              <ul className="list-disc list-inside mt-2 text-white/60">
+                <li>Pengaturan bot</li>
+                <li>Semua produk dan kategori</li>
+                <li>Semua pesanan</li>
+                <li>Semua pembayaran</li>
+                <li>Saldo dan riwayat pencairan</li>
+                <li>Langganan bot</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteUser}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />}
+              Hapus User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

@@ -682,6 +682,66 @@ export async function getAllUsers(): Promise<User[]> {
   return content.users
 }
 
+// Get last login activity for a user
+export async function getLastLoginActivity(userId: string): Promise<string | null> {
+  const { content } = await getFileContent()
+  const activities = content.accountActivities || []
+  
+  const loginActivities = activities
+    .filter(a => a.userId === userId && a.action === 'login')
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  
+  return loginActivities.length > 0 ? loginActivities[0].createdAt : null
+}
+
+// Get all users with their last login info
+export async function getAllUsersWithActivity(): Promise<(User & { lastLogin: string | null })[]> {
+  const { content } = await getFileContent()
+  const activities = content.accountActivities || []
+  
+  return content.users.map(user => {
+    const loginActivities = activities
+      .filter(a => a.userId === user.id && a.action === 'login')
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    
+    return {
+      ...user,
+      lastLogin: loginActivities.length > 0 ? loginActivities[0].createdAt : null
+    }
+  })
+}
+
+// Delete user and all related data
+export async function deleteUser(userId: string): Promise<boolean> {
+  const { content, sha } = await getFileContent()
+  
+  // Find user
+  const userIndex = content.users.findIndex(u => u.id === userId)
+  if (userIndex === -1) return false
+  
+  // Prevent deleting admin users
+  if (content.users[userIndex].role === 'admin') {
+    return false
+  }
+  
+  // Remove user
+  content.users.splice(userIndex, 1)
+  
+  // Remove all related data
+  content.botSettings = content.botSettings.filter(b => b.userId !== userId)
+  content.productCategories = content.productCategories.filter(c => c.userId !== userId)
+  content.products = content.products.filter(p => p.userId !== userId)
+  content.orders = content.orders.filter(o => o.userId !== userId)
+  content.qrisSettings = content.qrisSettings.filter(q => q.userId !== userId)
+  content.payments = content.payments.filter(p => p.userId !== userId)
+  content.withdrawals = content.withdrawals.filter(w => w.userId !== userId)
+  content.balanceAdjustments = content.balanceAdjustments.filter(b => b.userId !== userId)
+  content.botSubscriptions = content.botSubscriptions.filter(s => s.userId !== userId)
+  content.accountActivities = (content.accountActivities || []).filter(a => a.userId !== userId)
+  
+  return await updateFile(content, sha)
+}
+
 // Withdrawal operations
 export async function getWithdrawals(userId: string): Promise<Withdrawal[]> {
   const { content } = await getFileContent()
