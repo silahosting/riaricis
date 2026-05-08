@@ -14,34 +14,34 @@ interface StatsCardProps {
 export function StatsCard({ title, value, icon: Icon, variant = 'default', description, className, animationDelay = 0 }: StatsCardProps) {
   const styles = {
     default: {
-      bg: 'glass-card',
-      text: 'text-white',
-      icon: 'bg-white/10 text-white/60',
+      bg: 'bg-white border border-border',
+      text: 'text-foreground',
+      icon: 'bg-muted text-muted-foreground',
     },
     primary: {
-      bg: 'glass-card',
-      text: 'text-white',
-      icon: 'bg-primary/20 text-primary shadow-lg shadow-primary/20',
+      bg: 'bg-white border border-border',
+      text: 'text-foreground',
+      icon: 'bg-primary/10 text-primary',
     },
     secondary: {
-      bg: 'glass-card',
-      text: 'text-white',
-      icon: 'bg-secondary/20 text-secondary shadow-lg shadow-secondary/20',
+      bg: 'bg-white border border-border',
+      text: 'text-foreground',
+      icon: 'bg-secondary/10 text-secondary',
     },
     accent: {
-      bg: 'glass-card',
-      text: 'text-white',
-      icon: 'bg-accent/20 text-accent shadow-lg shadow-accent/20',
+      bg: 'bg-white border border-border',
+      text: 'text-foreground',
+      icon: 'bg-accent/10 text-accent',
     },
     success: {
-      bg: 'glass-card',
-      text: 'text-white',
-      icon: 'bg-success/20 text-success shadow-lg shadow-success/20',
+      bg: 'bg-white border border-border',
+      text: 'text-foreground',
+      icon: 'bg-success/10 text-success',
     },
     warning: {
-      bg: 'glass-card',
-      text: 'text-white',
-      icon: 'bg-warning/20 text-warning shadow-lg shadow-warning/20',
+      bg: 'bg-white border border-border',
+      text: 'text-foreground',
+      icon: 'bg-warning/10 text-warning',
     },
   }
 
@@ -50,7 +50,7 @@ export function StatsCard({ title, value, icon: Icon, variant = 'default', descr
   return (
     <div 
       className={cn(
-        'p-5 rounded-3xl hover:scale-[1.02] transition-all duration-300 animate-slide-up group',
+        'p-5 rounded-2xl hover:shadow-md transition-all duration-300 animate-slide-up group shadow-sm',
         style.bg, 
         style.text,
         className
@@ -59,13 +59,13 @@ export function StatsCard({ title, value, icon: Icon, variant = 'default', descr
     >
       <div className="flex items-start justify-between">
         <div className="flex-1">
-          <p className="text-sm font-medium text-white/60">{title}</p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="text-2xl font-bold mt-1">{value}</p>
           {description && (
-            <p className="text-xs mt-2 text-white/50">{description}</p>
+            <p className="text-xs mt-2 text-muted-foreground">{description}</p>
           )}
         </div>
-        <div className={cn('w-11 h-11 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300', style.icon)}>
+        <div className={cn('w-11 h-11 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-300', style.icon)}>
           <Icon className="w-5 h-5" />
         </div>
       </div>

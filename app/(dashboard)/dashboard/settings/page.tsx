@@ -531,6 +531,10 @@ export default function SettingsPage() {
                   <li>Klik tombol <strong>Pasang Webhook</strong> di atas</li>
                   <li>Tunggu beberapa detik lalu coba /start lagi</li>
                 </ol>
+                <p className="mt-2 text-amber-500 font-medium">
+                  Penting: Webhook harus dipasang dari URL production (bukan localhost). 
+                  Pastikan aplikasi sudah di-deploy ke Vercel.
+                </p>
               </div>
             </div>
           </div>

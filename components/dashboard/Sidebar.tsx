@@ -30,7 +30,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
           onClick={onClose}
         />
       )}
@@ -38,20 +38,20 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-50 h-full w-72 bg-black/40 backdrop-blur-2xl border-r border-white/10 flex flex-col transition-transform duration-300 ease-out lg:translate-x-0',
+          'fixed left-0 top-0 z-50 h-full w-72 bg-white border-r border-border flex flex-col transition-transform duration-300 ease-out lg:translate-x-0 shadow-lg',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-white/10">
+        <div className="flex items-center justify-between p-5 border-b border-border">
           <Link href="/dashboard" className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20">
               <Bot className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg tracking-tight">SewaBot</span>
+            <span className="font-bold text-lg tracking-tight text-foreground">SewaBot</span>
           </Link>
-          <button onClick={onClose} className="lg:hidden p-2 hover:bg-white/10 rounded-xl transition-colors">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="lg:hidden p-2 hover:bg-muted rounded-xl transition-colors">
+            <X className="w-5 h-5 text-foreground" />
           </button>
         </div>
 
@@ -71,8 +71,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     className={cn(
                       'flex items-center gap-3 px-4 py-3 font-medium text-sm tracking-wide transition-all duration-300 rounded-2xl',
                       isActive
-                        ? 'bg-primary/20 text-white shadow-lg shadow-primary/20'
-                        : 'text-white/60 hover:bg-white/10 hover:text-white'
+                        ? 'bg-primary text-white shadow-md shadow-primary/20'
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                     )}
                   >
                     <Icon className="w-5 h-5" />
@@ -85,7 +85,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/10">
+        <div className="p-4 border-t border-border">
           <form action={logoutAction}>
             <NeoButton type="submit" variant="destructive" className="w-full rounded-2xl">
               <LogOut className="w-4 h-4" />

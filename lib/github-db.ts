@@ -456,6 +456,9 @@ export async function getDashboardStats(userId: string) {
     .filter((o) => o.status === 'completed' && !o.isSandbox)
     .reduce((sum, o) => sum + o.totalPrice, 0)
   const isBotActive = botSettings?.isActive || false
+  
+  // Calculate total stock (sum of all items across all products)
+  const totalStock = products.reduce((sum, p) => sum + (p.items?.length || 0), 0)
 
   return {
     totalProducts,
@@ -465,6 +468,7 @@ export async function getDashboardStats(userId: string) {
     completedOrders,
     totalRevenue,
     isBotActive,
+    totalStock,
   }
 }
 

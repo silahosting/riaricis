@@ -3,113 +3,113 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/* iOS 26 Glassmorphism Design System */
+/* Clean Light Design System */
 :root {
-  /* Core colors - iOS inspired with vibrant mesh gradients */
-  --background: #000000;
-  --foreground: #ffffff;
-  --card: rgba(255, 255, 255, 0.08);
-  --card-foreground: #ffffff;
-  --popover: rgba(255, 255, 255, 0.1);
-  --popover-foreground: #ffffff;
+  /* Core colors - Clean white theme */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
   
-  /* Primary - iOS Blue */
-  --primary: #007AFF;
+  /* Primary - Modern Blue */
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
   
-  /* Secondary - iOS Indigo */
-  --secondary: #5856D6;
+  /* Secondary - Soft Purple */
+  --secondary: #7c3aed;
   --secondary-foreground: #ffffff;
   
-  /* Accent - iOS Teal */
-  --accent: #64D2FF;
-  --accent-foreground: #000000;
+  /* Accent - Cyan */
+  --accent: #06b6d4;
+  --accent-foreground: #ffffff;
   
   /* Muted */
-  --muted: rgba(255, 255, 255, 0.06);
-  --muted-foreground: rgba(255, 255, 255, 0.6);
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
   
-  /* Destructive - iOS Red */
-  --destructive: #FF3B30;
+  /* Destructive - Red */
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   
-  /* Success - iOS Green */
-  --success: #30D158;
-  --success-foreground: #000000;
+  /* Success - Green */
+  --success: #22c55e;
+  --success-foreground: #ffffff;
   
-  /* Warning - iOS Orange */
-  --warning: #FF9F0A;
-  --warning-foreground: #000000;
+  /* Warning - Amber */
+  --warning: #f59e0b;
+  --warning-foreground: #ffffff;
   
-  /* Glass specific */
-  --border: rgba(255, 255, 255, 0.15);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: #007AFF;
-  --shadow: rgba(0, 0, 0, 0.3);
+  /* Border & Input */
+  --border: #e2e8f0;
+  --input: #f1f5f9;
+  --ring: #2563eb;
+  --shadow: rgba(0, 0, 0, 0.08);
   
-  /* Glass variables */
-  --glass-bg: rgba(255, 255, 255, 0.08);
-  --glass-border: rgba(255, 255, 255, 0.18);
+  /* Glass variables - light mode */
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.08);
   --glass-blur: 20px;
   --glass-saturate: 180%;
   
   /* Charts */
-  --chart-1: #007AFF;
-  --chart-2: #5856D6;
-  --chart-3: #30D158;
-  --chart-4: #FF9F0A;
-  --chart-5: #FF3B30;
+  --chart-1: #2563eb;
+  --chart-2: #7c3aed;
+  --chart-3: #22c55e;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
   
-  --radius: 20px;
+  --radius: 16px;
   
   /* Sidebar */
-  --sidebar: rgba(255, 255, 255, 0.05);
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #007AFF;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #2563eb;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 255, 255, 0.1);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #007AFF;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #2563eb;
 }
 
 .dark {
-  --background: #000000;
-  --foreground: #ffffff;
-  --card: rgba(255, 255, 255, 0.08);
-  --card-foreground: #ffffff;
-  --popover: rgba(255, 255, 255, 0.1);
-  --popover-foreground: #ffffff;
-  --primary: #0A84FF;
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
-  --secondary: #5E5CE6;
+  --secondary: #8b5cf6;
   --secondary-foreground: #ffffff;
-  --accent: #64D2FF;
-  --accent-foreground: #000000;
-  --muted: rgba(255, 255, 255, 0.06);
-  --muted-foreground: rgba(255, 255, 255, 0.6);
-  --destructive: #FF453A;
+  --accent: #22d3ee;
+  --accent-foreground: #0f172a;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --destructive: #f87171;
   --destructive-foreground: #ffffff;
-  --success: #32D74B;
-  --success-foreground: #000000;
-  --warning: #FFD60A;
-  --warning-foreground: #000000;
-  --border: rgba(255, 255, 255, 0.15);
-  --input: rgba(255, 255, 255, 0.1);
-  --ring: #0A84FF;
-  --chart-1: #0A84FF;
-  --chart-2: #5E5CE6;
-  --chart-3: #32D74B;
-  --chart-4: #FFD60A;
-  --chart-5: #FF453A;
-  --sidebar: rgba(255, 255, 255, 0.05);
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: #0A84FF;
+  --success: #4ade80;
+  --success-foreground: #0f172a;
+  --warning: #fbbf24;
+  --warning-foreground: #0f172a;
+  --border: #334155;
+  --input: #1e293b;
+  --ring: #3b82f6;
+  --chart-1: #3b82f6;
+  --chart-2: #8b5cf6;
+  --chart-3: #4ade80;
+  --chart-4: #fbbf24;
+  --chart-5: #f87171;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #3b82f6;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 255, 255, 0.1);
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #0A84FF;
+  --sidebar-accent: #334155;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: #334155;
+  --sidebar-ring: #3b82f6;
 }
 
 @theme inline {
@@ -167,135 +167,108 @@
   }
 }
 
-/* iOS 26 Glassmorphism Utilities */
+/* Clean Light Utilities */
 @layer utilities {
-  /* Glass morphism effects */
+  /* Card effects */
   .glass {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
   
   .glass-light {
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
   
   .glass-dark {
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   }
   
   .glass-card {
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(40px) saturate(150%);
-    -webkit-backdrop-filter: blur(40px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   }
   
   .glass-button {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px) saturate(150%);
-    -webkit-backdrop-filter: blur(10px) saturate(150%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
   
   .glass-input {
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
   }
   
-  /* Neo shadow replacements for glass */
+  /* Neo shadow - light theme */
   .neo-shadow {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   }
   .neo-shadow-sm {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
   .neo-shadow-lg {
-    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
   }
   .neo-shadow-xl {
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
   }
   .neo-border {
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid #e2e8f0;
   }
   .neo-border-2 {
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid #cbd5e1;
   }
   .neo-border-4 {
-    border: 2px solid rgba(255, 255, 255, 0.25);
+    border: 2px solid #cbd5e1;
   }
   .neo-hover {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
   }
   .neo-hover:hover {
-    transform: translateY(-2px) scale(1.01);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
   }
   .neo-hover:active {
-    transform: translateY(0) scale(0.99);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   }
   
-  /* iOS mesh gradient background */
+  /* Clean light background */
   .dev-bg {
-    background: 
-      radial-gradient(ellipse at 20% 0%, rgba(120, 0, 255, 0.3) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 0%, rgba(0, 100, 255, 0.3) 0%, transparent 50%),
-      radial-gradient(ellipse at 40% 100%, rgba(255, 0, 128, 0.2) 0%, transparent 50%),
-      radial-gradient(ellipse at 90% 80%, rgba(0, 200, 255, 0.2) 0%, transparent 50%),
-      linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     background-attachment: fixed;
   }
   
-  /* iOS style glow effects */
+  /* Subtle glow effects */
   .glow-primary {
-    box-shadow: 0 0 40px rgba(0, 122, 255, 0.4);
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);
   }
   .glow-accent {
-    box-shadow: 0 0 40px rgba(100, 210, 255, 0.4);
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.15);
   }
   .glow-success {
-    box-shadow: 0 0 40px rgba(48, 209, 88, 0.4);
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
   }
   
-  /* iOS blur navbar */
+  /* Clean navbar */
   .glass-nav {
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(40px) saturate(180%);
-    -webkit-backdrop-filter: blur(40px) saturate(180%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
   
-  /* Liquid glass effect */
+  /* Clean card effect */
   .liquid-glass {
-    background: linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.05) 50%,
-      rgba(255, 255, 255, 0.1) 100%
-    );
-    backdrop-filter: blur(30px) saturate(200%);
-    -webkit-backdrop-filter: blur(30px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    box-shadow: 
-      0 8px 32px rgba(0, 0, 0, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.15),
-      inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   }
 }
 

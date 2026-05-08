@@ -21,11 +21,35 @@ export async function POST(request: NextRequest) {
     let webhookUrl = body.webhookUrl
 
     if (!webhookUrl) {
-      // Auto-generate webhook URL based on the request host
-      const host = request.headers.get('host') || 'localhost:3000'
-      const protocol = host.includes('localhost') ? 'http' : 'https'
-      webhookUrl = `${protocol}://${host}/api/telegram/webhook?token=${settings.botToken}`
+      // Check for VERCEL_URL or NEXT_PUBLIC_APP_URL environment variables first
+      const vercelUrl = process.env.VERCEL_URL
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL
+      
+      let host: string
+      
+      if (appUrl) {
+        // Use configured app URL (without protocol)
+        host = appUrl.replace(/^https?:\/\//, '')
+      } else if (vercelUrl) {
+        // Use Vercel deployment URL
+        host = vercelUrl
+      } else {
+        // Fallback to request host
+        host = request.headers.get('host') || 'localhost:3000'
+      }
+      
+      // Always use HTTPS for production (Telegram requires HTTPS)
+      const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1')
+      if (isLocalhost) {
+        return NextResponse.json({ 
+          error: 'Webhook tidak bisa dipasang dari localhost. Deploy aplikasi ke Vercel terlebih dahulu, atau set NEXT_PUBLIC_APP_URL dengan domain production.' 
+        }, { status: 400 })
+      }
+      
+      webhookUrl = `https://${host}/api/telegram/webhook?token=${settings.botToken}`
     }
+    
+    console.log('[v0] Setting webhook URL:', webhookUrl)
 
     // Set webhook on Telegram
     const response = await fetch(`${TELEGRAM_API}${settings.botToken}/setWebhook`, {

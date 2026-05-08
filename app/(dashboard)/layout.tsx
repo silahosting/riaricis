@@ -37,8 +37,8 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen dev-bg flex items-center justify-center">
-        <div className="w-16 h-16 glass rounded-3xl flex items-center justify-center shadow-lg shadow-primary/20">
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-lg border border-border">
           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary animate-spin" style={{ animationDuration: '1s' }} />
         </div>
       </div>
@@ -48,14 +48,7 @@ export default function DashboardLayout({
   if (!user) return null
 
   return (
-    <div className="min-h-screen dev-bg">
-      {/* iOS mesh gradient ambient background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-secondary/20 rounded-full blur-[100px] animate-pulse" />
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-accent/15 rounded-full blur-[80px]" />
-      </div>
-      
+    <div className="min-h-screen bg-background">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <div className="lg:pl-72 relative">

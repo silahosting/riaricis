@@ -277,10 +277,10 @@ export default function RegisterPage() {
   // Loading state while checking OTP status
   if (checkingOtp) {
     return (
-      <NeoCard className="liquid-glass rounded-[32px] animate-scale-in">
+      <NeoCard className="bg-white border border-border rounded-2xl shadow-lg animate-scale-in">
         <NeoCardContent className="flex flex-col items-center justify-center py-12">
           <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
-          <p className="text-white/60">Memuat...</p>
+          <p className="text-muted-foreground">Memuat...</p>
         </NeoCardContent>
       </NeoCard>
     )
@@ -289,14 +289,14 @@ export default function RegisterPage() {
   // Registration Form
   if (step === 'register') {
     return (
-      <NeoCard className="liquid-glass rounded-[32px] animate-scale-in">
+      <NeoCard className="bg-white border border-border rounded-2xl shadow-lg animate-scale-in">
         <NeoCardHeader className="text-center">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-secondary/30 animate-float relative">
+          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-secondary to-primary rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-secondary/20 animate-float relative">
             <UserPlus className="w-8 h-8 text-white" />
             <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-warning animate-pulse" />
           </div>
-          <NeoCardTitle className="text-xl font-bold normal-case animate-slide-down">Buat Akun Baru</NeoCardTitle>
-          <NeoCardDescription className="animate-slide-down stagger-1 text-white/60">
+          <NeoCardTitle className="text-xl font-bold normal-case animate-slide-down text-foreground">Buat Akun Baru</NeoCardTitle>
+          <NeoCardDescription className="animate-slide-down stagger-1 text-muted-foreground">
             Daftar untuk mulai sewa dan kelola bot Anda
           </NeoCardDescription>
         </NeoCardHeader>
@@ -311,7 +311,7 @@ export default function RegisterPage() {
             )}
             
             <div className="flex flex-col gap-2 animate-slide-up stagger-1">
-              <label htmlFor="name" className="text-sm font-medium text-white/60">
+              <label htmlFor="name" className="text-sm font-medium text-muted-foreground">
                 Nama Lengkap
               </label>
               <div className="relative group">
@@ -330,7 +330,7 @@ export default function RegisterPage() {
             </div>
             
             <div className="flex flex-col gap-2 animate-slide-up stagger-2">
-              <label htmlFor="email" className="text-sm font-medium text-white/60">
+              <label htmlFor="email" className="text-sm font-medium text-muted-foreground">
                 {otpEnabled ? 'Email Aktif' : 'Email'}
               </label>
               <div className="relative group">
@@ -347,12 +347,12 @@ export default function RegisterPage() {
                 />
               </div>
               {otpEnabled && (
-                <p className="text-xs text-white/40">Kode OTP akan dikirim ke email ini</p>
+                <p className="text-xs text-muted-foreground">Kode OTP akan dikirim ke email ini</p>
               )}
             </div>
             
             <div className="flex flex-col gap-2 animate-slide-up stagger-3">
-              <label htmlFor="password" className="text-sm font-medium text-white/60">
+              <label htmlFor="password" className="text-sm font-medium text-muted-foreground">
                 Password
               </label>
               <div className="relative group">
@@ -372,7 +372,7 @@ export default function RegisterPage() {
             </div>
             
             <div className="flex flex-col gap-2 animate-slide-up stagger-4">
-              <label htmlFor="confirmPassword" className="text-sm font-medium text-white/60">
+              <label htmlFor="confirmPassword" className="text-sm font-medium text-muted-foreground">
                 Konfirmasi Password
               </label>
               <div className="relative group">
@@ -413,7 +413,7 @@ export default function RegisterPage() {
         </NeoCardContent>
         
         <NeoCardFooter className="flex justify-center">
-          <p className="text-sm text-white/60 animate-slide-up stagger-6">
+          <p className="text-sm text-muted-foreground animate-slide-up stagger-6">
             Sudah punya akun?{' '}
             <Link 
               href="/login" 
@@ -429,17 +429,17 @@ export default function RegisterPage() {
 
   // OTP Verification Form
   return (
-    <NeoCard className="liquid-glass rounded-[32px] animate-scale-in">
+    <NeoCard className="bg-white border border-border rounded-2xl shadow-lg animate-scale-in">
       <NeoCardHeader className="text-center">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-primary/30 animate-float relative">
+        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20 animate-float relative">
           <KeyRound className="w-8 h-8 text-white" />
           <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-warning animate-pulse" />
         </div>
-        <NeoCardTitle className="text-xl font-bold normal-case animate-slide-down">Verifikasi Email</NeoCardTitle>
-        <NeoCardDescription className="animate-slide-down stagger-1 text-white/60">
+        <NeoCardTitle className="text-xl font-bold normal-case animate-slide-down text-foreground">Verifikasi Email</NeoCardTitle>
+        <NeoCardDescription className="animate-slide-down stagger-1 text-muted-foreground">
           Masukkan kode OTP yang dikirim ke
           <br />
-          <span className="text-white font-medium">{email}</span>
+          <span className="text-foreground font-medium">{email}</span>
         </NeoCardDescription>
       </NeoCardHeader>
       
@@ -465,7 +465,7 @@ export default function RegisterPage() {
                   value={digit}
                   onChange={(e) => handleOtpChange(index, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                  className="w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-white/20 bg-white/5 text-white focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all disabled:opacity-50"
+                  className="w-12 h-14 text-center text-2xl font-bold rounded-xl border-2 border-border bg-muted/30 text-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all disabled:opacity-50"
                   disabled={isLoading}
                 />
               ))}
@@ -474,7 +474,7 @@ export default function RegisterPage() {
             {/* Countdown */}
             <div className="text-center">
               {countdown > 0 ? (
-                <p className="text-sm text-white/60">
+                <p className="text-sm text-muted-foreground">
                   Kode berlaku: <span className="text-primary font-mono font-bold">{formatTime(countdown)}</span>
                 </p>
               ) : (
@@ -507,7 +507,7 @@ export default function RegisterPage() {
               className={`text-sm flex items-center gap-2 transition-all ${
                 canResend 
                   ? 'text-primary hover:text-secondary cursor-pointer hover:underline' 
-                  : 'text-white/40 cursor-not-allowed'
+                  : 'text-muted-foreground cursor-not-allowed'
               }`}
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
@@ -521,7 +521,7 @@ export default function RegisterPage() {
                 setError(null)
               }}
               disabled={isLoading}
-              className="text-sm text-white/60 hover:text-white flex items-center gap-1 transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               Ganti email

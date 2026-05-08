@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import { Package, ShoppingCart, DollarSign, Bot, TrendingUp, Clock, CreditCard } from 'lucide-react'
+import { Package, ShoppingCart, DollarSign, Bot, TrendingUp, Clock, CreditCard, Database } from 'lucide-react'
 import { getSession } from '@/lib/auth'
 import { getDashboardStats, getOrders } from '@/lib/github-db'
 import { StatsCard } from '@/components/dashboard/StatsCard'
@@ -52,7 +52,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <StatsCard
           title="Total Produk"
           value={stats.totalProducts}
@@ -60,6 +60,14 @@ export default async function DashboardPage() {
           variant="primary"
           description={`${stats.activeProducts} produk aktif`}
           animationDelay={50}
+        />
+        <StatsCard
+          title="Total Stok"
+          value={stats.totalStock}
+          icon={Database}
+          variant="accent"
+          description="Akun tersedia"
+          animationDelay={75}
         />
         <StatsCard
           title="Total Pesanan"
@@ -186,6 +194,15 @@ export default async function DashboardPage() {
           </NeoCardHeader>
           <NeoCardContent>
             <div className="flex flex-col gap-5">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium">Total Stok Akun</span>
+                  <span className="text-sm font-semibold text-accent">{stats.totalStock} akun</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-accent to-accent/70 rounded-full transition-all" style={{ width: stats.totalStock > 0 ? '100%' : '0%', minWidth: stats.totalStock > 0 ? '8px' : '0px' }} />
+                </div>
+              </div>
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">Produk Aktif</span>
