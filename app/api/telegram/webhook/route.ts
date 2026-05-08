@@ -1061,12 +1061,13 @@ async function handleCallbackQuery(
         return
       }
 
-      // Try to get user QRIS, fallback to admin QRIS
-      let qrisResult = await createOrkutQrisPayment(totalPrice, `Pembayaran ${product.name}`, 'user', telegramUserId)
+      // Try to get seller/bot owner QRIS first, fallback to admin QRIS
+      // botOwnerId = database user ID of the seller who owns this bot
+      let qrisResult = await createOrkutQrisPayment(totalPrice, `Pembayaran ${product.name}`, 'user', botOwnerId)
       
       if (!qrisResult.success) {
-        // Fallback to admin QRIS
-        // User QRIS not found or failed, falling back to admin QRIS
+        // Fallback to admin QRIS if seller doesn't have their own QRIS configured
+        console.log('[v0] Seller QRIS not found or failed, falling back to admin QRIS')
         qrisResult = await createOrkutQrisPayment(totalPrice, `Pembayaran ${product.name}`, 'admin')
       }
 
@@ -1557,14 +1558,15 @@ async function handleCallbackQuery(
         message: `Cek status Orkut: ${order.productName}`,
       })
 
-      // Check status real-time from Orkut (include amount and codeqr for API)
-      const statusCheck = await checkOrkutPaymentStatus(
-        payments.transactionId,
-        'user',
-        order.buyerId,
-        payments.amount,
-        payments.qrString
-      )
+  // Check status real-time from Orkut (include amount and codeqr for API)
+  // Use order.userId (seller's database ID) to check their QRIS settings
+const statusCheck = await checkOrkutPaymentStatus(
+  payments.transactionId,
+  'user',
+  order.userId, // Use seller's database ID, not buyer's telegram ID
+  payments.amount,
+  payments.qrString
+  )
 
       if (statusCheck.status === 'paid') {
         // Log payment completion
