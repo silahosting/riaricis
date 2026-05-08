@@ -743,27 +743,30 @@ async function handleCallbackQuery(
     
     const confirmText = generateOrderConfirmText(product, 1)
     
-    // Get payment settings and user's preferred method
+    // Check if seller has their own QRIS settings first
+    const sellerQrisSettings = await getQrisSettings('user', botOwnerId)
+    const hasSellerQris = sellerQrisSettings && sellerQrisSettings.merchantId && sellerQrisSettings.authToken
+    
+    // Get global payment settings as fallback
     const paymentSettings = await getPaymentSettings()
     const orkutEnabled = paymentSettings?.orkutEnabled ?? false
     const midtransEnabled = paymentSettings?.midtransEnabled ?? false
-    const userPreferredMethod = botSettings.preferredPaymentMethod || 'orkut'
     
-    // Build payment buttons based on enabled methods and user preference
+    // Build payment buttons based on seller's QRIS availability
     const paymentButtons: { text: string; callback_data: string }[][] = []
     
     // Always show saldo button
     paymentButtons.push([{ text: 'Bayar dengan Saldo', callback_data: `pay_saldo_${productId}` }])
     
-    // Show QRIS button based on user's preferred method
-    if (userPreferredMethod === 'midtrans' && midtransEnabled) {
-      paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
-    } else if (userPreferredMethod === 'orkut' && orkutEnabled) {
+    // Priority: Seller's own QRIS > Global payment settings
+    if (hasSellerQris) {
+      // Seller has their own QRIS configured - use Orkut
       paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
     } else if (midtransEnabled) {
-      // Fallback to any available method
+      // No seller QRIS, fallback to Midtrans if enabled globally
       paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
     } else if (orkutEnabled) {
+      // Fallback to admin Orkut if enabled globally
       paymentButtons.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
     }
     
@@ -821,20 +824,21 @@ async function handleCallbackQuery(
     
     const confirmText = generateOrderConfirmText(product, newQty)
     
-    // Get payment settings and user's preferred method
+    // Check if seller has their own QRIS settings first
+    const sellerQrisSettings2 = await getQrisSettings('user', botOwnerId)
+    const hasSellerQris2 = sellerQrisSettings2 && sellerQrisSettings2.merchantId && sellerQrisSettings2.authToken
+    
+    // Get global payment settings as fallback
     const paymentSettings2 = await getPaymentSettings()
     const orkutEnabled2 = paymentSettings2?.orkutEnabled ?? false
     const midtransEnabled2 = paymentSettings2?.midtransEnabled ?? false
-    const userPreferredMethod2 = botSettings.preferredPaymentMethod || 'orkut'
     
-    // Build payment buttons based on enabled methods and user preference
+    // Build payment buttons based on seller's QRIS availability
     const paymentButtons2: { text: string; callback_data: string }[][] = []
     paymentButtons2.push([{ text: 'Bayar dengan Saldo', callback_data: `pay_saldo_${productId}` }])
     
-    // Show QRIS button based on user's preferred method
-    if (userPreferredMethod2 === 'midtrans' && midtransEnabled2) {
-      paymentButtons2.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
-    } else if (userPreferredMethod2 === 'orkut' && orkutEnabled2) {
+    // Priority: Seller's own QRIS > Global payment settings
+    if (hasSellerQris2) {
       paymentButtons2.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_orkut_${productId}` }])
     } else if (midtransEnabled2) {
       paymentButtons2.push([{ text: '💳 Bayar dengan QRIS', callback_data: `pay_qris_midtrans_${productId}` }])
@@ -879,20 +883,21 @@ async function handleCallbackQuery(
     
     const confirmText = generateOrderConfirmText(product, session.quantity)
     
-    // Get payment settings and user's preferred method
+    // Check if seller has their own QRIS settings first
+    const sellerQrisSettings3 = await getQrisSettings('user', botOwnerId)
+    const hasSellerQris3 = sellerQrisSettings3 && sellerQrisSettings3.merchantId && sellerQrisSettings3.authToken
+    
+    // Get global payment settings as fallback
     const paymentSettings3 = await getPaymentSettings()
     const orkutEnabled3 = paymentSettings3?.orkutEnabled ?? false
     const midtransEnabled3 = paymentSettings3?.midtransEnabled ?? false
-    const userPreferredMethod3 = botSettings.preferredPaymentMethod || 'orkut'
     
-    // Build payment buttons based on enabled methods and user preference
+    // Build payment buttons based on seller's QRIS availability
     const paymentButtons3: { text: string; callback_data: string }[][] = []
     paymentButtons3.push([{ text: 'Bayar dengan Saldo', callback_data: `pay_saldo_${productId}` }])
     
-    // Show QRIS button based on user's preferred method
-    if (userPreferredMethod3 === 'midtrans' && midtransEnabled3) {
-      paymentButtons3.push([{ text: '✅️ Bayar dengan QRIS [ MIDTRANS ]', callback_data: `pay_qris_midtrans_${productId}` }])
-    } else if (userPreferredMethod3 === 'orkut' && orkutEnabled3) {
+    // Priority: Seller's own QRIS > Global payment settings
+    if (hasSellerQris3) {
       paymentButtons3.push([{ text: '✅️ Bayar dengan QRIS [ ORKUT ]', callback_data: `pay_qris_orkut_${productId}` }])
     } else if (midtransEnabled3) {
       paymentButtons3.push([{ text: '✅️ Bayar dengan QRIS [ MIDTRANS ]', callback_data: `pay_qris_midtrans_${productId}` }])
