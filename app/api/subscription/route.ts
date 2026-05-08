@@ -14,7 +14,7 @@ import {
 } from '@/lib/github-db'
 import { createOrkutQrisPayment, checkOrkutPaymentStatus } from '@/lib/orkut'
 
-const BOT_SUBSCRIPTION_PRICE = 25000 // Rp 25.000 for 3 months
+const BOT_SUBSCRIPTION_PRICE = 10 // Rp 25.000 for 3 months
 
 export async function GET() {
   try {

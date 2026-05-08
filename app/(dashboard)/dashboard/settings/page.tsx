@@ -1,12 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bot, Key, Power, Save, Eye, EyeOff, AlertCircle, CheckCircle, Webhook, Trash2, RefreshCw, CreditCard, User, Image } from 'lucide-react'
+import { Bot, Key, Power, Save, Eye, EyeOff, AlertCircle, CheckCircle, Webhook, Trash2, RefreshCw, CreditCard, User, Image, QrCode, Wallet, Info } from 'lucide-react'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoInput } from '@/components/ui/neo-input'
 import { NeoBadge } from '@/components/ui/neo-badge'
+import { NeoTextarea } from '@/components/ui/neo-textarea'
 import { saveBotSettingsAction, toggleBotStatusAction } from '@/actions/settings.actions'
-import type { BotSettings, PaymentSettings } from '@/types'
+import type { BotSettings, PaymentSettings, QrisSettings } from '@/types'
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState<BotSettings | null>(null)
@@ -19,11 +20,25 @@ export default function SettingsPage() {
   const [webhookInfo, setWebhookInfo] = useState<{ url: string; pending_update_count: number } | null>(null)
   const [settingWebhook, setSettingWebhook] = useState(false)
   const [savingPayment, setSavingPayment] = useState(false)
+  
+  // User QRIS states
+  const [userQris, setUserQris] = useState<QrisSettings | null>(null)
+  const [savingQris, setSavingQris] = useState(false)
+  const [showQrisToken, setShowQrisToken] = useState(false)
+  const [showQrisApiKey, setShowQrisApiKey] = useState(false)
+  const [qrisForm, setQrisForm] = useState({
+    username: '',
+    apiKey: 'new2025',
+    token: '',
+    merchantId: '',
+    codeQr: '',
+  })
 
   useEffect(() => {
     fetchSettings()
     fetchWebhookInfo()
     fetchPaymentSettings()
+    fetchUserQris()
   }, [])
 
   async function fetchSettings() {
@@ -62,6 +77,90 @@ export default function SettingsPage() {
       }
     } catch (error) {
       console.error('Error fetching payment settings:', error)
+    }
+  }
+
+  async function fetchUserQris() {
+    try {
+      // Fetch user's own QRIS settings
+      const res = await fetch('/api/settings/qris?type=user&userId=me')
+      if (res.ok) {
+        const data = await res.json()
+        if (data.qrisSettings) {
+          setUserQris(data.qrisSettings)
+          setQrisForm({
+            username: data.qrisSettings.username || '',
+            apiKey: 'new2025', // Hidden, don't populate
+            token: '', // Hidden, don't populate
+            merchantId: data.qrisSettings.merchantId || '',
+            codeQr: data.qrisSettings.codeQr || '',
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching user QRIS:', error)
+    }
+  }
+
+  async function handleSaveQris() {
+    setSavingQris(true)
+    setMessage(null)
+
+    try {
+      const res = await fetch('/api/settings/qris', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'user',
+          userId: 'me', // API will resolve to current user
+          username: qrisForm.username,
+          apiKey: "new2025" || undefined, // Don't send if empty (keep existing)
+          token: qrisForm.token || undefined, // Don't send if empty (keep existing)
+          merchantId: qrisForm.merchantId,
+          codeQr: qrisForm.codeQr,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'Pengaturan QRIS berhasil disimpan!' })
+        fetchUserQris()
+        // Clear sensitive fields after save
+        setQrisForm(prev => ({ ...prev, apiKey: 'new2025', token: '' }))
+      } else {
+        setMessage({ type: 'error', text: data.error || 'Gagal menyimpan pengaturan QRIS' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Gagal menyimpan pengaturan QRIS' })
+    } finally {
+      setSavingQris(false)
+    }
+  }
+
+  async function handleDeleteQris() {
+    if (!confirm('Hapus pengaturan QRIS Anda? Pembayaran akan menggunakan QRIS admin.')) return
+    
+    setSavingQris(true)
+    setMessage(null)
+
+    try {
+      const res = await fetch('/api/settings/qris?type=user&userId=me', {
+        method: 'DELETE',
+      })
+
+      if (res.ok) {
+        setMessage({ type: 'success', text: 'Pengaturan QRIS berhasil dihapus!' })
+        setUserQris(null)
+        setQrisForm({ username: '', apiKey: 'new2025', token: '', merchantId: '', codeQr: '' })
+      } else {
+        const data = await res.json()
+        setMessage({ type: 'error', text: data.error || 'Gagal menghapus pengaturan QRIS' })
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: 'Gagal menghapus pengaturan QRIS' })
+    } finally {
+      setSavingQris(false)
     }
   }
 
@@ -419,6 +518,130 @@ export default function SettingsPage() {
               Simpan pengaturan bot terlebih dahulu sebelum memasang webhook.
             </p>
           )}
+        </div>
+      </div>
+
+      {/* User QRIS Settings Card */}
+      <div className={`p-5 rounded-xl border ${
+        userQris?.isActive 
+          ? 'bg-gradient-to-br from-orange-500/20 to-orange-500/5 border-orange-500/30' 
+          : 'bg-card border-border'
+      }`}>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                userQris?.isActive ? 'bg-orange-500/20 text-orange-500' : 'bg-muted text-muted-foreground'
+              }`}>
+                <Wallet className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="font-semibold">QRIS Pribadi (Opsional)</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <NeoBadge variant={userQris?.isActive ? 'success' : 'secondary'}>
+                    {userQris?.isActive ? 'Aktif' : 'Tidak Aktif'}
+                  </NeoBadge>
+                  {userQris?.merchantId && (
+                    <span className="text-xs text-muted-foreground">ID: {userQris.merchantId}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            {userQris?.isActive && (
+              <NeoButton
+                variant="destructive"
+                size="sm"
+                onClick={handleDeleteQris}
+                disabled={savingQris}
+              >
+                <Trash2 className="w-4 h-4" />
+                Hapus
+              </NeoButton>
+            )}
+          </div>
+
+          <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 flex items-start gap-2">
+            <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+            <div className="text-xs text-blue-300">
+              <p className="font-medium mb-1">Apa itu QRIS Pribadi?</p>
+              <p className="text-blue-300/80">
+                Jika Anda memiliki akun Orkut QRIS sendiri, Anda bisa menggunakannya untuk menerima pembayaran langsung ke rekening Anda. Jika tidak diatur, pembayaran akan menggunakan QRIS admin.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-muted-foreground">
+                Username Orkut
+              </label>
+              <NeoInput
+                type="text"
+                placeholder="username_orkut"
+                value={qrisForm.username}
+                onChange={(e) => setQrisForm(prev => ({ ...prev, username: e.target.value }))}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-muted-foreground">
+                Auth Token
+              </label>
+              <div className="relative">
+                <NeoInput
+                  type={showQrisToken ? 'text' : 'password'}
+                  placeholder={userQris ? '••••••• (tersimpan)' : 'format: merchantId:token'}
+                  value={qrisForm.token}
+                  onChange={(e) => setQrisForm(prev => ({ ...prev, token: e.target.value }))}
+                  className="pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowQrisToken(!showQrisToken)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showQrisToken ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-muted-foreground">
+                Merchant ID
+              </label>
+              <NeoInput
+                type="text"
+                placeholder="1234567"
+                value={qrisForm.merchantId}
+                onChange={(e) => setQrisForm(prev => ({ ...prev, merchantId: e.target.value }))}
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-muted-foreground">
+                Code QR (QRIS String)
+              </label>
+              <NeoTextarea
+                placeholder="00020101021126670016COM.NOBUBANK.WWW..."
+                value={qrisForm.codeQr}
+                onChange={(e) => setQrisForm(prev => ({ ...prev, codeQr: e.target.value }))}
+                rows={3}
+                className="font-mono text-xs"
+              />
+              <p className="text-xs text-muted-foreground">
+                String QRIS dari akun Anda. Bisa didapat dari dashboard Orkut.
+              </p>
+            </div>
+          </div>
+
+          <NeoButton
+            onClick={handleSaveQris}
+            disabled={savingQris || !qrisForm.merchantId || !qrisForm.codeQr}
+            className="w-full sm:w-auto"
+          >
+            <Save className="w-4 h-4" />
+            {savingQris ? 'Menyimpan...' : userQris ? 'Update QRIS' : 'Simpan QRIS'}
+          </NeoButton>
         </div>
       </div>
 

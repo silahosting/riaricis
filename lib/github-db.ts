@@ -516,6 +516,28 @@ export async function createOrUpdateQrisSettings(
   }
 }
 
+// Delete QRIS settings
+export async function deleteQrisSettings(
+  type: 'admin' | 'user',
+  userId?: string
+): Promise<boolean> {
+  const { content, sha } = await getFileContent()
+  let index = -1
+
+  if (type === 'admin') {
+    index = content.qrisSettings.findIndex((q) => q.type === 'admin')
+  } else {
+    index = content.qrisSettings.findIndex((q) => q.type === 'user' && q.userId === userId)
+  }
+
+  if (index === -1) {
+    return false
+  }
+
+  content.qrisSettings.splice(index, 1)
+  return await updateFile(content, sha)
+}
+
 // Payment operations
 export async function getPaymentByOrderId(orderId: string): Promise<Payment | null> {
   const { content } = await getFileContent()

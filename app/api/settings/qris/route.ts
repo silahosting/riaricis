@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createOrUpdateQrisSettings, getQrisSettings } from '@/lib/github-db'
+import { createOrUpdateQrisSettings, getQrisSettings, deleteQrisSettings } from '@/lib/github-db'
+import { getCurrentUser } from '@/lib/auth'
 
 // GET - Retrieve QRIS settings
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') as 'admin' | 'user' || 'admin'
-    const userId = searchParams.get('userId')
+    let userId = searchParams.get('userId')
+
+    // Handle 'me' as current user
+    if (userId === 'me') {
+      const user = await getCurrentUser()
+      if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+      userId = user.id
+    }
 
     const qrisSettings = await getQrisSettings(type, userId || undefined)
 
@@ -30,7 +40,16 @@ export async function GET(request: NextRequest) {
 // POST/PUT - Create or update QRIS settings
 export async function POST(request: NextRequest) {
   try {
-    const { type, username, apiKey, token, merchantId, codeQr, userId } = await request.json()
+    let { type, username, apiKey, token, merchantId, codeQr, userId } = await request.json()
+
+    // Handle 'me' as current user
+    if (userId === 'me') {
+      const user = await getCurrentUser()
+      if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+      userId = user.id
+    }
 
     // Validate type
     if (!type || (type !== 'admin' && type !== 'user')) {
@@ -40,7 +59,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate for user QRIS - needs token, merchantId, codeQr only
+    // Validate for user QRIS - needs merchantId and codeQr at minimum
     if (type === 'user') {
       if (!userId) {
         return NextResponse.json(
@@ -48,11 +67,19 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         )
       }
-      if (!token || !merchantId || !codeQr) {
+      if (!merchantId || !codeQr) {
         return NextResponse.json(
-          { error: 'Missing required fields for user QRIS: token, merchantId, codeQr' },
+          { error: 'Missing required fields for user QRIS: merchantId, codeQr' },
           { status: 400 }
         )
+      }
+      
+      // For update, check if existing settings and use those values if not provided
+      const existing = await getQrisSettings('user', userId)
+      if (existing) {
+        username = username || existing.username
+        apiKey = apiKey || existing.apiKey
+        token = token || existing.token
       }
     }
 
@@ -69,9 +96,9 @@ export async function POST(request: NextRequest) {
     const qrisSettings = await createOrUpdateQrisSettings(
       type,
       {
-        username: username || '', // Use empty string for user QRIS
-        apiKey: apiKey || '', // Use empty string for user QRIS (will use hardcoded value)
-        token,
+        username: username || '',
+        apiKey: apiKey || '',
+        token: token || '',
         merchantId,
         codeQr,
         isActive: true,
@@ -105,4 +132,46 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   return POST(request)
+}
+
+// DELETE - Remove user QRIS settings
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const type = searchParams.get('type') as 'admin' | 'user' || 'user'
+    let userId = searchParams.get('userId')
+
+    // Handle 'me' as current user
+    if (userId === 'me') {
+      const user = await getCurrentUser()
+      if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+      userId = user.id
+    }
+
+    if (type === 'user' && !userId) {
+      return NextResponse.json(
+        { error: 'userId required for user type' },
+        { status: 400 }
+      )
+    }
+
+    const success = await deleteQrisSettings(type, userId || undefined)
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'QRIS settings not found or failed to delete' },
+        { status: 404 }
+      )
+    }
+
+    return NextResponse.json({ success: true, message: 'QRIS settings deleted' })
+  } catch (error) {
+    console.error('[QRIS Settings DELETE Error]', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
 }
