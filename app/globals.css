@@ -23,7 +23,7 @@
   
   /* Accent - iOS Teal */
   --accent: #5ac8fa;
-  --accent-foreground: #1c1c1e;
+  --accent-foreground: #003d52;
   
   /* Muted - Frosted */
   --muted: rgba(120, 120, 128, 0.12);
@@ -39,7 +39,7 @@
   
   /* Warning - iOS Orange */
   --warning: #ff9500;
-  --warning-foreground: #1c1c1e;
+  --warning-foreground: #4a2800;
   
   /* Border & Input - Frosted */
   --border: rgba(60, 60, 67, 0.12);
@@ -88,7 +88,7 @@
   --secondary: #5e5ce6;
   --secondary-foreground: #ffffff;
   --accent: #64d2ff;
-  --accent-foreground: #1c1c1e;
+  --accent-foreground: #003d52;
   --muted: rgba(118, 118, 128, 0.24);
   --muted-foreground: #98989d;
   --destructive: #ff453a;
@@ -96,7 +96,7 @@
   --success: #30d158;
   --success-foreground: #ffffff;
   --warning: #ff9f0a;
-  --warning-foreground: #1c1c1e;
+  --warning-foreground: #4a2800;
   --border: rgba(84, 84, 88, 0.36);
   --input: rgba(118, 118, 128, 0.24);
   --ring: #0a84ff;

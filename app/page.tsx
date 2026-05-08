@@ -35,10 +35,10 @@ const features = [
 ]
 
 const steps = [
-  { number: '01', title: 'Daftar Akun', description: 'Buat akun gratis dalam hitungan detik', color: 'primary' },
-  { number: '02', title: 'Setup Bot', description: 'Masukkan token bot dari BotFather', color: 'secondary' },
-  { number: '03', title: 'Tambah Produk', description: 'Upload produk yang ingin dijual', color: 'accent' },
-  { number: '04', title: 'Mulai Jualan', description: 'Bot siap menerima pesanan otomatis', color: 'success' },
+  { number: '01', title: 'Daftar Akun', description: 'Buat akun gratis dalam hitungan detik', colorClass: 'text-primary/30' },
+  { number: '02', title: 'Setup Bot', description: 'Masukkan token bot dari BotFather', colorClass: 'text-secondary/30' },
+  { number: '03', title: 'Tambah Produk', description: 'Upload produk yang ingin dijual', colorClass: 'text-primary/30' },
+  { number: '04', title: 'Mulai Jualan', description: 'Bot siap menerima pesanan otomatis', colorClass: 'text-success/30' },
 ]
 
 export default async function LandingPage() {
@@ -230,7 +230,7 @@ export default async function LandingPage() {
             {steps.map((step, index) => (
               <div key={index} className="relative">
                 <div className="liquid-glass rounded-3xl p-6 h-full hover:scale-[1.02] hover:shadow-ios-lg transition-all duration-300">
-                  <span className={`text-5xl font-bold text-${step.color}/40`}>{step.number}</span>
+                  <span className={`text-5xl font-bold ${step.colorClass}`}>{step.number}</span>
                   <h3 className="font-semibold text-lg mt-2">{step.title}</h3>
                   <p className="text-sm text-muted-foreground mt-1">{step.description}</p>
                 </div>

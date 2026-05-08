@@ -115,7 +115,7 @@ export default async function DashboardPage() {
               </NeoButton>
             </Link>
             <Link href="/dashboard/settings">
-              <NeoButton variant="accent" className="hover:scale-105 active:scale-95 transition-transform">
+              <NeoButton variant="outline" className="hover:scale-105 active:scale-95 transition-transform">
                 <Bot className="w-5 h-5" />
                 Pengaturan Bot
               </NeoButton>
