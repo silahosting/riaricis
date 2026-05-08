@@ -484,36 +484,27 @@ function generateOrderConfirmText(product: Product, quantity: number): string {
   return teks
 }
 
-// Escape HTML special characters to prevent parsing errors
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-}
-
-// Generate start menu text (using HTML formatting)
+// Generate start menu text
 function generateStartMenuText(user: TelegramUser, botStats: { totalSold: number; totalRevenue: number; totalUsers: number }, userStats: { transactions: number; purchased: number; balance: number }): string {
-  // Escape user input to prevent HTML injection
-  const firstName = escapeHtml(user.first_name || 'User')
-  const username = user.username ? `@${escapeHtml(user.username)}` : 'Tidak ada'
+  const firstName = user.first_name || 'User'
+  const username = user.username ? `@${user.username}` : 'Tidak ada'
   
-  let teks = `<b>Halo kak ${firstName}</b> 👋🏻\n`
+  let teks = `Halo kak ${firstName} 👋🏻\n`
   teks += `${getIndonesianDate()}\n\n`
   
-  teks += `<b>User Info :</b>\n`
-  teks += `└ ID : <code>${user.id}</code>\n`
+  teks += `User Info :\n`
+  teks += `└ ID : ${user.id}\n`
   teks += `└ Username : ${username}\n`
-  teks += `└ Transaksi: <b>Rp. ${toRupiah(userStats.transactions)}</b>\n`
+  teks += `└ Transaksi: Rp. ${toRupiah(userStats.transactions)}\n`
   teks += `└ Produk dibeli : ${userStats.purchased}x\n`
-  teks += `└ Saldo Pengguna : <b>Rp. ${toRupiah(userStats.balance)}</b>\n\n`
+  teks += `└ Saldo Pengguna : Rp. ${toRupiah(userStats.balance)}\n\n`
   
-  teks += `<b>BOT Stats :</b>\n`
+  teks += `BOT Stats :\n`
   teks += `└ Terjual : ${botStats.totalSold} pcs\n`
-  teks += `└ Total Transaksi : <b>Rp. ${toRupiah(botStats.totalRevenue)}</b>\n`
+  teks += `└ Total Transaksi : Rp. ${toRupiah(botStats.totalRevenue)}\n`
   teks += `└ Total User : ${botStats.totalUsers}\n\n`
   
-  teks += `<b>Shortcuts :</b>\n`
+  teks += `Shortcuts :\n`
   teks += `/start - Mulai bot\n`
   teks += `/stock - Cek stok produk\n`
   teks += `/saldo - Cek saldo`
@@ -592,7 +583,7 @@ async function handleCallbackQuery(
     
     await sendPhoto(botToken, chatId, startMenuPhoto, {
       caption: menuText,
-      parseMode: 'HTML',
+      parseMode: 'Markdown',
       replyMarkup: generateMainMenuKeyboard(userStats.balance)
     })
     return
@@ -1899,7 +1890,6 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
     try {
       const result = await sendPhoto(botToken, chatId, startMenuPhoto, {
         caption: menuText,
-        parseMode: 'HTML',
         replyMarkup: generateMainMenuKeyboard(userStats.balance)
       })
       console.log('[v0] /start sendPhoto completed')
