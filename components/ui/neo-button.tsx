@@ -6,18 +6,18 @@ import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
 const neoButtonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold tracking-wide transition-all duration-300 ease-out disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 rounded-2xl active:scale-95',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold tracking-wide transition-all duration-200 ease-out disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-5 [&_svg]:shrink-0 rounded-xl active:scale-95',
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_4px_20px_rgba(0,122,255,0.4)] hover:shadow-[0_8px_30px_rgba(0,122,255,0.5)]',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-[0_4px_20px_rgba(88,86,214,0.4)]',
-        accent: 'bg-accent text-accent-foreground hover:bg-accent/90 shadow-[0_4px_20px_rgba(100,210,255,0.4)]',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-[0_4px_20px_rgba(255,59,48,0.4)]',
-        success: 'bg-success text-success-foreground hover:bg-success/90 shadow-[0_4px_20px_rgba(48,209,88,0.4)]',
-        warning: 'bg-warning text-warning-foreground hover:bg-warning/90 shadow-[0_4px_20px_rgba(255,159,10,0.4)]',
-        outline: 'glass-button text-foreground hover:bg-white/15',
-        ghost: 'bg-transparent border-transparent shadow-none hover:bg-white/10 rounded-2xl',
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm hover:shadow-md',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 shadow-sm',
+        accent: 'bg-accent text-accent-foreground hover:bg-accent/90 shadow-sm',
+        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm',
+        success: 'bg-success text-success-foreground hover:bg-success/90 shadow-sm',
+        warning: 'bg-warning text-warning-foreground hover:bg-warning/90 shadow-sm',
+        outline: 'border border-border bg-card text-foreground hover:bg-muted',
+        ghost: 'bg-transparent border-transparent shadow-none hover:bg-muted rounded-xl text-foreground',
       },
       size: {
         default: 'h-12 px-6 py-2 text-sm',

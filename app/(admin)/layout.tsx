@@ -68,12 +68,12 @@ export default function AdminLayout({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-violet-600 animate-pulse flex items-center justify-center">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary animate-pulse flex items-center justify-center">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <p className="text-white/60 text-sm font-medium">Verifying admin access...</p>
+          <p className="text-muted-foreground text-sm font-medium">Verifying admin access...</p>
         </div>
       </div>
     )
@@ -82,43 +82,33 @@ export default function AdminLayout({
   if (!user || !isAdmin) return null
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
-      {/* Animated gradient background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-br from-cyan-500/5 via-transparent to-violet-500/5 rounded-full blur-3xl" />
-      </div>
-
-      {/* Grid pattern overlay */}
-      <div className="fixed inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
-
+    <div className="min-h-screen bg-background">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed top-0 left-0 h-full w-72 bg-[#111111]/90 backdrop-blur-xl border-r border-white/5 z-50 transform transition-transform duration-300 ease-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
+      <aside className={`fixed top-0 left-0 h-full w-72 bg-white border-r border-border shadow-lg z-50 transform transition-transform duration-300 ease-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
         <div className="flex flex-col h-full">
           {/* Logo */}
-          <div className="p-6 border-b border-white/5">
+          <div className="p-6 border-b border-border">
             <div className="flex items-center justify-between">
               <Link href="/admin" className="flex items-center gap-3 group">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:shadow-cyan-500/40 transition-shadow">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md">
                   <Shield className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-white font-bold text-lg tracking-tight">Admin Panel</h1>
-                  <p className="text-white/40 text-xs">Payment Management</p>
+                  <h1 className="text-foreground font-bold text-lg tracking-tight">Admin Panel</h1>
+                  <p className="text-muted-foreground text-xs">Payment Management</p>
                 </div>
               </Link>
               <button 
                 onClick={() => setSidebarOpen(false)}
-                className="lg:hidden p-2 text-white/60 hover:text-white transition-colors"
+                className="lg:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -136,32 +126,32 @@ export default function AdminLayout({
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
                     isActive
-                      ? 'bg-gradient-to-r from-cyan-500/20 to-violet-500/20 text-white border border-white/10'
-                      : 'text-white/60 hover:text-white hover:bg-white/5'
+                      ? 'bg-primary text-white'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }`}
                 >
-                  <item.icon className={`w-5 h-5 ${isActive ? 'text-cyan-400' : 'text-white/40 group-hover:text-white/60'}`} />
+                  <item.icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-muted-foreground group-hover:text-foreground'}`} />
                   <span>{item.label}</span>
-                  {isActive && <ChevronRight className="w-4 h-4 ml-auto text-cyan-400" />}
+                  {isActive && <ChevronRight className="w-4 h-4 ml-auto text-white" />}
                 </Link>
               )
             })}
           </nav>
 
           {/* User section */}
-          <div className="p-4 border-t border-white/5">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 mb-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
+          <div className="p-4 border-t border-border">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-muted mb-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold text-sm">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white text-sm font-medium truncate">{user.name}</p>
-                <p className="text-white/40 text-xs truncate">{user.email}</p>
+                <p className="text-foreground text-sm font-medium truncate">{user.name}</p>
+                <p className="text-muted-foreground text-xs truncate">{user.email}</p>
               </div>
             </div>
             <NeoButton
               variant="ghost"
-              className="w-full justify-start gap-3 text-white/60 hover:text-red-400 hover:bg-red-500/10"
+              className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               onClick={handleLogout}
             >
               <LogOut className="w-5 h-5" />
@@ -174,18 +164,18 @@ export default function AdminLayout({
       {/* Main content */}
       <div className="lg:pl-72 relative">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 bg-[#0a0a0a]/80 backdrop-blur-xl border-b border-white/5">
+        <header className="sticky top-0 z-30 bg-white border-b border-border shadow-sm">
           <div className="flex items-center justify-between px-4 lg:px-6 h-16">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 text-white/60 hover:text-white transition-colors"
+              className="lg:hidden p-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               <Menu className="w-6 h-6" />
             </button>
             
             <div className="flex items-center gap-3 ml-auto">
               <Link href="/dashboard">
-                <NeoButton variant="outline" size="sm" className="text-white/60 border-white/10 hover:border-white/20">
+                <NeoButton variant="outline" size="sm">
                   Back to Dashboard
                 </NeoButton>
               </Link>

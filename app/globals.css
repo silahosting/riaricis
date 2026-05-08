@@ -23,7 +23,7 @@
   
   /* Accent - Cyan */
   --accent: #06b6d4;
-  --accent-foreground: #ffffff;
+  --accent-foreground: #0f172a;
   
   /* Muted */
   --muted: #f1f5f9;
@@ -39,7 +39,7 @@
   
   /* Warning - Amber */
   --warning: #f59e0b;
-  --warning-foreground: #ffffff;
+  --warning-foreground: #0f172a;
   
   /* Border & Input */
   --border: #e2e8f0;
@@ -90,8 +90,8 @@
   --muted-foreground: #94a3b8;
   --destructive: #f87171;
   --destructive-foreground: #ffffff;
-  --success: #4ade80;
-  --success-foreground: #0f172a;
+  --success: #22c55e;
+  --success-foreground: #ffffff;
   --warning: #fbbf24;
   --warning-foreground: #0f172a;
   --border: #334155;

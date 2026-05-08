@@ -43,18 +43,18 @@ export function ProductCategoryCard({ category, productCount, stockCount, onUpda
   }
 
   return (
-    <div className={`glass-card p-4 rounded-3xl transition-all duration-300 ${
+    <div className={`bg-white border border-border p-4 rounded-2xl shadow-sm transition-all duration-300 ${
       category.isActive 
-        ? 'hover:scale-[1.01]' 
+        ? 'hover:shadow-md' 
         : 'opacity-60'
     }`}>
       <div className="flex items-start gap-4">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
+        <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${
           category.isActive 
-            ? 'bg-gradient-to-br from-primary/20 to-secondary/20 shadow-lg shadow-primary/20' 
-            : 'bg-white/5'
+            ? 'bg-gradient-to-br from-primary/10 to-secondary/10' 
+            : 'bg-muted'
         }`}>
-          <FolderOpen className={`w-6 h-6 ${category.isActive ? 'text-primary' : 'text-white/40'}`} />
+          <FolderOpen className={`w-6 h-6 ${category.isActive ? 'text-primary' : 'text-muted-foreground'}`} />
         </div>
         
         <div className="flex-1 min-w-0">
@@ -76,22 +76,22 @@ export function ProductCategoryCard({ category, productCount, stockCount, onUpda
           </div>
           
           {category.description && (
-            <p className="text-sm text-white/50 mt-2 line-clamp-2">
+            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
               {category.description}
             </p>
           )}
           
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-1.5">
-                <Package className="w-4 h-4 text-white/40" />
-                <span className="text-sm font-medium text-white/70">
+                <Package className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">
                   {productCount} varian
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className={`text-sm font-medium ${
-                  stockCount > 0 ? 'text-success' : 'text-white/40'
+                  stockCount > 0 ? 'text-success' : 'text-muted-foreground'
                 }`}>
                   {stockCount} stok
                 </span>

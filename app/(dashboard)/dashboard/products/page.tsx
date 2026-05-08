@@ -23,26 +23,26 @@ export default async function ProductsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Produk</h1>
-          <p className="text-white/60 text-sm">Kelola kategori dan produk yang dijual melalui bot</p>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">Produk</h1>
+          <p className="text-muted-foreground text-sm">Kelola kategori dan produk yang dijual melalui bot</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-border rounded-xl text-sm shadow-sm">
           <FolderOpen className="w-4 h-4 text-primary" />
-          <span className="text-white/60">Produk:</span>
-          <span className="font-semibold">{categories.length}</span>
+          <span className="text-muted-foreground">Produk:</span>
+          <span className="font-semibold text-foreground">{categories.length}</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-border rounded-xl text-sm shadow-sm">
           <Layers className="w-4 h-4 text-secondary" />
-          <span className="text-white/60">Varian:</span>
-          <span className="font-semibold">{products.length}</span>
+          <span className="text-muted-foreground">Varian:</span>
+          <span className="font-semibold text-foreground">{products.length}</span>
         </div>
-        <div className="flex items-center gap-2 px-3 py-1.5 glass rounded-xl text-sm">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white border border-border rounded-xl text-sm shadow-sm">
           <Package className="w-4 h-4 text-success" />
-          <span className="text-white/60">Total Stok:</span>
+          <span className="text-muted-foreground">Total Stok:</span>
           <span className="font-semibold text-success">{totalStock} item</span>
         </div>
       </div>
@@ -72,12 +72,12 @@ export default async function ProductsPage() {
             </div>
 
             {categories.length === 0 ? (
-              <div className="glass-card p-8 rounded-3xl flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-3xl flex items-center justify-center mb-4 shadow-lg shadow-primary/20">
+              <div className="bg-white border border-border p-8 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl flex items-center justify-center mb-4">
                   <FolderOpen className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Belum Ada Produk</h3>
-                <p className="text-white/60 text-sm mb-4 max-w-sm">
+                <h3 className="font-semibold text-lg mb-2 text-foreground">Belum Ada Produk</h3>
+                <p className="text-muted-foreground text-sm mb-4 max-w-sm">
                   Buat produk terlebih dahulu (contoh: AI Pro, Canva Pro, Netflix Premium)
                 </p>
                 <Link href="/dashboard/products/categories/new">

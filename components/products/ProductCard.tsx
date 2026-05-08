@@ -45,18 +45,18 @@ export function ProductCard({ product, categoryName, onUpdate }: ProductCardProp
   const stockCount = product.items?.length || product.stock || 0
 
   return (
-    <div className={`glass-card p-4 rounded-3xl transition-all duration-300 ${
+    <div className={`bg-white border border-border p-4 rounded-2xl shadow-sm transition-all duration-300 ${
       product.isActive 
-        ? 'hover:scale-[1.01]' 
+        ? 'hover:shadow-md' 
         : 'opacity-60'
     }`}>
       <div className="flex items-start gap-4">
-        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${
+        <div className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${
           product.isActive 
-            ? 'bg-gradient-to-br from-secondary/20 to-primary/20 shadow-lg shadow-secondary/20' 
-            : 'bg-white/5'
+            ? 'bg-gradient-to-br from-secondary/10 to-primary/10' 
+            : 'bg-muted'
         }`}>
-          <Package className={`w-6 h-6 ${product.isActive ? 'text-secondary' : 'text-white/40'}`} />
+          <Package className={`w-6 h-6 ${product.isActive ? 'text-secondary' : 'text-muted-foreground'}`} />
         </div>
         
         <div className="flex-1 min-w-0">
@@ -85,15 +85,15 @@ export function ProductCard({ product, categoryName, onUpdate }: ProductCardProp
           </div>
           
           {product.description && (
-            <p className="text-sm text-white/50 mt-2 line-clamp-2">
+            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
               {product.description}
             </p>
           )}
           
-          <div className="flex items-center justify-between mt-3 pt-3 border-t border-white/10">
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
-                <Database className="w-4 h-4 text-white/40" />
+                <Database className="w-4 h-4 text-muted-foreground" />
                 <span className={`text-sm font-medium ${
                   stockCount > 0 ? 'text-success' : 'text-destructive'
                 }`}>

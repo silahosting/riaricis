@@ -93,7 +93,7 @@ export default async function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 glass rounded-full px-4 py-2 mb-6">
                 <Sparkles className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-white/90">
+                <span className="text-sm font-medium text-foreground">
                   Platform Bot Auto Order #1
                 </span>
               </div>
@@ -132,16 +132,16 @@ export default async function LandingPage() {
                 )}
               </div>
               
-              <div className="flex items-center gap-6 mt-8 text-sm text-white/70">
+              <div className="flex items-center gap-6 mt-8 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 bg-success rounded-full flex items-center justify-center shadow-lg shadow-success/40">
-                    <Check className="w-3 h-3 text-black" />
+                    <Check className="w-3 h-3 text-success-foreground" />
                   </div>
                   <span>Gratis Selamanya</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 bg-success rounded-full flex items-center justify-center shadow-lg shadow-success/40">
-                    <Check className="w-3 h-3 text-black" />
+                    <Check className="w-3 h-3 text-success-foreground" />
                   </div>
                   <span>Tanpa Kartu Kredit</span>
                 </div>
@@ -274,7 +274,7 @@ export default async function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="py-8 border-t border-white/10 relative">
+      <footer className="py-8 border-t border-border relative">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">

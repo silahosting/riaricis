@@ -9,7 +9,7 @@ const NeoTextarea = React.forwardRef<HTMLTextAreaElement, NeoTextareaProps>(
     return (
       <textarea
         className={cn(
-          'flex min-h-[120px] w-full glass-input px-4 py-3 text-sm rounded-2xl transition-all duration-300 placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50 resize-none',
+          'flex min-h-[120px] w-full bg-muted border border-border px-4 py-3 text-sm text-foreground rounded-xl transition-all duration-200 placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 resize-none',
           className
         )}
         ref={ref}

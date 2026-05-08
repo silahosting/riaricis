@@ -34,7 +34,7 @@ const NeoCardTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h3
     ref={ref}
-    className={cn('text-lg font-semibold tracking-tight', className)}
+    className={cn('text-lg font-semibold tracking-tight text-foreground', className)}
     {...props}
   />
 ))
