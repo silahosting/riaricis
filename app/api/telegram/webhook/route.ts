@@ -745,7 +745,8 @@ async function handleCallbackQuery(
     
     // Check if seller has their own QRIS settings first
     const sellerQrisSettings = await getQrisSettings('user', botOwnerId)
-    const hasSellerQris = sellerQrisSettings && sellerQrisSettings.merchantId && sellerQrisSettings.authToken
+    // Check merchantId and token (token is the auth token field in QrisSettings interface)
+    const hasSellerQris = sellerQrisSettings && sellerQrisSettings.isActive && sellerQrisSettings.merchantId && sellerQrisSettings.token
     
     // Get global payment settings as fallback
     const paymentSettings = await getPaymentSettings()
@@ -826,7 +827,7 @@ async function handleCallbackQuery(
     
     // Check if seller has their own QRIS settings first
     const sellerQrisSettings2 = await getQrisSettings('user', botOwnerId)
-    const hasSellerQris2 = sellerQrisSettings2 && sellerQrisSettings2.merchantId && sellerQrisSettings2.authToken
+    const hasSellerQris2 = sellerQrisSettings2 && sellerQrisSettings2.isActive && sellerQrisSettings2.merchantId && sellerQrisSettings2.token
     
     // Get global payment settings as fallback
     const paymentSettings2 = await getPaymentSettings()
@@ -885,7 +886,7 @@ async function handleCallbackQuery(
     
     // Check if seller has their own QRIS settings first
     const sellerQrisSettings3 = await getQrisSettings('user', botOwnerId)
-    const hasSellerQris3 = sellerQrisSettings3 && sellerQrisSettings3.merchantId && sellerQrisSettings3.authToken
+    const hasSellerQris3 = sellerQrisSettings3 && sellerQrisSettings3.isActive && sellerQrisSettings3.merchantId && sellerQrisSettings3.token
     
     // Get global payment settings as fallback
     const paymentSettings3 = await getPaymentSettings()
