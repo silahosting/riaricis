@@ -518,6 +518,22 @@ export default function SettingsPage() {
               Simpan pengaturan bot terlebih dahulu sebelum memasang webhook.
             </p>
           )}
+          
+          {/* Troubleshooting Info */}
+          <div className="bg-muted/30 p-3 rounded-lg border border-border/50">
+            <div className="flex items-start gap-2">
+              <Info className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p className="font-medium text-foreground">Bot tidak merespon /start?</p>
+                <ol className="list-decimal list-inside space-y-0.5">
+                  <li>Pastikan Bot Token sudah benar</li>
+                  <li>Pastikan Status Bot dalam keadaan <strong>Aktif</strong></li>
+                  <li>Klik tombol <strong>Pasang Webhook</strong> di atas</li>
+                  <li>Tunggu beberapa detik lalu coba /start lagi</li>
+                </ol>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

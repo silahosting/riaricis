@@ -1934,24 +1934,39 @@ export async function POST(request: NextRequest) {
     const url = new URL(request.url)
     const botToken = request.headers.get('x-telegram-bot-token') || url.searchParams.get('token')
 
+    console.log('[v0] Webhook received, token:', botToken ? `${botToken.slice(0, 10)}...` : 'NONE')
+
     if (!botToken) {
-      console.error('No bot token provided')
+      console.error('[v0] No bot token provided')
       return NextResponse.json({ error: 'No bot token' }, { status: 400 })
     }
 
     // Get bot settings to verify token and get owner ID
     const settings = await getBotSettingsByToken(botToken)
     
+    console.log('[v0] Bot settings found:', settings ? {
+      userId: settings.userId,
+      botName: settings.botName,
+      isActive: settings.isActive,
+      ownerId: settings.ownerId
+    } : 'NOT FOUND')
+    
     if (!settings) {
-      console.error('Invalid bot token or bot not found')
+      console.error('[v0] Invalid bot token or bot not found')
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
     if (!settings.isActive) {
+      console.log('[v0] Bot is not active, ignoring message')
       return NextResponse.json({ ok: true })
     }
 
     const update: TelegramUpdate = await request.json()
+    console.log('[v0] Update type:', update.message ? 'message' : update.callback_query ? 'callback_query' : 'unknown')
+    
+    if (update.message) {
+      console.log('[v0] Message from:', update.message.from.first_name, 'Text:', update.message.text)
+    }
 
     // Handle callback queries (button clicks)
     if (update.callback_query) {
@@ -1968,7 +1983,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ ok: true })
   } catch (error) {
-    console.error('Webhook error:', error)
+    console.error('[v0] Webhook error:', error)
     return NextResponse.json({ ok: true })
   }
 }

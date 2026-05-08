@@ -48,7 +48,8 @@ import {
   Trash2,
   Clock,
   AlertTriangle,
-  CheckCircle2
+  CheckCircle2,
+  Crown
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -60,6 +61,8 @@ interface User {
   createdAt: string
   lastActivity?: string | null
   lastActivityType?: string | null
+  hasActiveSubscription?: boolean
+  subscriptionEndDate?: string | null
 }
 
 interface UserBalanceInfo {
@@ -294,7 +297,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
           <NeoCardContent className="p-6">
             <div className="flex items-center gap-4">
@@ -304,6 +307,20 @@ export default function AdminUsersPage() {
               <div>
                 <p className="text-white/60 text-sm">Total Users</p>
                 <p className="text-2xl font-bold text-white">{users.length}</p>
+              </div>
+            </div>
+          </NeoCardContent>
+        </NeoCard>
+
+        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-amber-500/30">
+          <NeoCardContent className="p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <Crown className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <p className="text-amber-400 text-sm">Sewa VIP</p>
+                <p className="text-2xl font-bold text-white">{users.filter(u => u.hasActiveSubscription).length}</p>
               </div>
             </div>
           </NeoCardContent>
@@ -412,18 +429,39 @@ export default function AdminUsersPage() {
                   {users.map((user) => (
                     <div
                       key={user.id}
-                      className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors"
+                      className={`flex items-center justify-between p-4 rounded-xl bg-white/5 border hover:bg-white/10 transition-colors ${user.hasActiveSubscription ? 'border-amber-500/30' : 'border-white/5'}`}
                     >
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-violet-600 flex items-center justify-center text-white font-bold text-sm">
-                          {user.name.charAt(0).toUpperCase()}
+                        <div className="relative">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm ${user.hasActiveSubscription ? 'bg-gradient-to-br from-amber-500 to-yellow-500' : 'bg-gradient-to-br from-cyan-500 to-violet-600'}`}>
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                          {user.hasActiveSubscription && (
+                            <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                              <Crown className="w-3 h-3 text-white" />
+                            </div>
+                          )}
                         </div>
                         <div>
-                          <p className="text-white font-medium">{user.name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-white font-medium">{user.name}</p>
+                            {user.hasActiveSubscription && (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold shadow-lg shadow-amber-500/30">
+                                <Crown className="w-3 h-3" />
+                                Sewa VIP
+                              </span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2 text-white/40 text-sm">
                             <Mail className="w-3 h-3" />
                             {user.email}
                           </div>
+                          {user.hasActiveSubscription && user.subscriptionEndDate && (
+                            <div className="flex items-center gap-1 text-amber-400 text-xs mt-0.5">
+                              <Crown className="w-3 h-3" />
+                              VIP sampai {new Date(user.subscriptionEndDate).toLocaleDateString('id-ID')}
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-3">

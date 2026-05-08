@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { User, Mail, Calendar, Save, Lock, AlertCircle, CheckCircle, Link, Activity, LogIn, LogOut, Key, UserCog, Bot, Monitor, Smartphone, Globe } from 'lucide-react'
+import { User, Mail, Calendar, Save, Lock, AlertCircle, CheckCircle, Link, Activity, LogIn, LogOut, Key, UserCog, Bot, Monitor, Smartphone, Globe, Crown } from 'lucide-react'
 import { NeoCard, NeoCardHeader, NeoCardTitle, NeoCardDescription, NeoCardContent, NeoCardFooter } from '@/components/ui/neo-card'
 import { NeoButton } from '@/components/ui/neo-button'
 import { NeoInput } from '@/components/ui/neo-input'
@@ -116,24 +116,38 @@ export default function ProfilePage() {
       {/* Profile Card */}
       <NeoCard className="bg-secondary text-secondary-foreground">
         <NeoCardContent className="flex items-center gap-6">
-          {user.profilePhotoUrl ? (
-            <img 
-              src={user.profilePhotoUrl} 
-              alt={user.name}
-              className="w-20 h-20 neo-border-2 object-cover"
-              onError={(e) => {
-                // Fallback to initial if image fails
-                const target = e.target as HTMLImageElement
-                target.style.display = 'none'
-                target.nextElementSibling?.classList.remove('hidden')
-              }}
-            />
-          ) : null}
-          <div className={`w-20 h-20 bg-white neo-border-2 flex items-center justify-center font-black text-3xl text-secondary ${user.profilePhotoUrl ? 'hidden' : ''}`}>
-            {user.name.charAt(0).toUpperCase()}
+          <div className="relative">
+            {user.profilePhotoUrl ? (
+              <img 
+                src={user.profilePhotoUrl} 
+                alt={user.name}
+                className="w-20 h-20 neo-border-2 object-cover"
+                onError={(e) => {
+                  // Fallback to initial if image fails
+                  const target = e.target as HTMLImageElement
+                  target.style.display = 'none'
+                  target.nextElementSibling?.classList.remove('hidden')
+                }}
+              />
+            ) : null}
+            <div className={`w-20 h-20 bg-white neo-border-2 flex items-center justify-center font-black text-3xl text-secondary ${user.profilePhotoUrl ? 'hidden' : ''}`}>
+              {user.name.charAt(0).toUpperCase()}
+            </div>
+            {/* VIP ring indicator */}
+            {user.hasActiveSubscription && (
+              <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-amber-500 to-yellow-500 -z-10 animate-pulse" />
+            )}
           </div>
           <div>
-            <p className="font-black text-xl">{user.name}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="font-black text-xl">{user.name}</p>
+              {user.hasActiveSubscription && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold shadow-lg shadow-amber-500/30">
+                  <Crown className="w-3 h-3" />
+                  Sewa VIP
+                </span>
+              )}
+            </div>
             <p className="opacity-80">{user.email}</p>
             <div className="flex items-center gap-2 mt-2 text-sm opacity-70">
               <Calendar className="w-4 h-4" />
@@ -143,6 +157,18 @@ export default function ProfilePage() {
                 year: 'numeric'
               })}
             </div>
+            {user.hasActiveSubscription && user.subscriptionEndDate && (
+              <div className="flex items-center gap-2 mt-1 text-sm">
+                <Crown className="w-4 h-4 text-amber-400" />
+                <span className="text-amber-400">
+                  VIP sampai {new Date(user.subscriptionEndDate).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </span>
+              </div>
+            )}
           </div>
         </NeoCardContent>
       </NeoCard>

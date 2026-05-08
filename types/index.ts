@@ -272,4 +272,7 @@ export interface Database {
   accountActivities: AccountActivity[]
 }
 
-export type SessionUser = Omit<User, 'password'>
+export type SessionUser = Omit<User, 'password'> & {
+  hasActiveSubscription?: boolean
+  subscriptionEndDate?: string | null
+}

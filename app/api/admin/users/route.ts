@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { isCurrentUserAdmin } from '@/lib/auth'
-import { getAllUsers, getAllUsersWithActivity, deleteUser } from '@/lib/github-db'
+import { getAllUsers, getAllUsersWithActivity, deleteUser, getAllSubscriptions } from '@/lib/github-db'
 
 export async function GET(request: NextRequest) {
   try {
@@ -13,16 +13,36 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const withActivity = searchParams.get('withActivity') === 'true'
 
+    // Get all subscriptions to check VIP status
+    const subscriptions = await getAllSubscriptions()
+    const now = new Date()
+    
+    // Create a map of userId to active subscription
+    const activeSubscriptionMap = new Map<string, { endDate: string }>()
+    subscriptions.forEach(sub => {
+      if (sub.status === 'active' && sub.endDate && new Date(sub.endDate) > now) {
+        activeSubscriptionMap.set(sub.userId, { endDate: sub.endDate })
+      }
+    })
+
     if (withActivity) {
       const users = await getAllUsersWithActivity()
-      // Remove passwords from response
-      const safeUsers = users.map(({ password, ...user }) => user)
+      // Remove passwords from response and add subscription info
+      const safeUsers = users.map(({ password, ...user }) => ({
+        ...user,
+        hasActiveSubscription: activeSubscriptionMap.has(user.id),
+        subscriptionEndDate: activeSubscriptionMap.get(user.id)?.endDate || null
+      }))
       return NextResponse.json({ users: safeUsers })
     }
 
     const users = await getAllUsers()
-    // Remove passwords from response
-    const safeUsers = users.map(({ password, ...user }) => user)
+    // Remove passwords from response and add subscription info
+    const safeUsers = users.map(({ password, ...user }) => ({
+      ...user,
+      hasActiveSubscription: activeSubscriptionMap.has(user.id),
+      subscriptionEndDate: activeSubscriptionMap.get(user.id)?.endDate || null
+    }))
 
     return NextResponse.json({ users: safeUsers })
   } catch (error) {
