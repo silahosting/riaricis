@@ -138,16 +138,23 @@ async function sendPhoto(
   }
 ) {
   console.log('[v0] sendPhoto called, chatId:', chatId, 'photo:', photo?.slice(0, 50))
+  
+  const body: Record<string, unknown> = {
+    chat_id: chatId,
+    photo,
+    caption: options?.caption,
+    reply_markup: options?.replyMarkup,
+  }
+  
+  // Only add parse_mode if explicitly provided
+  if (options?.parseMode) {
+    body.parse_mode = options.parseMode
+  }
+  
   const response = await fetch(`${TELEGRAM_API}${botToken}/sendPhoto`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: chatId,
-      photo,
-      caption: options?.caption,
-      parse_mode: options?.parseMode || 'Markdown',
-      reply_markup: options?.replyMarkup,
-    }),
+    body: JSON.stringify(body),
   })
   const result = await response.json()
   console.log('[v0] sendPhoto result:', JSON.stringify(result).slice(0, 200))
@@ -479,9 +486,10 @@ function generateOrderConfirmText(product: Product, quantity: number): string {
 
 // Generate start menu text
 function generateStartMenuText(user: TelegramUser, botStats: { totalSold: number; totalRevenue: number; totalUsers: number }, userStats: { transactions: number; purchased: number; balance: number }): string {
+  const firstName = user.first_name || 'User'
   const username = user.username ? `@${user.username}` : 'Tidak ada'
   
-  let teks = `Halo kak ${user.first_name} 👋🏻\n`
+  let teks = `Halo kak ${firstName} 👋🏻\n`
   teks += `${getIndonesianDate()}\n\n`
   
   teks += `User Info :\n`
@@ -1882,7 +1890,6 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
     try {
       const result = await sendPhoto(botToken, chatId, startMenuPhoto, {
         caption: menuText,
-        parseMode: 'Markdown',
         replyMarkup: generateMainMenuKeyboard(userStats.balance)
       })
       console.log('[v0] /start sendPhoto completed')
