@@ -1,26 +1,15 @@
 import { NextResponse } from 'next/server'
-import { cookies } from 'next/headers'
-import { verifyToken } from '@/lib/auth'
-import { getAllSubscriptions, getUsers } from '@/lib/github-db'
+import { isCurrentUserAdmin } from '@/lib/auth'
+import { getAllSubscriptions } from '@/lib/github-db'
 
 export async function GET() {
   try {
-    const cookieStore = await cookies()
-    const token = cookieStore.get('token')?.value
-    
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const payload = await verifyToken(token)
-    if (!payload || payload.role !== 'admin') {
+    const isAdmin = await isCurrentUserAdmin()
+    if (!isAdmin) {
       return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
     }
 
-    const [subscriptions, users] = await Promise.all([
-      getAllSubscriptions(),
-      getUsers()
-    ])
+    const subscriptions = await getAllSubscriptions()
 
     // Sort by createdAt descending (newest first)
     const sortedSubscriptions = subscriptions.sort((a, b) => 
