@@ -13,13 +13,15 @@ import {
   X,
   Shield,
   ChevronRight,
-  Wallet
+  Wallet,
+  Terminal
 } from 'lucide-react'
 import { NeoButton } from '@/components/ui/neo-button'
 import type { SessionUser } from '@/types'
 
 const adminNavItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+  { href: '/admin/error-logs', icon: Terminal, label: 'Error Logs' },
   { href: '/admin/withdrawals', icon: Wallet, label: 'Pencairan Dana' },
   { href: '/admin/payments', icon: CreditCard, label: 'Payment Settings' },
   { href: '/admin/users', icon: Users, label: 'Users' },

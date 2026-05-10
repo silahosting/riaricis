@@ -244,6 +244,27 @@ export interface AccountActivity {
   createdAt: string
 }
 
+// Error log for tracking system errors and user feature issues
+export interface ErrorLog {
+  id: string
+  userId?: string // Optional - null for system errors
+  userName?: string
+  userEmail?: string
+  type: 'system' | 'user_feature' | 'bot' | 'payment' | 'api' | 'database' | 'webhook'
+  severity: 'info' | 'warning' | 'error' | 'critical'
+  source: string // e.g., 'telegram-webhook', 'payment-create', 'order-process'
+  message: string
+  stackTrace?: string
+  metadata?: Record<string, unknown> // Additional context data
+  isSensitive: boolean // If true, only visible to admin
+  status: 'new' | 'investigating' | 'resolved' | 'ignored'
+  resolvedAt?: string
+  resolvedBy?: string
+  resolvedNote?: string
+  createdAt: string
+  updatedAt: string
+}
+
 // OTP Email Settings for registration verification
 export interface OtpSettings {
   id: string
@@ -270,6 +291,7 @@ export interface Database {
   adminFeeIncomes: AdminFeeIncome[]
   botActivityLogs: BotActivityLog[]
   accountActivities: AccountActivity[]
+  errorLogs: ErrorLog[]
 }
 
 export type SessionUser = Omit<User, 'password'> & {

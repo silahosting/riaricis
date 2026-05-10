@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { updatePaymentByOrderId, getOrderById, updateOrder } from '@/lib/github-db'
+import { logPaymentError } from '@/lib/error-logger'
 
 export async function POST(request: NextRequest) {
   try {
@@ -73,6 +74,18 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     console.error('[v0] Orkut Webhook Error:', error)
+    
+    // Log error
+    await logPaymentError(
+      'orkut-webhook',
+      error instanceof Error ? error.message : String(error),
+      {
+        severity: 'error',
+        stackTrace: error instanceof Error ? error.stack : undefined,
+        isSensitive: true,
+      }
+    )
+    
     return NextResponse.json(
       { error: 'Failed to process webhook' },
       { status: 500 }

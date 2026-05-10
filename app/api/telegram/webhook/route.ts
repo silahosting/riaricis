@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getBotSettingsByToken, getAllProducts, getProductsByUserId, getProductCategories, getAllOrders, getOrdersByUserId, getOrderById, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder, getPaymentSettings, createBotActivityLog, createAdminFeeIncome, detectSpamActivity } from '@/lib/github-db'
+import { getBotSettingsByToken, getAllProducts, getProductsByUserId, getProductCategories, getAllOrders, getOrdersByUserId, getOrderById, getProductById, updateProduct, createOrder, getQrisSettings, createPayment, updatePaymentByOrderId, getPaymentByOrderId, updateOrder, getPaymentSettings, createBotActivityLog, createAdminFeeIncome, detectSpamActivity, getUserById } from '@/lib/github-db'
 import { createOrkutQrisPayment, checkOrkutPaymentStatus } from '@/lib/orkut'
 import { createMidtransQrisPayment, checkMidtransPaymentStatus, isMidtransPaymentPaid } from '@/lib/midtrans'
+import { logBotError, logWebhookError } from '@/lib/error-logger'
 import type { Product, ProductCategory, PaymentSettings } from '@/types'
 
 // Telegram API base URL
@@ -2015,6 +2016,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true })
   } catch (error) {
     console.error('[v0] Webhook error:', error)
+    
+    // Log error to error logs
+    const botToken = request.nextUrl.searchParams.get('token')
+    let userId: string | undefined
+    let userName: string | undefined
+    
+    if (botToken) {
+      const settings = await getBotSettingsByToken(botToken)
+      if (settings) {
+        userId = settings.userId
+        const user = await getUserById(settings.userId)
+        userName = user?.name
+      }
+    }
+    
+    await logWebhookError(
+      'telegram-webhook',
+      error instanceof Error ? error.message : String(error),
+      {
+        userId,
+        userName,
+        severity: 'error',
+        stackTrace: error instanceof Error ? error.stack : undefined,
+        metadata: {
+          botToken: botToken?.slice(0, 10) + '...',
+        },
+        isSensitive: true,
+      }
+    )
+    
     return NextResponse.json({ ok: true })
   }
 }

@@ -1,5 +1,5 @@
 import { GITHUB_CONFIG } from './constants'
-import type { Database, User, BotSettings, ProductCategory, Product, Order, QrisSettings, Payment, PaymentSettings, OtpSettings, Withdrawal, BalanceAdjustment, BotSubscription, AdminFeeIncome, BotActivityLog, AccountActivity } from '@/types'
+import type { Database, User, BotSettings, ProductCategory, Product, Order, QrisSettings, Payment, PaymentSettings, OtpSettings, Withdrawal, BalanceAdjustment, BotSubscription, AdminFeeIncome, BotActivityLog, AccountActivity, ErrorLog } from '@/types'
 
 const defaultDatabase: Database = {
   users: [],
@@ -17,6 +17,7 @@ const defaultDatabase: Database = {
   adminFeeIncomes: [],
   botActivityLogs: [],
   accountActivities: [],
+  errorLogs: [],
 }
 
 const API_BASE = "https://api-orkut-iota-seven.vercel.app" // ganti dengan URL API kamu
@@ -61,6 +62,7 @@ async function getFileContent(): Promise<{ content: Database; sha: string | null
       adminFeeIncomes: Array.isArray(data.content?.adminFeeIncomes) ? data.content.adminFeeIncomes : [],
       botActivityLogs: Array.isArray(data.content?.botActivityLogs) ? data.content.botActivityLogs : [],
       accountActivities: Array.isArray(data.content?.accountActivities) ? data.content.accountActivities : [],
+      errorLogs: Array.isArray(data.content?.errorLogs) ? data.content.errorLogs : [],
     }
     
     return { content, sha: data.sha || null }
@@ -1191,4 +1193,173 @@ export async function getAllAccountActivities(limit: number = 100): Promise<Acco
   return activities
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, limit)
+}
+
+// ============= ERROR LOG OPERATIONS =============
+
+// Create error log
+export async function createErrorLog(
+  data: Omit<ErrorLog, 'id' | 'createdAt' | 'updatedAt' | 'status'> & { status?: ErrorLog['status'] }
+): Promise<ErrorLog | null> {
+  const { content, sha } = await getFileContent()
+  const now = new Date().toISOString()
+
+  const newLog: ErrorLog = {
+    ...data,
+    id: generateId(),
+    status: data.status || 'new',
+    createdAt: now,
+    updatedAt: now,
+  }
+
+  content.errorLogs = content.errorLogs || []
+  
+  // Keep only last 500 error logs to prevent database bloat
+  if (content.errorLogs.length >= 500) {
+    // Remove oldest resolved/ignored logs first
+    const resolvedLogs = content.errorLogs
+      .filter(l => l.status === 'resolved' || l.status === 'ignored')
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+      .slice(0, 50)
+      .map(l => l.id)
+    
+    if (resolvedLogs.length > 0) {
+      content.errorLogs = content.errorLogs.filter(l => !resolvedLogs.includes(l.id))
+    } else {
+      // If no resolved logs, remove oldest logs
+      content.errorLogs = content.errorLogs
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+        .slice(0, 450)
+    }
+  }
+  
+  content.errorLogs.push(newLog)
+  const success = await updateFile(content, sha)
+  return success ? newLog : null
+}
+
+// Get error logs for admin (all logs)
+export async function getErrorLogs(
+  options: {
+    limit?: number
+    status?: ErrorLog['status']
+    type?: ErrorLog['type']
+    severity?: ErrorLog['severity']
+    userId?: string
+  } = {}
+): Promise<ErrorLog[]> {
+  const { content } = await getFileContent()
+  let logs = content.errorLogs || []
+  
+  // Filter by options
+  if (options.status) {
+    logs = logs.filter(l => l.status === options.status)
+  }
+  if (options.type) {
+    logs = logs.filter(l => l.type === options.type)
+  }
+  if (options.severity) {
+    logs = logs.filter(l => l.severity === options.severity)
+  }
+  if (options.userId) {
+    logs = logs.filter(l => l.userId === options.userId)
+  }
+  
+  // Sort by createdAt desc (newest first)
+  logs = logs.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  
+  // Apply limit
+  if (options.limit) {
+    logs = logs.slice(0, options.limit)
+  }
+  
+  return logs
+}
+
+// Get error logs for user (only non-sensitive logs for their userId)
+export async function getUserErrorLogs(
+  userId: string,
+  options: {
+    limit?: number
+    status?: ErrorLog['status']
+  } = {}
+): Promise<ErrorLog[]> {
+  const { content } = await getFileContent()
+  let logs = content.errorLogs || []
+  
+  // Filter by userId and non-sensitive only
+  logs = logs.filter(l => l.userId === userId && !l.isSensitive)
+  
+  // Filter by status if provided
+  if (options.status) {
+    logs = logs.filter(l => l.status === options.status)
+  }
+  
+  // Sort by createdAt desc (newest first)
+  logs = logs.sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  
+  // Apply limit
+  const limit = options.limit || 100
+  logs = logs.slice(0, limit)
+  
+  return logs
+}
+
+// Update error log status
+export async function updateErrorLog(
+  id: string,
+  data: Partial<Pick<ErrorLog, 'status' | 'resolvedAt' | 'resolvedBy' | 'resolvedNote'>>
+): Promise<ErrorLog | null> {
+  const { content, sha } = await getFileContent()
+  const index = content.errorLogs?.findIndex(l => l.id === id) ?? -1
+  
+  if (index === -1) return null
+  
+  content.errorLogs[index] = {
+    ...content.errorLogs[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  }
+  
+  const success = await updateFile(content, sha)
+  return success ? content.errorLogs[index] : null
+}
+
+// Get error log by ID
+export async function getErrorLogById(id: string): Promise<ErrorLog | null> {
+  const { content } = await getFileContent()
+  return content.errorLogs?.find(l => l.id === id) || null
+}
+
+// Get error stats for dashboard
+export async function getErrorStats(): Promise<{
+  total: number
+  new: number
+  investigating: number
+  resolved: number
+  critical: number
+  error: number
+  warning: number
+  byType: Record<string, number>
+}> {
+  const { content } = await getFileContent()
+  const logs = content.errorLogs || []
+  
+  const stats = {
+    total: logs.length,
+    new: logs.filter(l => l.status === 'new').length,
+    investigating: logs.filter(l => l.status === 'investigating').length,
+    resolved: logs.filter(l => l.status === 'resolved').length,
+    critical: logs.filter(l => l.severity === 'critical').length,
+    error: logs.filter(l => l.severity === 'error').length,
+    warning: logs.filter(l => l.severity === 'warning').length,
+    byType: {} as Record<string, number>,
+  }
+  
+  // Count by type
+  logs.forEach(l => {
+    stats.byType[l.type] = (stats.byType[l.type] || 0) + 1
+  })
+  
+  return stats
 }
