@@ -92,8 +92,8 @@ export default function PaymentSettingsPage() {
     <div className="space-y-6 max-w-4xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Payment Settings</h1>
-        <p className="text-white/60 mt-1">Configure your payment gateway integrations</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">Payment Settings</h1>
+        <p className="text-muted-foreground mt-1">Configure your payment gateway integrations</p>
       </div>
 
       {/* Alert Message */}
@@ -113,15 +113,15 @@ export default function PaymentSettingsPage() {
       )}
 
       {/* Default Payment Method */}
-      <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+      <NeoCard className="bg-card backdrop-blur-xl border border-border">
         <NeoCardHeader>
-          <NeoCardTitle className="text-white flex items-center gap-3">
+          <NeoCardTitle className="text-foreground flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-              <CreditCard className="w-4 h-4 text-violet-400" />
+              <CreditCard className="w-4 h-4 text-violet-600" />
             </div>
             Default Payment Method
           </NeoCardTitle>
-          <NeoCardDescription className="text-white/60">
+          <NeoCardDescription className="text-muted-foreground">
             Select the default payment method when both are enabled
           </NeoCardDescription>
         </NeoCardHeader>
@@ -133,7 +133,7 @@ export default function PaymentSettingsPage() {
               className={`flex-1 p-4 rounded-xl border-2 transition-all ${
                 settings.defaultPaymentMethod === 'orkut'
                   ? 'border-cyan-500 bg-cyan-500/10'
-                  : 'border-white/10 bg-white/5 hover:border-white/20'
+                  : 'border-border bg-muted hover:border-border/80'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -141,8 +141,8 @@ export default function PaymentSettingsPage() {
                   <span className="text-white font-bold text-sm">OK</span>
                 </div>
                 <div className="text-left">
-                  <p className="text-white font-medium">Orkut QRIS</p>
-                  <p className="text-white/40 text-xs">Order Kuota Payment</p>
+                  <p className="text-foreground font-medium">Orkut QRIS</p>
+                  <p className="text-muted-foreground text-xs">Order Kuota Payment</p>
                 </div>
               </div>
             </button>
@@ -152,7 +152,7 @@ export default function PaymentSettingsPage() {
               className={`flex-1 p-4 rounded-xl border-2 transition-all ${
                 settings.defaultPaymentMethod === 'midtrans'
                   ? 'border-violet-500 bg-violet-500/10'
-                  : 'border-white/10 bg-white/5 hover:border-white/20'
+                  : 'border-border bg-muted hover:border-border/80'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -160,8 +160,8 @@ export default function PaymentSettingsPage() {
                   <span className="text-white font-bold text-sm">MT</span>
                 </div>
                 <div className="text-left">
-                  <p className="text-white font-medium">Midtrans QRIS</p>
-                  <p className="text-white/40 text-xs">Midtrans Gateway</p>
+                  <p className="text-foreground font-medium">Midtrans QRIS</p>
+                  <p className="text-muted-foreground text-xs">Midtrans Gateway</p>
                 </div>
               </div>
             </button>
@@ -170,7 +170,7 @@ export default function PaymentSettingsPage() {
       </NeoCard>
 
       {/* Orkut QRIS Settings */}
-      <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+      <NeoCard className="bg-card backdrop-blur-xl border border-border">
         <NeoCardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -178,8 +178,8 @@ export default function PaymentSettingsPage() {
                 <QrCode className="w-5 h-5 text-white" />
               </div>
               <div>
-                <NeoCardTitle className="text-white">Orkut QRIS (Order Kuota)</NeoCardTitle>
-                <NeoCardDescription className="text-white/60">Configure your Orkut QRIS integration</NeoCardDescription>
+                <NeoCardTitle className="text-foreground">Orkut QRIS (Order Kuota)</NeoCardTitle>
+                <NeoCardDescription className="text-muted-foreground">Configure your Orkut QRIS integration</NeoCardDescription>
               </div>
             </div>
             <button
@@ -198,32 +198,32 @@ export default function PaymentSettingsPage() {
         <NeoCardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white/80">Username</label>
+              <label className="text-sm font-medium text-foreground">Username</label>
               <NeoInput
                 value={settings.orkutUsername || ''}
                 onChange={(e) => setSettings({ ...settings, orkutUsername: e.target.value })}
                 placeholder="Enter Orkut username"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white/80">Merchant ID</label>
+              <label className="text-sm font-medium text-foreground">Merchant ID</label>
               <NeoInput
                 value={settings.orkutMerchantId || ''}
                 onChange={(e) => setSettings({ ...settings, orkutMerchantId: e.target.value })}
                 placeholder="Enter merchant ID"
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
               />
             </div>
           </div>
           
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-white/80">API Key</label>
+              <label className="text-sm font-medium text-foreground">API Key</label>
               <button
                 type="button"
                 onClick={() => setShowOrkutKeys(!showOrkutKeys)}
-                className="text-white/40 hover:text-white transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showOrkutKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -233,35 +233,35 @@ export default function PaymentSettingsPage() {
               value={settings.orkutApiKey || ''}
               onChange={(e) => setSettings({ ...settings, orkutApiKey: e.target.value })}
               placeholder="Enter API key"
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-white/80">Token</label>
+            <label className="text-sm font-medium text-foreground">Token</label>
             <NeoInput
               type={showOrkutKeys ? 'text' : 'password'}
               value={settings.orkutToken || ''}
               onChange={(e) => setSettings({ ...settings, orkutToken: e.target.value })}
               placeholder="Enter token"
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-white/80">QRIS Code</label>
+            <label className="text-sm font-medium text-foreground">QRIS Code</label>
             <NeoInput
               value={settings.orkutCodeQr || ''}
               onChange={(e) => setSettings({ ...settings, orkutCodeQr: e.target.value })}
               placeholder="Enter QRIS code string"
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </NeoCardContent>
       </NeoCard>
 
       {/* Midtrans Settings */}
-      <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+      <NeoCard className="bg-card backdrop-blur-xl border border-border">
         <NeoCardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -269,8 +269,8 @@ export default function PaymentSettingsPage() {
                 <CreditCard className="w-5 h-5 text-white" />
               </div>
               <div>
-                <NeoCardTitle className="text-white">Midtrans QRIS</NeoCardTitle>
-                <NeoCardDescription className="text-white/60">Configure your Midtrans payment gateway</NeoCardDescription>
+                <NeoCardTitle className="text-foreground">Midtrans QRIS</NeoCardTitle>
+                <NeoCardDescription className="text-muted-foreground">Configure your Midtrans payment gateway</NeoCardDescription>
               </div>
             </div>
             <button
@@ -288,22 +288,22 @@ export default function PaymentSettingsPage() {
         </NeoCardHeader>
         <NeoCardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-white/80">Merchant ID</label>
+            <label className="text-sm font-medium text-foreground">Merchant ID</label>
             <NeoInput
               value={settings.midtransMerchantId || ''}
               onChange={(e) => setSettings({ ...settings, midtransMerchantId: e.target.value })}
               placeholder="Enter Midtrans merchant ID"
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-white/80">Server Key</label>
+              <label className="text-sm font-medium text-foreground">Server Key</label>
               <button
                 type="button"
                 onClick={() => setShowMidtransKeys(!showMidtransKeys)}
-                className="text-white/40 hover:text-white transition-colors"
+                className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showMidtransKeys ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -313,25 +313,25 @@ export default function PaymentSettingsPage() {
               value={settings.midtransServerKey || ''}
               onChange={(e) => setSettings({ ...settings, midtransServerKey: e.target.value })}
               placeholder="Enter server key (SB-Mid-server-xxx)"
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-white/80">Client Key</label>
+            <label className="text-sm font-medium text-foreground">Client Key</label>
             <NeoInput
               type={showMidtransKeys ? 'text' : 'password'}
               value={settings.midtransClientKey || ''}
               onChange={(e) => setSettings({ ...settings, midtransClientKey: e.target.value })}
               placeholder="Enter client key (SB-Mid-client-xxx)"
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
-          <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+          <div className="flex items-center justify-between p-4 rounded-xl bg-muted border border-border">
             <div>
-              <p className="text-white font-medium">Production Mode</p>
-              <p className="text-white/40 text-sm">Enable for live transactions</p>
+              <p className="text-foreground font-medium">Production Mode</p>
+              <p className="text-muted-foreground text-sm">Enable for live transactions</p>
             </div>
             <button
               type="button"
@@ -349,8 +349,8 @@ export default function PaymentSettingsPage() {
           {/* Fee Settings */}
           <div className="p-4 rounded-xl bg-gradient-to-r from-violet-500/10 to-cyan-500/10 border border-violet-500/20 space-y-4">
             <div className="flex items-center gap-2">
-              <Percent className="w-5 h-5 text-violet-400" />
-              <p className="text-white font-medium">Fee Settings</p>
+              <Percent className="w-5 h-5 text-violet-600" />
+              <p className="text-foreground font-medium">Fee Settings</p>
             </div>
             
             {/* Fee Type */}
@@ -360,8 +360,8 @@ export default function PaymentSettingsPage() {
                 onClick={() => setSettings({ ...settings, midtransFeeType: 'fixed' })}
                 className={`flex-1 p-3 rounded-lg border transition-all ${
                   settings.midtransFeeType === 'fixed'
-                    ? 'border-violet-500 bg-violet-500/20 text-white'
-                    : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20'
+                    ? 'border-violet-500 bg-violet-500/20 text-foreground'
+                    : 'border-border bg-muted text-muted-foreground hover:border-border/80'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -374,8 +374,8 @@ export default function PaymentSettingsPage() {
                 onClick={() => setSettings({ ...settings, midtransFeeType: 'percent' })}
                 className={`flex-1 p-3 rounded-lg border transition-all ${
                   settings.midtransFeeType === 'percent'
-                    ? 'border-violet-500 bg-violet-500/20 text-white'
-                    : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20'
+                    ? 'border-violet-500 bg-violet-500/20 text-foreground'
+                    : 'border-border bg-muted text-muted-foreground hover:border-border/80'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -387,7 +387,7 @@ export default function PaymentSettingsPage() {
 
             {/* Fee Amount */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-white/80">
+              <label className="text-sm font-medium text-foreground">
                 {settings.midtransFeeType === 'fixed' ? 'Nominal Fee (Rp)' : 'Persentase Fee (%)'}
               </label>
               <NeoInput
@@ -395,11 +395,11 @@ export default function PaymentSettingsPage() {
                 value={settings.midtransFeeAmount || 0}
                 onChange={(e) => setSettings({ ...settings, midtransFeeAmount: parseFloat(e.target.value) || 0 })}
                 placeholder={settings.midtransFeeType === 'fixed' ? 'Contoh: 1000' : 'Contoh: 2.5'}
-                className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                 min={0}
                 step={settings.midtransFeeType === 'percent' ? '0.1' : '100'}
               />
-              <p className="text-xs text-white/40">
+              <p className="text-xs text-muted-foreground">
                 {settings.midtransFeeType === 'fixed' 
                   ? 'Fee akan ditambahkan ke setiap transaksi'
                   : 'Fee dihitung dari persentase total harga produk'}
@@ -409,29 +409,29 @@ export default function PaymentSettingsPage() {
             {/* Random Fee Range */}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white/80">Random Fee Min</label>
+                <label className="text-sm font-medium text-foreground">Random Fee Min</label>
                 <NeoInput
                   type="number"
                   value={settings.midtransRandomFeeMin || 1}
                   onChange={(e) => setSettings({ ...settings, midtransRandomFeeMin: parseInt(e.target.value) || 1 })}
                   placeholder="1"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                   min={0}
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white/80">Random Fee Max</label>
+                <label className="text-sm font-medium text-foreground">Random Fee Max</label>
                 <NeoInput
                   type="number"
                   value={settings.midtransRandomFeeMax || 100}
                   onChange={(e) => setSettings({ ...settings, midtransRandomFeeMax: parseInt(e.target.value) || 100 })}
                   placeholder="100"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                   min={0}
                 />
               </div>
             </div>
-            <p className="text-xs text-white/40">
+            <p className="text-xs text-muted-foreground">
               Random fee akan ditambahkan ke fee dasar (antara min dan max) untuk membuat kode unik setiap transaksi
             </p>
           </div>

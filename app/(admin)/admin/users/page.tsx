@@ -292,91 +292,91 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">User Management</h1>
-        <p className="text-white/60 mt-1">View and manage registered users</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">User Management</h1>
+        <p className="text-muted-foreground mt-1">View and manage registered users</p>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-white/60 text-sm">Total Users</p>
-                <p className="text-2xl font-bold text-white">{users.length}</p>
+                <p className="text-muted-foreground text-sm">Total Users</p>
+                <p className="text-2xl font-bold text-foreground">{users.length}</p>
               </div>
             </div>
           </NeoCardContent>
         </NeoCard>
 
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-amber-500/30">
+        <NeoCard className="bg-card backdrop-blur-xl border border-amber-500/30">
           <NeoCardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg shadow-amber-500/30">
                 <Crown className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-amber-400 text-sm">Sewa VIP</p>
-                <p className="text-2xl font-bold text-white">{users.filter(u => u.hasActiveSubscription).length}</p>
+                <p className="text-amber-600 text-sm">Sewa VIP</p>
+                <p className="text-2xl font-bold text-foreground">{users.filter(u => u.hasActiveSubscription).length}</p>
               </div>
             </div>
           </NeoCardContent>
         </NeoCard>
 
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                 <Shield className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-white/60 text-sm">Admins</p>
-                <p className="text-2xl font-bold text-white">{users.filter(u => u.role === 'admin').length}</p>
+                <p className="text-muted-foreground text-sm">Admins</p>
+                <p className="text-2xl font-bold text-foreground">{users.filter(u => u.role === 'admin').length}</p>
               </div>
             </div>
           </NeoCardContent>
         </NeoCard>
 
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center">
                 <Users className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-white/60 text-sm">Regular Users</p>
-                <p className="text-2xl font-bold text-white">{users.filter(u => u.role === 'user' || !u.role).length}</p>
+                <p className="text-muted-foreground text-sm">Regular Users</p>
+                <p className="text-2xl font-bold text-foreground">{users.filter(u => u.role === 'user' || !u.role).length}</p>
               </div>
             </div>
           </NeoCardContent>
         </NeoCard>
 
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
                 <UserX className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-white/60 text-sm">Tidak Aktif</p>
-                <p className="text-2xl font-bold text-white">{inactiveUsers.length}</p>
+                <p className="text-muted-foreground text-sm">Tidak Aktif</p>
+                <p className="text-2xl font-bold text-foreground">{inactiveUsers.length}</p>
               </div>
             </div>
           </NeoCardContent>
         </NeoCard>
 
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardContent className="p-6">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
                 <Wallet className="w-6 h-6 text-white" />
               </div>
               <div>
-                <p className="text-white/60 text-sm">Total Saldo User</p>
-                <p className="text-2xl font-bold text-white">
+                <p className="text-muted-foreground text-sm">Total Saldo User</p>
+                <p className="text-2xl font-bold text-foreground">
                   {formatCurrency(usersWithBalance.reduce((sum, u) => sum + u.availableBalance, 0))}
                 </p>
               </div>
@@ -387,7 +387,7 @@ export default function AdminUsersPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="users" className="space-y-4">
-        <TabsList className="bg-[#111111]/90 border border-white/5">
+        <TabsList className="bg-card border border-border">
           <TabsTrigger value="users" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Users className="w-4 h-4 mr-2" />
             Daftar User
@@ -409,11 +409,11 @@ export default function AdminUsersPage() {
 
         {/* Users Tab */}
         <TabsContent value="users">
-          <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCard className="bg-card backdrop-blur-xl border border-border">
             <NeoCardHeader>
-              <NeoCardTitle className="text-white flex items-center gap-3">
+              <NeoCardTitle className="text-foreground flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                  <Users className="w-4 h-4 text-cyan-400" />
+                  <Users className="w-4 h-4 text-cyan-600" />
                 </div>
                 Registered Users
               </NeoCardTitle>
@@ -421,15 +421,15 @@ export default function AdminUsersPage() {
             <NeoCardContent>
               {users.length === 0 ? (
                 <div className="text-center py-12">
-                  <Users className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                  <p className="text-white/40">No users registered yet</p>
+                  <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                  <p className="text-muted-foreground">No users registered yet</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {users.map((user) => (
                     <div
                       key={user.id}
-                      className={`flex items-center justify-between p-4 rounded-xl bg-white/5 border hover:bg-white/10 transition-colors ${user.hasActiveSubscription ? 'border-amber-500/30' : 'border-white/5'}`}
+                      className={`flex items-center justify-between p-4 rounded-xl bg-muted border hover:bg-muted/80 transition-colors ${user.hasActiveSubscription ? 'border-amber-500/30' : 'border-border'}`}
                     >
                       <div className="flex items-center gap-4">
                         <div className="relative">
@@ -444,7 +444,7 @@ export default function AdminUsersPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="text-white font-medium">{user.name}</p>
+                            <p className="text-foreground font-medium">{user.name}</p>
                             {user.hasActiveSubscription && (
                               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold shadow-lg shadow-amber-500/30">
                                 <Crown className="w-3 h-3" />
@@ -452,12 +452,12 @@ export default function AdminUsersPage() {
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-2 text-white/40 text-sm">
+                          <div className="flex items-center gap-2 text-muted-foreground text-sm">
                             <Mail className="w-3 h-3" />
                             {user.email}
                           </div>
                           {user.hasActiveSubscription && user.subscriptionEndDate && (
-                            <div className="flex items-center gap-1 text-amber-400 text-xs mt-0.5">
+                            <div className="flex items-center gap-1 text-amber-600 text-xs mt-0.5">
                               <Crown className="w-3 h-3" />
                               VIP sampai {new Date(user.subscriptionEndDate).toLocaleDateString('id-ID')}
                             </div>
@@ -466,7 +466,7 @@ export default function AdminUsersPage() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="text-right hidden sm:block">
-                          <div className="flex items-center gap-1 text-white/40 text-xs">
+                          <div className="flex items-center gap-1 text-muted-foreground text-xs">
                             <Calendar className="w-3 h-3" />
                             {new Date(user.createdAt).toLocaleDateString('id-ID')}
                           </div>
@@ -485,22 +485,22 @@ export default function AdminUsersPage() {
 
         {/* Inactive Users Tab */}
         <TabsContent value="inactive">
-          <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCard className="bg-card backdrop-blur-xl border border-border">
             <NeoCardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <NeoCardTitle className="text-white flex items-center gap-3">
+                <NeoCardTitle className="text-foreground flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
-                    <UserX className="w-4 h-4 text-red-400" />
+                    <UserX className="w-4 h-4 text-red-600" />
                   </div>
                   User Tidak Aktif
                 </NeoCardTitle>
                 <div className="flex items-center gap-3">
-                  <Label className="text-white/60 text-sm whitespace-nowrap">Tidak login selama:</Label>
+                  <Label className="text-muted-foreground text-sm whitespace-nowrap">Tidak login selama:</Label>
                   <Select value={inactiveMonths} onValueChange={setInactiveMonths}>
-                    <SelectTrigger className="w-[140px] bg-white/5 border-white/10 text-white">
+                    <SelectTrigger className="w-[140px] bg-muted border-border text-foreground">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-[#1a1a1a] border-white/10">
+                    <SelectContent className="bg-card border-border">
                       <SelectItem value="1">1 Bulan</SelectItem>
                       <SelectItem value="2">2 Bulan</SelectItem>
                       <SelectItem value="3">3 Bulan</SelectItem>
@@ -515,8 +515,8 @@ export default function AdminUsersPage() {
               {inactiveUsers.length === 0 ? (
                 <div className="text-center py-12">
                   <CheckCircle2 className="w-12 h-12 text-emerald-500/40 mx-auto mb-4" />
-                  <p className="text-white/60">Tidak ada user yang tidak aktif selama {inactiveMonths} bulan</p>
-                  <p className="text-white/40 text-sm mt-1">Semua user aktif menggunakan platform</p>
+                  <p className="text-muted-foreground">Tidak ada user yang tidak aktif selama {inactiveMonths} bulan</p>
+                  <p className="text-muted-foreground/70 text-sm mt-1">Semua user aktif menggunakan platform</p>
                 </div>
               ) : (
                 <div className="space-y-3">

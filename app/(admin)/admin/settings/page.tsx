@@ -89,8 +89,8 @@ export default function AdminSettingsPage() {
     <div className="space-y-6 max-w-2xl">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Admin Settings</h1>
-        <p className="text-white/60 mt-1">Configure system-wide settings</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">Admin Settings</h1>
+        <p className="text-muted-foreground mt-1">Configure system-wide settings</p>
       </div>
 
       {/* Alert Message */}
@@ -114,30 +114,30 @@ export default function AdminSettingsPage() {
       )}
 
       {/* OTP Email Settings */}
-      <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+      <NeoCard className="bg-card backdrop-blur-xl border border-border">
         <NeoCardHeader>
-          <NeoCardTitle className="text-white flex items-center gap-3">
+          <NeoCardTitle className="text-foreground flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-              <Mail className="w-4 h-4 text-emerald-400" />
+              <Mail className="w-4 h-4 text-emerald-600" />
             </div>
             Email OTP Verification
           </NeoCardTitle>
-          <NeoCardDescription className="text-white/60">
+          <NeoCardDescription className="text-muted-foreground">
             Konfigurasi email untuk verifikasi OTP saat registrasi akun baru
           </NeoCardDescription>
         </NeoCardHeader>
         <NeoCardContent className="space-y-4">
           {loadingOtp ? (
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-white/40" />
+              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
           ) : (
             <>
               {otpMessage && (
                 <div className={`flex items-center gap-3 p-3 rounded-lg border ${
                   otpMessage.type === 'success' 
-                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                    : 'bg-red-500/10 border-red-500/20 text-red-400'
+                    ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600'
+                    : 'bg-red-500/10 border-red-500/20 text-red-600'
                 }`}>
                   {otpMessage.type === 'success' ? (
                     <CheckCircle className="w-4 h-4 flex-shrink-0" />
@@ -148,10 +148,10 @@ export default function AdminSettingsPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+              <div className="flex items-center justify-between p-4 rounded-xl bg-muted border border-border">
                 <div>
-                  <p className="text-white font-medium text-sm">Aktifkan Verifikasi OTP</p>
-                  <p className="text-white/50 text-xs mt-0.5">
+                  <p className="text-foreground font-medium text-sm">Aktifkan Verifikasi OTP</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">
                     User harus verifikasi email saat registrasi
                   </p>
                 </div>
@@ -162,36 +162,36 @@ export default function AdminSettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white/80">Email Pengirim (Gmail)</label>
+                <label className="text-sm font-medium text-foreground">Email Pengirim (Gmail)</label>
                 <NeoInput
                   type="email"
                   value={otpFromEmail}
                   onChange={(e) => setOtpFromEmail(e.target.value)}
                   placeholder="youremail@gmail.com"
-                  className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                 />
-                <p className="text-white/40 text-xs">Email Gmail yang akan digunakan untuk mengirim kode OTP</p>
+                <p className="text-muted-foreground text-xs">Email Gmail yang akan digunakan untuk mengirim kode OTP</p>
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-medium text-white/80">App Password</label>
+                <label className="text-sm font-medium text-foreground">App Password</label>
                 <div className="relative">
                   <NeoInput
                     type={showOtpPass ? 'text' : 'password'}
                     value={otpFromPass}
                     onChange={(e) => setOtpFromPass(e.target.value)}
                     placeholder="xxxx xxxx xxxx xxxx"
-                    className="bg-white/5 border-white/10 text-white placeholder:text-white/40 pr-10"
+                    className="bg-muted border-border text-foreground placeholder:text-muted-foreground pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowOtpPass(!showOtpPass)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/60"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
                     {showOtpPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-white/40 text-xs">
+                <p className="text-muted-foreground text-xs">
                   Bukan password biasa! Buat App Password di Google Account &gt; Security &gt; 2-Step Verification &gt; App passwords
                 </p>
               </div>
@@ -235,28 +235,28 @@ export default function AdminSettingsPage() {
       </NeoCard>
 
       {/* Admin Emails */}
-      <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+      <NeoCard className="bg-card backdrop-blur-xl border border-border">
         <NeoCardHeader>
-          <NeoCardTitle className="text-white flex items-center gap-3">
+          <NeoCardTitle className="text-foreground flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-              <Settings className="w-4 h-4 text-violet-400" />
+              <Settings className="w-4 h-4 text-violet-600" />
             </div>
             Admin Access
           </NeoCardTitle>
-          <NeoCardDescription className="text-white/60">
+          <NeoCardDescription className="text-muted-foreground">
             Configure which users have admin access to this panel
           </NeoCardDescription>
         </NeoCardHeader>
         <NeoCardContent className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-white/80">Admin Emails</label>
+            <label className="text-sm font-medium text-foreground">Admin Emails</label>
             <NeoInput
               value={adminEmails}
               onChange={(e) => setAdminEmails(e.target.value)}
               placeholder="admin@example.com, admin2@example.com"
-              className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
-            <p className="text-white/40 text-xs">Comma-separated list of admin email addresses</p>
+            <p className="text-muted-foreground text-xs">Comma-separated list of admin email addresses</p>
           </div>
 
           <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
@@ -293,22 +293,22 @@ export default function AdminSettingsPage() {
       </NeoCard>
 
       {/* Midtrans Webhook Info */}
-      <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+      <NeoCard className="bg-card backdrop-blur-xl border border-border">
         <NeoCardHeader>
-          <NeoCardTitle className="text-white flex items-center gap-3">
+          <NeoCardTitle className="text-foreground flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-              <Info className="w-4 h-4 text-cyan-400" />
+              <Info className="w-4 h-4 text-cyan-600" />
             </div>
             Webhook Configuration
           </NeoCardTitle>
         </NeoCardHeader>
         <NeoCardContent className="space-y-4">
-          <div className="p-4 rounded-xl bg-white/5 border border-white/5">
-            <p className="text-white/80 text-sm font-medium mb-2">Midtrans Webhook URL</p>
-            <code className="text-cyan-400 text-xs bg-cyan-500/10 px-3 py-2 rounded-lg block break-all">
+          <div className="p-4 rounded-xl bg-muted border border-border">
+            <p className="text-foreground text-sm font-medium mb-2">Midtrans Webhook URL</p>
+            <code className="text-cyan-600 text-xs bg-cyan-500/10 px-3 py-2 rounded-lg block break-all">
               {typeof window !== 'undefined' ? `${window.location.origin}/api/payments/midtrans/webhook` : '/api/payments/midtrans/webhook'}
             </code>
-            <p className="text-white/40 text-xs mt-2">
+            <p className="text-muted-foreground text-xs mt-2">
               Set this URL in your Midtrans dashboard under Settings &gt; Configuration &gt; Payment Notification URL
             </p>
           </div>

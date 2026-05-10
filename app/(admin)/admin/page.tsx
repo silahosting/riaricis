@@ -198,8 +198,8 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Admin Dashboard</h1>
-        <p className="text-white/60 mt-1">Overview of your payment platform</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">Admin Dashboard</h1>
+        <p className="text-muted-foreground mt-1">Overview of your payment platform</p>
       </div>
 
       {/* Stats Grid */}
@@ -212,14 +212,14 @@ export default function AdminDashboard() {
             <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl blur-xl" 
               style={{ background: `linear-gradient(to right, var(--tw-gradient-stops))` }} 
             />
-            <NeoCard className="relative bg-[#111111]/90 backdrop-blur-xl border border-white/5 hover:border-white/10 transition-all duration-300">
+            <NeoCard className="relative bg-card backdrop-blur-xl border border-border hover:border-border/80 transition-all duration-300">
               <NeoCardContent className="p-6">
                 <div className="flex items-start justify-between">
                   <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}>
                     <stat.icon className="w-6 h-6 text-white" />
                   </div>
                   <div className={`flex items-center gap-1 text-xs font-medium ${
-                    stat.trend === 'up' ? 'text-emerald-400' : stat.trend === 'down' ? 'text-red-400' : 'text-white/60'
+                    stat.trend === 'up' ? 'text-emerald-600' : stat.trend === 'down' ? 'text-red-600' : 'text-muted-foreground'
                   }`}>
                     {stat.trend === 'up' && <ArrowUpRight className="w-3 h-3" />}
                     {stat.trend === 'down' && <ArrowDownRight className="w-3 h-3" />}
@@ -227,10 +227,10 @@ export default function AdminDashboard() {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <p className="text-white/60 text-sm">{stat.title}</p>
-                  <p className="text-2xl font-bold text-white mt-1">
+                  <p className="text-muted-foreground text-sm">{stat.title}</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">
                     {loading ? (
-                      <span className="inline-block w-20 h-7 bg-white/10 rounded animate-pulse" />
+                      <span className="inline-block w-20 h-7 bg-muted rounded animate-pulse" />
                     ) : (
                       stat.value
                     )}
@@ -245,11 +245,11 @@ export default function AdminDashboard() {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Orders Chart */}
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardHeader>
-            <NeoCardTitle className="text-white flex items-center gap-3">
+            <NeoCardTitle className="text-foreground flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
+                <TrendingUp className="w-4 h-4 text-emerald-600" />
               </div>
               Orders (7 Days)
             </NeoCardTitle>
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
           <NeoCardContent>
             <div className="h-[200px]">
               {loading ? (
-                <div className="w-full h-full bg-white/5 rounded animate-pulse" />
+                <div className="w-full h-full bg-muted rounded animate-pulse" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={stats?.orderStats || []}>
@@ -286,11 +286,11 @@ export default function AdminDashboard() {
         </NeoCard>
 
         {/* Fee Income Chart */}
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardHeader>
-            <NeoCardTitle className="text-white flex items-center gap-3">
+            <NeoCardTitle className="text-foreground flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                <Wallet className="w-4 h-4 text-amber-400" />
+                <Wallet className="w-4 h-4 text-amber-600" />
               </div>
               Fee Income (7 Days)
             </NeoCardTitle>
@@ -298,7 +298,7 @@ export default function AdminDashboard() {
           <NeoCardContent>
             <div className="h-[200px]">
               {loading ? (
-                <div className="w-full h-full bg-white/5 rounded animate-pulse" />
+                <div className="w-full h-full bg-muted rounded animate-pulse" />
               ) : (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={stats?.feeStats || []}>
@@ -324,11 +324,11 @@ export default function AdminDashboard() {
       {/* Bot Terminal & Active Bots */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Terminal Console */}
-        <NeoCard className="lg:col-span-2 bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="lg:col-span-2 bg-card backdrop-blur-xl border border-border">
           <NeoCardHeader className="flex flex-row items-center justify-between">
-            <NeoCardTitle className="text-white flex items-center gap-3">
+            <NeoCardTitle className="text-foreground flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                <Terminal className="w-4 h-4 text-violet-400" />
+                <Terminal className="w-4 h-4 text-violet-600" />
               </div>
               Bot Activity Terminal
             </NeoCardTitle>
@@ -337,7 +337,7 @@ export default function AdminDashboard() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setAutoRefresh(!autoRefresh)}
-                className={`text-xs ${autoRefresh ? 'text-emerald-400' : 'text-white/60'}`}
+                className={`text-xs ${autoRefresh ? 'text-emerald-600' : 'text-muted-foreground'}`}
               >
                 <RefreshCw className={`w-3 h-3 mr-1 ${autoRefresh ? 'animate-spin' : ''}`} />
                 {autoRefresh ? 'Live' : 'Auto'}
@@ -347,7 +347,7 @@ export default function AdminDashboard() {
                 size="sm"
                 onClick={fetchLogs}
                 disabled={logsLoading}
-                className="text-xs text-white/60"
+                className="text-xs text-muted-foreground"
               >
                 <RefreshCw className={`w-3 h-3 mr-1 ${logsLoading ? 'animate-spin' : ''}`} />
                 Refresh
@@ -355,30 +355,30 @@ export default function AdminDashboard() {
             </div>
           </NeoCardHeader>
           <NeoCardContent>
-            <div className="bg-black/50 rounded-lg border border-white/5 font-mono text-xs">
-              <div className="flex items-center gap-2 px-3 py-2 border-b border-white/5 bg-white/5">
+            <div className="bg-slate-900 rounded-lg border border-slate-700 font-mono text-xs">
+              <div className="flex items-center gap-2 px-3 py-2 border-b border-slate-700 bg-slate-800">
                 <div className="w-3 h-3 rounded-full bg-red-500" />
                 <div className="w-3 h-3 rounded-full bg-yellow-500" />
                 <div className="w-3 h-3 rounded-full bg-green-500" />
-                <span className="ml-2 text-white/40">bot-monitor@admin ~ </span>
+                <span className="ml-2 text-slate-400">bot-monitor@admin ~ </span>
               </div>
               <ScrollArea className="h-[300px] p-3">
                 {logs.length === 0 ? (
-                  <div className="text-white/40 text-center py-8">
+                  <div className="text-slate-400 text-center py-8">
                     No activity logs yet. Bot activities will appear here.
                   </div>
                 ) : (
                   <div className="space-y-1">
                     {logs.map((log) => (
                       <div key={log.id} className="flex items-start gap-2 text-[11px] leading-relaxed">
-                        <span className="text-white/30 shrink-0">[{formatTime(log.createdAt)}]</span>
+                        <span className="text-slate-500 shrink-0">[{formatTime(log.createdAt)}]</span>
                         <span className="shrink-0">{getActionIcon(log.action)}</span>
                         <span className={`shrink-0 uppercase font-semibold ${getActionColor(log.action)}`}>
                           {log.action}
                         </span>
                         <span className="text-cyan-400 shrink-0">{log.botName}</span>
-                        <span className="text-white/60">-</span>
-                        <span className="text-white/80 break-all">{log.message}</span>
+                        <span className="text-slate-500">-</span>
+                        <span className="text-slate-300 break-all">{log.message}</span>
                         {log.telegramUsername && (
                           <span className="text-violet-400">@{log.telegramUsername}</span>
                         )}
@@ -393,43 +393,43 @@ export default function AdminDashboard() {
         </NeoCard>
 
         {/* Active Bots */}
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardHeader>
-            <NeoCardTitle className="text-white flex items-center gap-3">
+            <NeoCardTitle className="text-foreground flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                <Bot className="w-4 h-4 text-cyan-400" />
+                <Bot className="w-4 h-4 text-cyan-600" />
               </div>
               Active Bots
             </NeoCardTitle>
           </NeoCardHeader>
           <NeoCardContent>
-            <div className="flex items-center justify-between mb-4 p-3 rounded-lg bg-white/5 border border-white/5">
+            <div className="flex items-center justify-between mb-4 p-3 rounded-lg bg-muted border border-border">
               <div>
-                <p className="text-white/60 text-sm">Total Bots</p>
-                <p className="text-2xl font-bold text-white">{stats?.totalBots || 0}</p>
+                <p className="text-muted-foreground text-sm">Total Bots</p>
+                <p className="text-2xl font-bold text-foreground">{stats?.totalBots || 0}</p>
               </div>
               <div>
-                <p className="text-white/60 text-sm">Active</p>
-                <p className="text-2xl font-bold text-emerald-400">{stats?.activeBots || 0}</p>
+                <p className="text-muted-foreground text-sm">Active</p>
+                <p className="text-2xl font-bold text-emerald-600">{stats?.activeBots || 0}</p>
               </div>
             </div>
             <ScrollArea className="h-[240px]">
               <div className="space-y-2">
                 {(stats?.botList || []).length === 0 ? (
-                  <div className="text-white/40 text-center py-8 text-sm">
+                  <div className="text-muted-foreground text-center py-8 text-sm">
                     No bots registered yet.
                   </div>
                 ) : (
                   (stats?.botList || []).map((bot) => (
                     <div
                       key={bot.id}
-                      className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5"
+                      className="flex items-center justify-between p-3 rounded-lg bg-muted border border-border"
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-2 h-2 rounded-full ${bot.isActive ? 'bg-emerald-400' : 'bg-white/20'}`} />
+                        <div className={`w-2 h-2 rounded-full ${bot.isActive ? 'bg-emerald-500' : 'bg-muted-foreground/30'}`} />
                         <div>
-                          <p className="text-white font-medium text-sm">{bot.botName}</p>
-                          <p className="text-white/40 text-xs">ID: {bot.userId.slice(0, 8)}...</p>
+                          <p className="text-foreground font-medium text-sm">{bot.botName}</p>
+                          <p className="text-muted-foreground text-xs">ID: {bot.userId.slice(0, 8)}...</p>
                         </div>
                       </div>
                       <NeoBadge variant={bot.isActive ? 'success' : 'secondary'} className="text-xs">
@@ -446,24 +446,24 @@ export default function AdminDashboard() {
 
       {/* Payment Methods Status */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardHeader>
-            <NeoCardTitle className="text-white flex items-center gap-3">
+            <NeoCardTitle className="text-foreground flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                <CreditCard className="w-4 h-4 text-cyan-400" />
+                <CreditCard className="w-4 h-4 text-cyan-600" />
               </div>
               Payment Methods Status
             </NeoCardTitle>
           </NeoCardHeader>
           <NeoCardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-muted border border-border">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
                   <span className="text-white font-bold text-sm">OK</span>
                 </div>
                 <div>
-                  <p className="text-white font-medium">Orkut QRIS</p>
-                  <p className="text-white/40 text-sm">Order Kuota Payment</p>
+                  <p className="text-foreground font-medium">Orkut QRIS</p>
+                  <p className="text-muted-foreground text-sm">Order Kuota Payment</p>
                 </div>
               </div>
               <NeoBadge variant={stats?.orkutEnabled ? 'success' : 'destructive'}>
@@ -471,14 +471,14 @@ export default function AdminDashboard() {
               </NeoBadge>
             </div>
 
-            <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5">
+            <div className="flex items-center justify-between p-4 rounded-xl bg-muted border border-border">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
                   <span className="text-white font-bold text-sm">MT</span>
                 </div>
                 <div>
-                  <p className="text-white font-medium">Midtrans QRIS</p>
-                  <p className="text-white/40 text-sm">Midtrans Payment Gateway</p>
+                  <p className="text-foreground font-medium">Midtrans QRIS</p>
+                  <p className="text-muted-foreground text-sm">Midtrans Payment Gateway</p>
                 </div>
               </div>
               <NeoBadge variant={stats?.midtransEnabled ? 'success' : 'destructive'}>
@@ -489,11 +489,11 @@ export default function AdminDashboard() {
         </NeoCard>
 
         {/* Quick Actions */}
-        <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+        <NeoCard className="bg-card backdrop-blur-xl border border-border">
           <NeoCardHeader>
-            <NeoCardTitle className="text-white flex items-center gap-3">
+            <NeoCardTitle className="text-foreground flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                <TrendingUp className="w-4 h-4 text-violet-400" />
+                <TrendingUp className="w-4 h-4 text-violet-600" />
               </div>
               Quick Actions
             </NeoCardTitle>
@@ -501,33 +501,33 @@ export default function AdminDashboard() {
           <NeoCardContent className="space-y-3">
             <a 
               href="/admin/payments"
-              className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group cursor-pointer"
+              className="flex items-center justify-between p-4 rounded-xl bg-muted border border-border hover:bg-muted/80 hover:border-border/80 transition-all group cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <CreditCard className="w-5 h-5 text-cyan-400" />
-                <span className="text-white font-medium">Configure Payment Methods</span>
+                <CreditCard className="w-5 h-5 text-cyan-600" />
+                <span className="text-foreground font-medium">Configure Payment Methods</span>
               </div>
-              <ArrowUpRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+              <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
             </a>
             <a 
               href="/admin/users"
-              className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group cursor-pointer"
+              className="flex items-center justify-between p-4 rounded-xl bg-muted border border-border hover:bg-muted/80 hover:border-border/80 transition-all group cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <Users className="w-5 h-5 text-violet-400" />
-                <span className="text-white font-medium">Manage Users</span>
+                <Users className="w-5 h-5 text-violet-600" />
+                <span className="text-foreground font-medium">Manage Users</span>
               </div>
-              <ArrowUpRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+              <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
             </a>
             <a 
               href="/admin/withdrawals"
-              className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all group cursor-pointer"
+              className="flex items-center justify-between p-4 rounded-xl bg-muted border border-border hover:bg-muted/80 hover:border-border/80 transition-all group cursor-pointer"
             >
               <div className="flex items-center gap-3">
-                <Wallet className="w-5 h-5 text-amber-400" />
-                <span className="text-white font-medium">Manage Withdrawals</span>
+                <Wallet className="w-5 h-5 text-amber-600" />
+                <span className="text-foreground font-medium">Manage Withdrawals</span>
               </div>
-              <ArrowUpRight className="w-4 h-4 text-white/40 group-hover:text-white transition-colors" />
+              <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
             </a>
           </NeoCardContent>
         </NeoCard>

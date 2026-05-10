@@ -175,14 +175,14 @@ export default function AdminWithdrawalsPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-white tracking-tight">Pencairan Dana</h1>
-        <p className="text-white/60 mt-1">Kelola permintaan pencairan dana pengguna</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground tracking-tight">Pencairan Dana</h1>
+        <p className="text-muted-foreground mt-1">Kelola permintaan pencairan dana pengguna</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {statsCards.map((stat) => (
-          <NeoCard key={stat.title} className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCard key={stat.title} className="bg-card backdrop-blur-xl border border-border">
             <NeoCardContent className="p-6">
               <div className="flex items-start justify-between">
                 <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}>
@@ -190,10 +190,10 @@ export default function AdminWithdrawalsPage() {
                 </div>
               </div>
               <div className="mt-4">
-                <p className="text-white/60 text-sm">{stat.title}</p>
-                <p className="text-2xl font-bold text-white mt-1">
+                <p className="text-muted-foreground text-sm">{stat.title}</p>
+                <p className="text-2xl font-bold text-foreground mt-1">
                   {loading ? (
-                    <span className="inline-block w-20 h-7 bg-white/10 rounded animate-pulse" />
+                    <span className="inline-block w-20 h-7 bg-muted rounded animate-pulse" />
                   ) : (
                     stat.value
                   )}
@@ -206,7 +206,7 @@ export default function AdminWithdrawalsPage() {
 
       {/* Tabs: Withdrawals & User Info */}
       <Tabs defaultValue="withdrawals" className="space-y-4">
-        <TabsList className="bg-[#111111]/90 border border-white/5">
+        <TabsList className="bg-card border border-border">
           <TabsTrigger value="withdrawals" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <ArrowDownToLine className="w-4 h-4 mr-2" />
             Permintaan Pencairan
@@ -219,12 +219,12 @@ export default function AdminWithdrawalsPage() {
 
         {/* Withdrawals Tab */}
         <TabsContent value="withdrawals">
-          <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCard className="bg-card backdrop-blur-xl border border-border">
             <NeoCardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <NeoCardTitle className="text-white flex items-center gap-3">
+                <NeoCardTitle className="text-foreground flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-                    <ArrowDownToLine className="w-4 h-4 text-cyan-400" />
+                    <ArrowDownToLine className="w-4 h-4 text-cyan-600" />
                   </div>
                   Daftar Permintaan
                 </NeoCardTitle>
@@ -236,7 +236,7 @@ export default function AdminWithdrawalsPage() {
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                         filter === f
                           ? 'bg-primary text-primary-foreground'
-                          : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                          : 'bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground'
                       }`}
                     >
                       {f === 'all' ? 'Semua' : STATUS_CONFIG[f as keyof typeof STATUS_CONFIG]?.label}
@@ -248,12 +248,12 @@ export default function AdminWithdrawalsPage() {
             <NeoCardContent>
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-white/40" />
+              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : filteredWithdrawals.length === 0 ? (
             <div className="text-center py-12">
-              <Wallet className="w-12 h-12 mx-auto text-white/20 mb-4" />
-              <p className="text-white/40">Tidak ada permintaan pencairan</p>
+              <Wallet className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
+              <p className="text-muted-foreground">Tidak ada permintaan pencairan</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -263,7 +263,7 @@ export default function AdminWithdrawalsPage() {
                 return (
                   <div
                     key={w.id}
-                    className="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all"
+                    className="p-4 rounded-xl bg-muted border border-border hover:border-border/80 transition-all"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-start gap-4">
@@ -272,28 +272,28 @@ export default function AdminWithdrawalsPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <p className="text-white font-medium">{w.userName}</p>
+                            <p className="text-foreground font-medium">{w.userName}</p>
                             <NeoBadge variant={STATUS_CONFIG[w.status].variant} className="text-xs">
                               <StatusIcon className="w-3 h-3 mr-1" />
                               {STATUS_CONFIG[w.status].label}
                             </NeoBadge>
                           </div>
-                          <p className="text-white/40 text-sm">{w.userEmail}</p>
+                          <p className="text-muted-foreground text-sm">{w.userEmail}</p>
                           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm">
-                            <span className="text-white/60">
-                              {BANK_LABELS[w.bankType]}: <span className="text-white">{w.bankAccount}</span>
+                            <span className="text-muted-foreground">
+                              {BANK_LABELS[w.bankType]}: <span className="text-foreground">{w.bankAccount}</span>
                             </span>
-                            <span className="text-white/60">
-                              a/n <span className="text-white">{w.bankAccountName}</span>
+                            <span className="text-muted-foreground">
+                              a/n <span className="text-foreground">{w.bankAccountName}</span>
                             </span>
                           </div>
-                          <p className="text-white/40 text-xs mt-1">{formatDate(w.createdAt)}</p>
+                          <p className="text-muted-foreground text-xs mt-1">{formatDate(w.createdAt)}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="text-white font-bold text-lg">{formatCurrency(w.netAmount)}</p>
-                          <p className="text-white/40 text-xs">
+                          <p className="text-foreground font-bold text-lg">{formatCurrency(w.netAmount)}</p>
+                          <p className="text-muted-foreground text-xs">
                             dari {formatCurrency(w.amount)} (fee: {formatCurrency(w.fee)})
                           </p>
                         </div>
@@ -320,11 +320,11 @@ export default function AdminWithdrawalsPage() {
 
         {/* User Info Tab */}
         <TabsContent value="users">
-          <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCard className="bg-card backdrop-blur-xl border border-border">
             <NeoCardHeader>
-              <NeoCardTitle className="text-white flex items-center gap-3">
+              <NeoCardTitle className="text-foreground flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-                  <Users className="w-4 h-4 text-violet-400" />
+                  <Users className="w-4 h-4 text-violet-600" />
                 </div>
                 Info Dana Pengguna
               </NeoCardTitle>
@@ -332,19 +332,19 @@ export default function AdminWithdrawalsPage() {
             <NeoCardContent>
               {loading ? (
                 <div className="flex items-center justify-center py-12">
-                  <Loader2 className="w-8 h-8 animate-spin text-white/40" />
+                  <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
                 </div>
               ) : uniqueUsers.length === 0 ? (
                 <div className="text-center py-12">
-                  <Users className="w-12 h-12 mx-auto text-white/20 mb-4" />
-                  <p className="text-white/40">Belum ada data pengguna</p>
+                  <Users className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
+                  <p className="text-muted-foreground">Belum ada data pengguna</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {uniqueUsers.map((user) => (
                     <div
                       key={user.id}
-                      className="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all"
+                      className="p-4 rounded-xl bg-muted border border-border hover:border-border/80 transition-all"
                     >
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div className="flex items-start gap-4">
@@ -352,40 +352,40 @@ export default function AdminWithdrawalsPage() {
                             <User className="w-6 h-6 text-white" />
                           </div>
                           <div>
-                            <p className="text-white font-semibold text-lg">{user.name}</p>
-                            <p className="text-white/40 text-sm">{user.email}</p>
+                            <p className="text-foreground font-semibold text-lg">{user.name}</p>
+                            <p className="text-muted-foreground text-sm">{user.email}</p>
                             {user.lastWithdrawal && (
-                              <p className="text-white/30 text-xs mt-1">
+                              <p className="text-muted-foreground/70 text-xs mt-1">
                                 Terakhir tarik: {formatDate(user.lastWithdrawal)}
                               </p>
                             )}
                           </div>
                         </div>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                          <div className="p-3 rounded-lg bg-white/5 text-center">
-                            <ShoppingBag className="w-4 h-4 mx-auto text-cyan-400 mb-1" />
-                            <p className="text-white font-bold">{user.completedOrders}</p>
-                            <p className="text-white/40 text-xs">Order Selesai</p>
+                          <div className="p-3 rounded-lg bg-background text-center">
+                            <ShoppingBag className="w-4 h-4 mx-auto text-cyan-600 mb-1" />
+                            <p className="text-foreground font-bold">{user.completedOrders}</p>
+                            <p className="text-muted-foreground text-xs">Order Selesai</p>
                           </div>
-                          <div className="p-3 rounded-lg bg-white/5 text-center">
-                            <Banknote className="w-4 h-4 mx-auto text-emerald-400 mb-1" />
-                            <p className="text-white font-bold text-sm">{formatCurrency(user.totalRevenue)}</p>
-                            <p className="text-white/40 text-xs">Total Pendapatan</p>
+                          <div className="p-3 rounded-lg bg-background text-center">
+                            <Banknote className="w-4 h-4 mx-auto text-emerald-600 mb-1" />
+                            <p className="text-foreground font-bold text-sm">{formatCurrency(user.totalRevenue)}</p>
+                            <p className="text-muted-foreground text-xs">Total Pendapatan</p>
                           </div>
-                          <div className="p-3 rounded-lg bg-white/5 text-center">
-                            <TrendingDown className="w-4 h-4 mx-auto text-orange-400 mb-1" />
-                            <p className="text-white font-bold text-sm">{formatCurrency(user.totalWithdrawn)}</p>
-                            <p className="text-white/40 text-xs">Sudah Dicairkan</p>
+                          <div className="p-3 rounded-lg bg-background text-center">
+                            <TrendingDown className="w-4 h-4 mx-auto text-orange-600 mb-1" />
+                            <p className="text-foreground font-bold text-sm">{formatCurrency(user.totalWithdrawn)}</p>
+                            <p className="text-muted-foreground text-xs">Sudah Dicairkan</p>
                           </div>
                           <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-center">
-                            <Wallet className="w-4 h-4 mx-auto text-emerald-400 mb-1" />
-                            <p className="text-emerald-400 font-bold text-sm">{formatCurrency(user.availableBalance)}</p>
-                            <p className="text-emerald-400/60 text-xs">Saldo Tersedia</p>
+                            <Wallet className="w-4 h-4 mx-auto text-emerald-600 mb-1" />
+                            <p className="text-emerald-600 font-bold text-sm">{formatCurrency(user.availableBalance)}</p>
+                            <p className="text-emerald-600/60 text-xs">Saldo Tersedia</p>
                           </div>
                         </div>
                       </div>
-                      <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-sm">
-                        <span className="text-white/40">
+                      <div className="mt-3 pt-3 border-t border-border flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">
                           Total {user.withdrawalCount} kali pencairan
                         </span>
                         <NeoBadge variant={user.availableBalance > 0 ? 'success' : 'secondary'}>

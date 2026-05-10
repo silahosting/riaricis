@@ -222,12 +222,12 @@ export default function AdminErrorLogsPage() {
   })
 
   const statsCards = [
-    { label: 'Total', value: stats?.total || 0, color: 'text-white', bg: 'bg-white/10' },
-    { label: 'New', value: stats?.new || 0, color: 'text-red-400', bg: 'bg-red-500/20' },
-    { label: 'Investigating', value: stats?.investigating || 0, color: 'text-amber-400', bg: 'bg-amber-500/20' },
-    { label: 'Resolved', value: stats?.resolved || 0, color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
-    { label: 'Critical', value: stats?.critical || 0, color: 'text-red-500', bg: 'bg-red-600/20' },
-    { label: 'Error', value: stats?.error || 0, color: 'text-orange-400', bg: 'bg-orange-500/20' },
+    { label: 'Total', value: stats?.total || 0, color: 'text-foreground', bg: 'bg-muted' },
+    { label: 'New', value: stats?.new || 0, color: 'text-red-600', bg: 'bg-red-500/20' },
+    { label: 'Investigating', value: stats?.investigating || 0, color: 'text-amber-600', bg: 'bg-amber-500/20' },
+    { label: 'Resolved', value: stats?.resolved || 0, color: 'text-emerald-600', bg: 'bg-emerald-500/20' },
+    { label: 'Critical', value: stats?.critical || 0, color: 'text-red-600', bg: 'bg-red-600/20' },
+    { label: 'Error', value: stats?.error || 0, color: 'text-orange-600', bg: 'bg-orange-500/20' },
   ]
 
   return (
@@ -263,7 +263,7 @@ export default function AdminErrorLogsPage() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {statsCards.map((stat) => (
-          <div key={stat.label} className={`${stat.bg} rounded-xl p-4 border border-white/5`}>
+          <div key={stat.label} className={`${stat.bg} rounded-xl p-4 border border-border`}>
             <p className="text-muted-foreground text-xs uppercase tracking-wide">{stat.label}</p>
             <p className={`text-2xl font-bold ${stat.color} mt-1`}>{stat.value}</p>
           </div>
