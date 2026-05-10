@@ -592,11 +592,11 @@ export default function AdminUsersPage() {
 
         {/* Balance Tab */}
         <TabsContent value="balance">
-          <NeoCard className="bg-[#111111]/90 backdrop-blur-xl border border-white/5">
+          <NeoCard className="bg-card backdrop-blur-xl border border-border">
             <NeoCardHeader>
-              <NeoCardTitle className="text-white flex items-center gap-3">
+              <NeoCardTitle className="text-foreground flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                  <Wallet className="w-4 h-4 text-amber-400" />
+                  <Wallet className="w-4 h-4 text-amber-600" />
                 </div>
                 Kelola Saldo User
               </NeoCardTitle>
@@ -604,15 +604,15 @@ export default function AdminUsersPage() {
             <NeoCardContent>
               {usersWithBalance.length === 0 ? (
                 <div className="text-center py-12">
-                  <Wallet className="w-12 h-12 text-white/20 mx-auto mb-4" />
-                  <p className="text-white/40">Belum ada user dengan saldo</p>
+                  <Wallet className="w-12 h-12 text-muted-foreground/30 mx-auto mb-4" />
+                  <p className="text-muted-foreground">Belum ada user dengan saldo</p>
                 </div>
               ) : (
                 <div className="space-y-3">
                   {usersWithBalance.map((user) => (
                     <div
                       key={user.id}
-                      className="p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-all"
+                      className="p-4 rounded-xl bg-muted border border-border hover:border-border/80 transition-all"
                     >
                       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div className="flex items-start gap-4">
@@ -620,14 +620,14 @@ export default function AdminUsersPage() {
                             <span className="text-white font-bold">{user.name.charAt(0).toUpperCase()}</span>
                           </div>
                           <div>
-                            <p className="text-white font-semibold">{user.name}</p>
-                            <p className="text-white/40 text-sm">{user.email}</p>
+                            <p className="text-foreground font-semibold">{user.name}</p>
+                            <p className="text-muted-foreground text-sm">{user.email}</p>
                           </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-3">
                           <div className="flex flex-col items-end">
-                            <span className="text-white/40 text-xs">Saldo</span>
-                            <span className="text-emerald-400 font-bold">{formatCurrency(user.availableBalance)}</span>
+                            <span className="text-muted-foreground text-xs">Saldo</span>
+                            <span className="text-emerald-600 font-bold">{formatCurrency(user.availableBalance)}</span>
                           </div>
                           <div className="flex gap-2">
                             <NeoButton
@@ -652,18 +652,18 @@ export default function AdminUsersPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="mt-3 pt-3 border-t border-white/5 grid grid-cols-3 gap-4 text-center">
+                      <div className="mt-3 pt-3 border-t border-border grid grid-cols-3 gap-4 text-center">
                         <div>
-                          <p className="text-white/40 text-xs">Pendapatan</p>
-                          <p className="text-white text-sm font-medium">{formatCurrency(user.totalRevenue)}</p>
+                          <p className="text-muted-foreground text-xs">Pendapatan</p>
+                          <p className="text-foreground text-sm font-medium">{formatCurrency(user.totalRevenue)}</p>
                         </div>
                         <div>
-                          <p className="text-white/40 text-xs">Dicairkan</p>
-                          <p className="text-orange-400 text-sm font-medium">{formatCurrency(user.totalWithdrawn)}</p>
+                          <p className="text-muted-foreground text-xs">Dicairkan</p>
+                          <p className="text-orange-600 text-sm font-medium">{formatCurrency(user.totalWithdrawn)}</p>
                         </div>
                         <div>
-                          <p className="text-white/40 text-xs">Penyesuaian</p>
-                          <p className={`text-sm font-medium ${user.totalAdjustments >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          <p className="text-muted-foreground text-xs">Penyesuaian</p>
+                          <p className={`text-sm font-medium ${user.totalAdjustments >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>
                             {user.totalAdjustments >= 0 ? '+' : ''}{formatCurrency(user.totalAdjustments)}
                           </p>
                         </div>
@@ -679,13 +679,13 @@ export default function AdminUsersPage() {
 
       {/* Add Balance Dialog */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="bg-[#111111] border border-white/10 text-white">
+        <DialogContent className="bg-card border border-border text-foreground">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Banknote className="w-5 h-5 text-emerald-400" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <Banknote className="w-5 h-5 text-emerald-600" />
               {adjustType === 'add' ? 'Tambah' : 'Kurangi'} Saldo
             </DialogTitle>
-            <DialogDescription className="text-white/60">
+            <DialogDescription className="text-muted-foreground">
               {selectedUser?.name} - {selectedUser?.email}
             </DialogDescription>
           </DialogHeader>
@@ -695,8 +695,8 @@ export default function AdminUsersPage() {
                 onClick={() => setAdjustType('add')}
                 className={`flex-1 p-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${
                   adjustType === 'add'
-                    ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
-                    : 'border-white/10 text-white/60 hover:border-white/20'
+                    ? 'border-emerald-500 bg-emerald-500/20 text-emerald-600'
+                    : 'border-border text-muted-foreground hover:border-border/80'
                 }`}
               >
                 <Plus className="w-4 h-4" />
@@ -706,8 +706,8 @@ export default function AdminUsersPage() {
                 onClick={() => setAdjustType('deduct')}
                 className={`flex-1 p-3 rounded-lg border transition-all flex items-center justify-center gap-2 ${
                   adjustType === 'deduct'
-                    ? 'border-red-500 bg-red-500/20 text-red-400'
-                    : 'border-white/10 text-white/60 hover:border-white/20'
+                    ? 'border-red-500 bg-red-500/20 text-red-600'
+                    : 'border-border text-muted-foreground hover:border-border/80'
                 }`}
               >
                 <Minus className="w-4 h-4" />
@@ -715,29 +715,29 @@ export default function AdminUsersPage() {
               </button>
             </div>
             <div className="space-y-2">
-              <Label>Jumlah (Rp)</Label>
+              <Label className="text-foreground">Jumlah (Rp)</Label>
               <NeoInput
                 type="number"
                 placeholder="Contoh: 50000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="bg-white/5 border-white/10"
+                className="bg-muted border-border"
               />
             </div>
             <div className="space-y-2">
-              <Label>Alasan</Label>
+              <Label className="text-foreground">Alasan</Label>
               <NeoInput
                 type="text"
                 placeholder="Contoh: Bonus, Refund, dll"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                className="bg-white/5 border-white/10"
+                className="bg-muted border-border"
               />
             </div>
             {amount && (
-              <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                <p className="text-white/60 text-sm">Saldo setelah penyesuaian:</p>
-                <p className={`text-lg font-bold ${adjustType === 'add' ? 'text-emerald-400' : 'text-red-400'}`}>
+              <div className="p-3 rounded-lg bg-muted border border-border">
+                <p className="text-muted-foreground text-sm">Saldo setelah penyesuaian:</p>
+                <p className={`text-lg font-bold ${adjustType === 'add' ? 'text-emerald-600' : 'text-red-600'}`}>
                   {formatCurrency(
                     (selectedUser?.availableBalance || 0) + 
                     (adjustType === 'add' ? Number(amount) : -Number(amount))
@@ -768,13 +768,13 @@ export default function AdminUsersPage() {
 
       {/* History Dialog */}
       <Dialog open={showHistoryDialog} onOpenChange={setShowHistoryDialog}>
-        <DialogContent className="bg-[#111111] border border-white/10 text-white max-w-lg">
+        <DialogContent className="bg-card border border-border text-foreground max-w-lg">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <History className="w-5 h-5 text-cyan-400" />
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <History className="w-5 h-5 text-cyan-600" />
               Riwayat Penyesuaian Saldo
             </DialogTitle>
-            <DialogDescription className="text-white/60">
+            <DialogDescription className="text-muted-foreground">
               {selectedUser?.name}
             </DialogDescription>
           </DialogHeader>
@@ -782,23 +782,23 @@ export default function AdminUsersPage() {
             {selectedUser?.adjustments.map((adj) => (
               <div
                 key={adj.id}
-                className="p-3 rounded-lg bg-white/5 border border-white/5"
+                className="p-3 rounded-lg bg-muted border border-border"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {adj.type === 'add' ? (
-                      <TrendingUp className="w-4 h-4 text-emerald-400" />
+                      <TrendingUp className="w-4 h-4 text-emerald-600" />
                     ) : (
-                      <TrendingDown className="w-4 h-4 text-red-400" />
+                      <TrendingDown className="w-4 h-4 text-red-600" />
                     )}
-                    <span className={`font-bold ${adj.type === 'add' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <span className={`font-bold ${adj.type === 'add' ? 'text-emerald-600' : 'text-red-600'}`}>
                       {adj.type === 'add' ? '+' : '-'}{formatCurrency(adj.amount)}
                     </span>
                   </div>
-                  <span className="text-white/40 text-xs">{formatDate(adj.createdAt)}</span>
+                  <span className="text-muted-foreground text-xs">{formatDate(adj.createdAt)}</span>
                 </div>
-                <p className="text-white/60 text-sm mt-1">{adj.reason}</p>
-                <p className="text-white/40 text-xs mt-1">oleh {adj.adminName}</p>
+                <p className="text-muted-foreground text-sm mt-1">{adj.reason}</p>
+                <p className="text-muted-foreground/70 text-xs mt-1">oleh {adj.adminName}</p>
               </div>
             ))}
           </div>
@@ -807,17 +807,17 @@ export default function AdminUsersPage() {
 
       {/* Delete User Confirmation Dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent className="bg-[#111111] border border-white/10">
+        <AlertDialogContent className="bg-card border border-border">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white flex items-center gap-2">
-              <Trash2 className="w-5 h-5 text-red-400" />
+            <AlertDialogTitle className="text-foreground flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-red-600" />
               Hapus User
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-white/60">
-              Apakah Anda yakin ingin menghapus user <span className="text-white font-medium">{userToDelete?.name}</span> ({userToDelete?.email})?
+            <AlertDialogDescription className="text-muted-foreground">
+              Apakah Anda yakin ingin menghapus user <span className="text-foreground font-medium">{userToDelete?.name}</span> ({userToDelete?.email})?
               <br /><br />
-              <span className="text-red-400">Tindakan ini akan menghapus semua data terkait termasuk:</span>
-              <ul className="list-disc list-inside mt-2 text-white/60">
+              <span className="text-red-600">Tindakan ini akan menghapus semua data terkait termasuk:</span>
+              <ul className="list-disc list-inside mt-2 text-muted-foreground">
                 <li>Pengaturan bot</li>
                 <li>Semua produk dan kategori</li>
                 <li>Semua pesanan</li>
@@ -828,7 +828,7 @@ export default function AdminUsersPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+            <AlertDialogCancel className="bg-muted border-border text-foreground hover:bg-muted/80">
               Batal
             </AlertDialogCancel>
             <AlertDialogAction
