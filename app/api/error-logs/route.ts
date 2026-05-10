@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import { getUserErrorLogs } from '@/lib/github-db'
 import type { ErrorLog } from '@/types'
 
 // GET - Get error logs for current user (non-sensitive only)
 export async function GET(request: Request) {
   try {
-    const user = await getCurrentUser()
+    const user = await getSession()
     
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

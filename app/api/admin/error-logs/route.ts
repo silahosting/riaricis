@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { isCurrentUserAdmin, getCurrentUser } from '@/lib/auth'
+import { isCurrentUserAdmin, getSession } from '@/lib/auth'
 import { getErrorLogs, updateErrorLog, getErrorStats, createErrorLog } from '@/lib/github-db'
 import type { ErrorLog } from '@/types'
 
@@ -49,7 +49,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    const user = await getCurrentUser()
+    const user = await getSession()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
