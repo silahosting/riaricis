@@ -273,7 +273,7 @@ export default function WhatsAppPage() {
         {status?.botOffline && (
           <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
             <p className="text-amber-700 text-sm">
-              Bot WhatsApp tidak dapat dijangkau. Pastikan bot sudah berjalan di Railway/server Anda.
+              Bot WhatsApp tidak dapat dijangkau. Pastikan bot sudah berjalan di cPanel/server Anda.
             </p>
           </div>
         )}
@@ -293,12 +293,12 @@ export default function WhatsAppPage() {
               <Label htmlFor="botUrl">Bot URL</Label>
               <NeoInput
                 id="botUrl"
-                placeholder="https://your-bot.railway.app"
+                placeholder="https://wabot.domainmu.com"
                 value={botUrl}
                 onChange={(e) => setBotUrl(e.target.value)}
               />
               <p className="text-xs text-muted-foreground mt-1">
-                URL dari WhatsApp bot yang berjalan di Railway/server
+                URL dari WhatsApp bot yang berjalan di cPanel/server
               </p>
             </div>
 
@@ -437,14 +437,14 @@ export default function WhatsAppPage() {
           <div className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">1</span>
             <div>
-              <p className="font-medium text-foreground">Deploy Bot ke Railway</p>
-              <p>Copy folder <code className="bg-muted px-1 py-0.5 rounded">whatsapp-bot</code> dari project ini ke repository baru, lalu deploy ke Railway.</p>
+              <p className="font-medium text-foreground">Upload Bot ke cPanel</p>
+              <p>Upload folder <code className="bg-muted px-1 py-0.5 rounded">whatsapp-bot</code> ke cPanel ArenaHost. Buat subdomain seperti <code className="bg-muted px-1 py-0.5 rounded">wabot.domainmu.com</code> dan setup Node.js App.</p>
             </div>
           </div>
           <div className="flex gap-3">
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">2</span>
             <div>
-              <p className="font-medium text-foreground">Set Environment Variables di Railway</p>
+              <p className="font-medium text-foreground">Set Environment Variables (.env)</p>
               <p>
                 <code className="bg-muted px-1 py-0.5 rounded">VERCEL_API_URL</code> = URL website ini<br/>
                 <code className="bg-muted px-1 py-0.5 rounded">BOT_SECRET</code> = Secret key yang sama
@@ -455,7 +455,7 @@ export default function WhatsAppPage() {
             <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center text-xs font-bold">3</span>
             <div>
               <p className="font-medium text-foreground">Input Pengaturan di Sini</p>
-              <p>Masukkan Bot URL dari Railway dan Bot Secret yang sama.</p>
+              <p>Masukkan Bot URL dari cPanel (subdomain) dan Bot Secret yang sama.</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -474,20 +474,20 @@ export default function WhatsAppPage() {
           </div>
           <div className="flex flex-wrap gap-2">
             <a 
-              href="https://railway.app" 
+              href="https://arenahost.id" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-xs bg-background px-3 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors"
             >
-              Railway.app
+              ArenaHost.id
             </a>
             <a 
-              href="https://render.com" 
+              href="https://github.com/silahosting/riaricis/blob/main/whatsapp-bot/SETUP-CPANEL.md" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-xs bg-background px-3 py-1.5 rounded-full hover:bg-primary hover:text-white transition-colors"
             >
-              Render.com
+              Panduan Setup cPanel
             </a>
           </div>
         </div>
