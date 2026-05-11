@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import { getWhatsAppSettingsByUserId } from '@/lib/github-db'
 
 // POST - Request pairing code from WhatsApp bot
 export async function POST(request: NextRequest) {
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

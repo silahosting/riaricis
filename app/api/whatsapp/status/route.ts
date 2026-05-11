@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import { getWhatsAppSettingsByUserId, updateWhatsAppSettings } from '@/lib/github-db'
 
 // GET - Get connection status for current user
 export async function GET() {
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

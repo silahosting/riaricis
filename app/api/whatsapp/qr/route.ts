@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import { getWhatsAppSettingsByUserId } from '@/lib/github-db'
 
 // GET - Get QR code from WhatsApp bot
 export async function GET() {
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }

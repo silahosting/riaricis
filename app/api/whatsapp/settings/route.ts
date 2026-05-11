@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getCurrentUser } from '@/lib/auth'
+import { getSession } from '@/lib/auth'
 import { 
   getWhatsAppSettingsByUserId, 
   createWhatsAppSettings, 
@@ -9,7 +9,7 @@ import {
 
 // GET - Get WhatsApp settings for current user
 export async function GET() {
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -46,7 +46,7 @@ export async function GET() {
 
 // POST - Create or update WhatsApp settings
 export async function POST(request: NextRequest) {
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
 
 // DELETE - Remove WhatsApp settings
 export async function DELETE() {
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
