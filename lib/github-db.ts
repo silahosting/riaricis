@@ -18,6 +18,8 @@ const defaultDatabase: Database = {
   botActivityLogs: [],
   accountActivities: [],
   errorLogs: [],
+  whatsappSettings: [],
+  whatsappActivityLogs: [],
 }
 
 const API_BASE = "https://api-orkut-iota-seven.vercel.app" // ganti dengan URL API kamu
@@ -29,7 +31,7 @@ async function getGitHubHeaders() {
   }
 }
 
-async function getFileContent(): Promise<{ content: Database; sha: string | null }> {
+export async function getFileContent(): Promise<{ content: Database; sha: string | null }> {
   // Tidak perlu cek token/owner/repo — server yang handle
   try {
     const response = await fetch(`${API_BASE}/api/database`, {
@@ -63,6 +65,8 @@ async function getFileContent(): Promise<{ content: Database; sha: string | null
       botActivityLogs: Array.isArray(data.content?.botActivityLogs) ? data.content.botActivityLogs : [],
       accountActivities: Array.isArray(data.content?.accountActivities) ? data.content.accountActivities : [],
       errorLogs: Array.isArray(data.content?.errorLogs) ? data.content.errorLogs : [],
+      whatsappSettings: Array.isArray(data.content?.whatsappSettings) ? data.content.whatsappSettings : [],
+      whatsappActivityLogs: Array.isArray(data.content?.whatsappActivityLogs) ? data.content.whatsappActivityLogs : [],
     }
     
     return { content, sha: data.sha || null }
@@ -1362,4 +1366,106 @@ export async function getErrorStats(): Promise<{
   })
   
   return stats
+}
+
+// ============== WhatsApp Settings Functions ==============
+
+import type { WhatsAppSettings, WhatsAppActivityLog } from '@/types'
+
+// Get WhatsApp settings by user ID
+export async function getWhatsAppSettingsByUserId(userId: string): Promise<WhatsAppSettings | null> {
+  const { content } = await getFileContent()
+  if (!content.whatsappSettings) content.whatsappSettings = []
+  return content.whatsappSettings.find(s => s.userId === userId) || null
+}
+
+// Create WhatsApp settings
+export async function createWhatsAppSettings(
+  data: Omit<WhatsAppSettings, 'id' | 'createdAt' | 'updatedAt'>
+): Promise<WhatsAppSettings | null> {
+  const { content, sha } = await getFileContent()
+  if (!content.whatsappSettings) content.whatsappSettings = []
+  
+  const newSettings: WhatsAppSettings = {
+    ...data,
+    id: generateId(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+  
+  content.whatsappSettings.push(newSettings)
+  const success = await updateFile(content, sha)
+  return success ? newSettings : null
+}
+
+// Update WhatsApp settings
+export async function updateWhatsAppSettings(
+  userId: string,
+  data: Partial<Omit<WhatsAppSettings, 'id' | 'userId' | 'createdAt'>>
+): Promise<WhatsAppSettings | null> {
+  const { content, sha } = await getFileContent()
+  if (!content.whatsappSettings) content.whatsappSettings = []
+  
+  const index = content.whatsappSettings.findIndex(s => s.userId === userId)
+  if (index === -1) return null
+  
+  content.whatsappSettings[index] = {
+    ...content.whatsappSettings[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  }
+  
+  const success = await updateFile(content, sha)
+  return success ? content.whatsappSettings[index] : null
+}
+
+// Delete WhatsApp settings
+export async function deleteWhatsAppSettings(userId: string): Promise<boolean> {
+  const { content, sha } = await getFileContent()
+  if (!content.whatsappSettings) return true
+  
+  content.whatsappSettings = content.whatsappSettings.filter(s => s.userId !== userId)
+  return await updateFile(content, sha)
+}
+
+// Create WhatsApp activity log
+export async function createWhatsAppActivityLog(
+  data: Omit<WhatsAppActivityLog, 'id' | 'createdAt'>
+): Promise<WhatsAppActivityLog | null> {
+  const { content, sha } = await getFileContent()
+  if (!content.whatsappActivityLogs) content.whatsappActivityLogs = []
+  
+  const newLog: WhatsAppActivityLog = {
+    ...data,
+    id: generateId(),
+    createdAt: new Date().toISOString(),
+  }
+  
+  content.whatsappActivityLogs.push(newLog)
+  
+  // Keep only last 500 logs per user
+  const userLogs = content.whatsappActivityLogs.filter(l => l.userId === data.userId)
+  if (userLogs.length > 500) {
+    const toRemove = userLogs.slice(0, userLogs.length - 500)
+    content.whatsappActivityLogs = content.whatsappActivityLogs.filter(
+      l => !toRemove.some(r => r.id === l.id)
+    )
+  }
+  
+  const success = await updateFile(content, sha)
+  return success ? newLog : null
+}
+
+// Get WhatsApp activity logs by user ID
+export async function getWhatsAppActivityLogsByUserId(
+  userId: string,
+  limit = 50
+): Promise<WhatsAppActivityLog[]> {
+  const { content } = await getFileContent()
+  if (!content.whatsappActivityLogs) return []
+  
+  return content.whatsappActivityLogs
+    .filter(l => l.userId === userId)
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, limit)
 }

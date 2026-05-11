@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Bot, LayoutDashboard, Package, ShoppingCart, Settings, User, LogOut, X, Wallet, Crown, Terminal } from 'lucide-react'
+import { Bot, LayoutDashboard, Package, ShoppingCart, Settings, User, LogOut, X, Wallet, Crown, Terminal, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { NeoButton } from '@/components/ui/neo-button'
 import { logoutAction } from '@/actions/auth.actions'
@@ -14,6 +14,7 @@ const navItems = [
   { href: '/dashboard/orders', label: 'Pesanan', icon: ShoppingCart },
   { href: '/dashboard/withdraw', label: 'Pencairan Dana', icon: Wallet },
   { href: '/dashboard/console', label: 'Console', icon: Terminal },
+  { href: '/dashboard/whatsapp', label: 'WhatsApp Bot', icon: MessageCircle },
   { href: '/dashboard/profile', label: 'Profil', icon: User },
   { href: '/dashboard/settings', label: 'Pengaturan Bot', icon: Settings },
 ]

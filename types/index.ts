@@ -292,6 +292,32 @@ export interface Database {
   botActivityLogs: BotActivityLog[]
   accountActivities: AccountActivity[]
   errorLogs: ErrorLog[]
+  whatsappSettings: WhatsAppSettings[]
+  whatsappActivityLogs: WhatsAppActivityLog[]
+}
+
+// WhatsApp Bot Settings
+export interface WhatsAppSettings {
+  id: string
+  userId: string
+  botUrl: string // URL of the Railway bot (e.g., https://your-bot.railway.app)
+  botSecret: string // Secret key for authentication
+  isActive: boolean
+  isConnected: boolean
+  phoneNumber?: string // Connected WhatsApp number
+  createdAt: string
+  updatedAt: string
+}
+
+// WhatsApp Activity Log
+export interface WhatsAppActivityLog {
+  id: string
+  userId: string
+  whatsappNumber: string
+  whatsappName: string
+  action: 'start' | 'menu' | 'order' | 'payment' | 'complete' | 'error'
+  message?: string
+  createdAt: string
 }
 
 export type SessionUser = Omit<User, 'password'> & {
