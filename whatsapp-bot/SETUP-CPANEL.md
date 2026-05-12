@@ -7,109 +7,118 @@
 
 ## Langkah-langkah Setup
 
-### 1. Buat Subdomain (Opsional tapi Disarankan)
+### 1. Buat Subdomain
 1. Login ke cPanel ArenaHost
 2. Cari **"Subdomains"** atau **"Subdomain"**
 3. Buat subdomain baru, contoh: `wabot.domainmu.com`
-4. Document Root: `/home/username/wabot` (sesuaikan username)
+4. Document Root: `/home/username/wabot` (sesuaikan username cpanel Anda)
 
 ### 2. Upload File Bot
 1. Di cPanel, buka **"File Manager"**
 2. Masuk ke folder `/home/username/wabot`
-3. Upload semua file dari folder `whatsapp-bot` ini:
+3. Upload file-file berikut dari folder `whatsapp-bot`:
+   - `index.js` (file utama bot)
    - `package.json`
-   - `tsconfig.json`
    - `.env` (rename dari `.env.example` dan isi nilai yang benar)
-   - Folder `src/`
 
-### 3. Setup Node.js App di cPanel
+### 3. Buat File .env
+Di folder bot, buat file `.env` dengan isi:
+```env
+PORT=3001
+VERCEL_API_URL=https://riaricis.vercel.app
+BOT_SECRET=buatSecretKeyRandomDisini123
+AUTH_FOLDER=./session
+```
+**PENTING**: Ganti `BOT_SECRET` dengan string random yang aman. Gunakan nilai yang sama di dashboard website.
+
+### 4. Setup Node.js App di cPanel
 1. Di cPanel, cari **"Setup Node.js App"**
 2. Klik **"Create Application"**
 3. Isi form:
-   - **Node.js version**: Pilih `18.x` atau lebih baru
+   - **Node.js version**: Pilih `18.x` atau `20.x`
    - **Application mode**: Production
    - **Application root**: `/home/username/wabot`
    - **Application URL**: `wabot.domainmu.com`
-   - **Application startup file**: `dist/index.js`
+   - **Application startup file**: `index.js`
 4. Klik **"Create"**
 
-### 4. Install Dependencies dan Build
-1. Setelah app dibuat, akan muncul terminal command
-2. Copy command untuk masuk ke environment Node.js (biasanya seperti):
+### 5. Install Dependencies
+1. Setelah app dibuat, klik tombol **"Run NPM Install"**
+2. Atau buka **"Terminal"** di cPanel dan jalankan:
    ```bash
-   source /home/username/nodevenv/wabot/18/bin/activate && cd /home/username/wabot
-   ```
-3. Di cPanel, buka **"Terminal"** dan paste command di atas
-4. Jalankan:
-   ```bash
+   cd ~/wabot
+   source /home/username/nodevenv/wabot/18/bin/activate
    npm install
-   npm run build
    ```
-
-### 5. Konfigurasi Environment Variables
-1. Di folder bot, buat file `.env` dengan isi:
-   ```env
-   PORT=3001
-   VERCEL_API_URL=https://riaricis.vercel.app
-   BOT_SECRET=buatSecretKeyRandomDisini123
-   AUTH_FOLDER=./auth_info
-   ```
-2. Ganti `BOT_SECRET` dengan string random yang aman
-3. **PENTING**: Gunakan BOT_SECRET yang sama di dashboard WhatsApp website Anda
 
 ### 6. Start Aplikasi
 1. Kembali ke **"Setup Node.js App"**
-2. Klik tombol **"Run NPM Script"** pilih `start`
-3. Atau klik **"Restart"** pada aplikasi
+2. Klik tombol **"Start App"** atau **"Restart"**
+3. Bot sekarang berjalan!
 
-### 7. Konfigurasi di Dashboard Website
-1. Buka website Anda: https://riaricis.vercel.app
+### 7. Akses Web Interface Bot
+1. Buka browser: `https://wabot.domainmu.com`
+2. Akan muncul halaman control panel bot
+3. Pilih metode koneksi:
+   - **QR Code**: Scan dengan WhatsApp di HP
+   - **Pairing Code**: Masukkan nomor WA, dapat kode 8 digit
+
+### 8. Hubungkan ke Dashboard Website (Opsional)
+1. Buka website: https://riaricis.vercel.app
 2. Login dan masuk ke **Dashboard > WhatsApp Bot**
 3. Isi:
-   - **Bot URL**: `https://wabot.domainmu.com` (URL subdomain tadi)
+   - **Bot URL**: `https://wabot.domainmu.com`
    - **Bot Secret**: Secret key yang sama dengan di file `.env`
-4. Klik **Simpan Pengaturan**
-5. Setelah tersimpan, klik **Scan QR Code** atau **Pairing Code**
+4. Klik **Simpan**
+
+---
 
 ## Troubleshooting
 
 ### Bot tidak bisa start
 - Pastikan Node.js version minimal 18
-- Cek log error di cPanel > Setup Node.js App > Logs
-- Pastikan semua dependencies terinstall: `npm install`
+- Cek log error di cPanel > Setup Node.js App > View Log
+- Pastikan `npm install` sudah dijalankan
 
 ### QR Code tidak muncul
-- Tunggu beberapa detik setelah bot start
-- Cek status bot di: `https://wabot.domainmu.com/status`
-- Pastikan URL dan Secret benar
+- Tunggu 5-10 detik setelah bot start
+- Refresh halaman web bot
+- Cek status di: `https://wabot.domainmu.com/status`
 
-### Koneksi terputus terus
-- Beberapa shared hosting kill process yang berjalan lama
-- Solusi: Gunakan cron job untuk restart bot setiap beberapa jam
-- Atau upgrade ke VPS jika sering bermasalah
+### Pairing Code error
+- Pastikan nomor format benar: `628123456789` (tanpa + atau spasi)
+- Nomor harus aktif dan belum terdaftar di perangkat lain
+
+### Koneksi terputus
+- Buat cron job untuk keep alive (lihat di bawah)
+- Atau restart manual di cPanel jika terputus
 
 ### Setup Cron Job (Keep Alive)
 1. Di cPanel, buka **"Cron Jobs"**
-2. Tambah cron job baru:
-   - **Interval**: Every 5 minutes
-   - **Command**: `curl -s https://wabot.domainmu.com/status > /dev/null`
+2. Tambah cron baru:
+   - **Interval**: Every 5 minutes (`*/5 * * * *`)
+   - **Command**: 
+     ```
+     curl -s https://wabot.domainmu.com/status > /dev/null 2>&1
+     ```
+
+---
 
 ## Struktur File
 ```
 wabot/
-├── .env              # Environment variables
+├── .env              # Environment variables (BUAT MANUAL)
+├── index.js          # File utama bot
 ├── package.json      # Dependencies
-├── tsconfig.json     # TypeScript config
-├── src/
-│   └── index.ts      # Source code
-├── dist/             # Compiled code (setelah build)
-│   └── index.js
-└── auth_info/        # WhatsApp session (auto-generated)
+└── session/          # WhatsApp session (auto-generated)
 ```
 
-## API Endpoints Bot
-- `GET /status` - Cek status koneksi
-- `GET /qr` - Dapatkan QR code
-- `POST /pairing-code` - Request pairing code
-- `POST /logout` - Logout WhatsApp
-- `POST /send-message` - Kirim pesan (perlu secret)
+## API Endpoints
+| Endpoint | Method | Fungsi |
+|----------|--------|--------|
+| `/` | GET | Web interface (dashboard bot) |
+| `/status` | GET | Cek status koneksi |
+| `/qr` | GET | Dapatkan QR code |
+| `/pairing-code` | POST | Request pairing code |
+| `/logout` | POST | Logout WhatsApp |
+| `/send-message` | POST | Kirim pesan (perlu secret) |
