@@ -516,8 +516,10 @@ function generateStartMenuText(user: TelegramUser, botStats: { totalSold: number
   
   teks += `<b>Shortcuts :</b>\n`
   teks += `/start - Mulai bot\n`
+  teks += `/dashboard - Dashboard saya\n`
   teks += `/stock - Cek stok produk\n`
-  teks += `/saldo - Cek saldo`
+  teks += `/saldo - Cek saldo\n`
+  teks += `/riwayat - Riwayat transaksi`
   
   return teks
 }
@@ -531,15 +533,187 @@ function generateMainMenuKeyboard(userBalance: number) {
         { text: `💰 Saldo: Rp. ${toRupiah(userBalance)}`, callback_data: 'balance' }
       ],
       [
-        { text: '👩‍💼 Customer Service', callback_data: 'cs' },
-        { text: '📜 Riwayat Transaksi', callback_data: 'history' }
+        { text: '📊 Dashboard Saya', callback_data: 'my_dashboard' }
       ],
       [
-        { text: '✨ Produk Populer', callback_data: 'popular' },
+        { text: '👩‍💼 Customer Service', callback_data: 'cs' },
         { text: '❓ Cara Order', callback_data: 'how_to_order' }
+      ],
+      [
+        { text: '✨ Produk Populer', callback_data: 'popular' }
       ]
     ]
   }
+}
+
+// Generate dashboard menu text
+function generateDashboardMenuText(user: TelegramUser, userStats: { transactions: number; purchased: number; balance: number }): string {
+  const firstName = escapeHtml(user.first_name || 'User')
+  
+  let teks = `<b>📊 DASHBOARD</b>\n`
+  teks += `━━━━━━━━━━━━━━━━━━━━━\n\n`
+  teks += `Halo <b>${firstName}</b>!\n`
+  teks += `Berikut ringkasan akun kamu:\n\n`
+  teks += `💰 <b>Saldo:</b> Rp. ${toRupiah(userStats.balance)}\n`
+  teks += `📦 <b>Total Pembelian:</b> ${userStats.purchased}x\n`
+  teks += `💵 <b>Total Transaksi:</b> Rp. ${toRupiah(userStats.transactions)}\n\n`
+  teks += `━━━━━━━━━━━━━━━━━━━━━\n`
+  teks += `Pilih menu di bawah untuk detail:`
+  
+  return teks
+}
+
+// Generate dashboard keyboard
+function generateDashboardKeyboard() {
+  return {
+    inline_keyboard: [
+      [
+        { text: '👤 Profil Saya', callback_data: 'dash_profile' },
+        { text: '💳 Saldo & Keuangan', callback_data: 'dash_balance' }
+      ],
+      [
+        { text: '📜 Riwayat Transaksi', callback_data: 'dash_history_1' },
+        { text: '📈 Statistik', callback_data: 'dash_stats' }
+      ],
+      [
+        { text: '🏠 Kembali ke Menu', callback_data: 'menu_main' }
+      ]
+    ]
+  }
+}
+
+// Generate profile text
+function generateProfileText(user: TelegramUser, userStats: { transactions: number; purchased: number; balance: number }, joinDate?: string): string {
+  const firstName = escapeHtml(user.first_name || 'User')
+  const lastName = user.last_name ? escapeHtml(user.last_name) : ''
+  const username = user.username ? `@${escapeHtml(user.username)}` : 'Tidak ada'
+  const fullName = lastName ? `${firstName} ${lastName}` : firstName
+  
+  let teks = `<b>👤 PROFIL SAYA</b>\n`
+  teks += `━━━━━━━━━━━━━━━━━━━━━\n\n`
+  teks += `<b>Informasi Akun</b>\n`
+  teks += `├ Nama: <b>${fullName}</b>\n`
+  teks += `├ Username: ${username}\n`
+  teks += `├ ID Telegram: <code>${user.id}</code>\n`
+  teks += `└ Status: <b>Aktif</b>\n\n`
+  teks += `<b>Statistik Pembelian</b>\n`
+  teks += `├ Total Transaksi: <b>${userStats.purchased}x</b>\n`
+  teks += `├ Total Belanja: <b>Rp. ${toRupiah(userStats.transactions)}</b>\n`
+  teks += `└ Saldo: <b>Rp. ${toRupiah(userStats.balance)}</b>\n\n`
+  teks += `━━━━━━━━━━━━━━━━━━━━━\n`
+  teks += `<i>ID digunakan untuk verifikasi transaksi</i>`
+  
+  return teks
+}
+
+// Generate balance/finance text
+function generateBalanceText(userStats: { transactions: number; purchased: number; balance: number }): string {
+  let teks = `<b>💳 SALDO & KEUANGAN</b>\n`
+  teks += `━━━━━━━━━━━━━━━━━━━━━\n\n`
+  teks += `<b>💰 Saldo Tersedia</b>\n`
+  teks += `<code>Rp. ${toRupiah(userStats.balance)}</code>\n\n`
+  teks += `<b>📊 Ringkasan Keuangan</b>\n`
+  teks += `├ Total Pembelian: ${userStats.purchased}x\n`
+  teks += `├ Total Belanja: Rp. ${toRupiah(userStats.transactions)}\n`
+  teks += `└ Rata-rata/Transaksi: Rp. ${toRupiah(userStats.purchased > 0 ? Math.round(userStats.transactions / userStats.purchased) : 0)}\n\n`
+  teks += `━━━━━━━━━━━━━━━━━━━━━\n`
+  teks += `<i>Hubungi admin untuk top up saldo</i>`
+  
+  return teks
+}
+
+// Generate detailed history text with pagination
+function generateDetailedHistoryText(orders: Array<{ productName: string; quantity: number; totalPrice: number; createdAt: string; status: string }>, page: number, totalPages: number): string {
+  let teks = `<b>📜 RIWAYAT TRANSAKSI</b>\n`
+  teks += `━━━━━━━━━━━━━━━━━━━━━\n`
+  teks += `Halaman ${page}/${totalPages}\n\n`
+  
+  if (orders.length === 0) {
+    teks += `<i>Belum ada transaksi</i>\n\n`
+  } else {
+    orders.forEach((order, i) => {
+      const startIndex = (page - 1) * 5
+      const date = new Date(order.createdAt).toLocaleDateString('id-ID', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+      const statusEmoji = order.status === 'completed' ? '✅' : order.status === 'pending' ? '⏳' : '❌'
+      
+      teks += `<b>${startIndex + i + 1}. ${order.productName}</b>\n`
+      teks += `├ Qty: ${order.quantity}x\n`
+      teks += `├ Total: Rp. ${toRupiah(order.totalPrice)}\n`
+      teks += `├ Status: ${statusEmoji} ${order.status === 'completed' ? 'Selesai' : order.status === 'pending' ? 'Pending' : 'Dibatalkan'}\n`
+      teks += `└ Tanggal: ${date}\n\n`
+    })
+  }
+  
+  teks += `━━━━━━━━━━━━━━━━━━━━━`
+  
+  return teks
+}
+
+// Generate history pagination keyboard
+function generateHistoryKeyboard(page: number, totalPages: number) {
+  const keyboard: { text: string; callback_data: string }[][] = []
+  
+  // Pagination buttons
+  if (totalPages > 1) {
+    const navRow: { text: string; callback_data: string }[] = []
+    if (page > 1) {
+      navRow.push({ text: `⬅️ Hal ${page - 1}`, callback_data: `dash_history_${page - 1}` })
+    }
+    if (page < totalPages) {
+      navRow.push({ text: `Hal ${page + 1} ➡️`, callback_data: `dash_history_${page + 1}` })
+    }
+    if (navRow.length > 0) keyboard.push(navRow)
+  }
+  
+  keyboard.push([
+    { text: '📊 Dashboard', callback_data: 'my_dashboard' },
+    { text: '🏠 Menu Utama', callback_data: 'menu_main' }
+  ])
+  
+  return { inline_keyboard: keyboard }
+}
+
+// Generate stats text
+function generateStatsText(userStats: { transactions: number; purchased: number; balance: number }, orders: Array<{ productName: string; quantity: number; totalPrice: number; createdAt: string }>): string {
+  // Calculate additional stats
+  const thisMonth = new Date()
+  const thisMonthStart = new Date(thisMonth.getFullYear(), thisMonth.getMonth(), 1)
+  const thisMonthOrders = orders.filter(o => new Date(o.createdAt) >= thisMonthStart)
+  const thisMonthSpent = thisMonthOrders.reduce((sum, o) => sum + o.totalPrice, 0)
+  const thisMonthQty = thisMonthOrders.reduce((sum, o) => sum + o.quantity, 0)
+  
+  // Most purchased product
+  const productCounts: Record<string, number> = {}
+  orders.forEach(o => {
+    productCounts[o.productName] = (productCounts[o.productName] || 0) + o.quantity
+  })
+  const topProduct = Object.entries(productCounts).sort((a, b) => b[1] - a[1])[0]
+  
+  let teks = `<b>📈 STATISTIK PEMBELIAN</b>\n`
+  teks += `━━━━━━━━━━━━━━━━━━━━━\n\n`
+  teks += `<b>📅 Bulan Ini</b>\n`
+  teks += `├ Transaksi: ${thisMonthOrders.length}x\n`
+  teks += `├ Produk dibeli: ${thisMonthQty} pcs\n`
+  teks += `└ Total belanja: Rp. ${toRupiah(thisMonthSpent)}\n\n`
+  teks += `<b>📊 Sepanjang Waktu</b>\n`
+  teks += `├ Total transaksi: ${orders.length}x\n`
+  teks += `├ Total produk: ${userStats.purchased} pcs\n`
+  teks += `└ Total belanja: Rp. ${toRupiah(userStats.transactions)}\n\n`
+  
+  if (topProduct) {
+    teks += `<b>🏆 Produk Favorit</b>\n`
+    teks += `└ ${topProduct[0]} (${topProduct[1]}x)\n\n`
+  }
+  
+  teks += `━━━━━━━━━━━━━━━━━━━━━`
+  
+  return teks
 }
 
 // Handle callback queries (button clicks)
@@ -1732,9 +1906,118 @@ const statusCheck = await checkOrkutPaymentStatus(
     return
   }
   
-  // Handle balance check
+  // Handle balance check (quick view)
   if (data === 'balance') {
     await answerCallbackQuery(botToken, callbackQuery.id, `Saldo Anda: Rp. ${toRupiah(userStats.balance)}`, true)
+    return
+  }
+  
+  // Handle My Dashboard menu
+  if (data === 'my_dashboard') {
+    await answerCallbackQuery(botToken, callbackQuery.id)
+    const dashboardText = generateDashboardMenuText(user, userStats)
+    await replaceWithMessage(botToken, chatId, messageId, dashboardText, {
+      parseMode: 'HTML',
+      replyMarkup: generateDashboardKeyboard()
+    })
+    return
+  }
+  
+  // Handle Dashboard - Profile
+  if (data === 'dash_profile') {
+    await answerCallbackQuery(botToken, callbackQuery.id)
+    const profileText = generateProfileText(user, userStats)
+    await replaceWithMessage(botToken, chatId, messageId, profileText, {
+      parseMode: 'HTML',
+      replyMarkup: {
+        inline_keyboard: [
+          [
+            { text: '📊 Dashboard', callback_data: 'my_dashboard' },
+            { text: '🏠 Menu Utama', callback_data: 'menu_main' }
+          ]
+        ]
+      }
+    })
+    return
+  }
+  
+  // Handle Dashboard - Balance/Finance
+  if (data === 'dash_balance') {
+    await answerCallbackQuery(botToken, callbackQuery.id)
+    const balanceText = generateBalanceText(userStats)
+    await replaceWithMessage(botToken, chatId, messageId, balanceText, {
+      parseMode: 'HTML',
+      replyMarkup: {
+        inline_keyboard: [
+          [{ text: '💳 Top Up Saldo', callback_data: 'topup_info' }],
+          [
+            { text: '📊 Dashboard', callback_data: 'my_dashboard' },
+            { text: '🏠 Menu Utama', callback_data: 'menu_main' }
+          ]
+        ]
+      }
+    })
+    return
+  }
+  
+  // Handle Top Up Info
+  if (data === 'topup_info') {
+    await answerCallbackQuery(botToken, callbackQuery.id)
+    const topupText = `<b>💳 TOP UP SALDO</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `Untuk top up saldo, silakan hubungi admin/CS dengan menyertakan:\n\n` +
+      `1. ID Telegram: <code>${user.id}</code>\n` +
+      `2. Jumlah top up\n` +
+      `3. Bukti transfer\n\n` +
+      `<i>Admin akan memproses dalam 1x24 jam</i>`
+    
+    await replaceWithMessage(botToken, chatId, messageId, topupText, {
+      parseMode: 'HTML',
+      replyMarkup: {
+        inline_keyboard: [
+          [{ text: '👩‍💼 Hubungi CS', callback_data: 'cs' }],
+          [
+            { text: '💳 Kembali', callback_data: 'dash_balance' },
+            { text: '🏠 Menu Utama', callback_data: 'menu_main' }
+          ]
+        ]
+      }
+    })
+    return
+  }
+  
+  // Handle Dashboard - History with pagination
+  if (data.startsWith('dash_history_')) {
+    const page = parseInt(data.replace('dash_history_', '') || '1')
+    const itemsPerPage = 5
+    const totalPages = Math.max(1, Math.ceil(userOrders.length / itemsPerPage))
+    const startIndex = (page - 1) * itemsPerPage
+    const pageOrders = userOrders.slice(startIndex, startIndex + itemsPerPage)
+    
+    await answerCallbackQuery(botToken, callbackQuery.id)
+    const historyText = generateDetailedHistoryText(pageOrders, page, totalPages)
+    await replaceWithMessage(botToken, chatId, messageId, historyText, {
+      parseMode: 'HTML',
+      replyMarkup: generateHistoryKeyboard(page, totalPages)
+    })
+    return
+  }
+  
+  // Handle Dashboard - Stats
+  if (data === 'dash_stats') {
+    await answerCallbackQuery(botToken, callbackQuery.id)
+    const statsText = generateStatsText(userStats, userOrders)
+    await replaceWithMessage(botToken, chatId, messageId, statsText, {
+      parseMode: 'HTML',
+      replyMarkup: {
+        inline_keyboard: [
+          [
+            { text: '📊 Dashboard', callback_data: 'my_dashboard' },
+            { text: '🏠 Menu Utama', callback_data: 'menu_main' }
+          ]
+        ]
+      }
+    })
     return
   }
   
@@ -1750,30 +2033,19 @@ const statusCheck = await checkOrkutPaymentStatus(
     return
   }
   
-  // Handle history
+  // Handle history (redirect to dashboard history)
   if (data === 'history') {
+    // Redirect to the new dashboard history
+    const page = 1
+    const itemsPerPage = 5
+    const totalPages = Math.max(1, Math.ceil(userOrders.length / itemsPerPage))
+    const pageOrders = userOrders.slice(0, itemsPerPage)
+    
     await answerCallbackQuery(botToken, callbackQuery.id)
-    
-    if (userOrders.length === 0) {
-      const historyText = `*Riwayat Transaksi*\n\nBelum ada transaksi.`
-      await replaceWithMessage(botToken, chatId, messageId, historyText, {
-        replyMarkup: {
-          inline_keyboard: [[{ text: 'Kembali', callback_data: 'menu_main' }]]
-        }
-      })
-      return
-    }
-    
-    let historyText = `*Riwayat Transaksi*\n\n`
-    userOrders.slice(0, 10).forEach((order, i) => {
-      historyText += `${i + 1}. *${order.productName}*\n`
-      historyText += `   Qty: ${order.quantity} | Rp ${toRupiah(order.totalPrice)}\n\n`
-    })
-    
+    const historyText = generateDetailedHistoryText(pageOrders, page, totalPages)
     await replaceWithMessage(botToken, chatId, messageId, historyText, {
-      replyMarkup: {
-        inline_keyboard: [[{ text: 'Kembali', callback_data: 'menu_main' }]]
-      }
+      parseMode: 'HTML',
+      replyMarkup: generateHistoryKeyboard(page, totalPages)
     })
     return
   }
@@ -1924,30 +2196,66 @@ async function handleMessage(botToken: string, message: TelegramMessage, ownerId
 
   // Handle /saldo command
   if (text.startsWith('/saldo')) {
-    const balanceText = `*💰 Saldo Anda*\n\nSaldo: Rp. ${toRupiah(userStats.balance)}\n\n_Top up saldo melalui admin._`
+    const balanceText = generateBalanceText(userStats)
     await sendMessage(botToken, chatId, balanceText, {
+      parseMode: 'HTML',
       replyMarkup: {
-        inline_keyboard: [[{ text: '🏠 Main Menu', callback_data: 'menu_main' }]]
+        inline_keyboard: [
+          [{ text: '💳 Top Up Saldo', callback_data: 'topup_info' }],
+          [{ text: '📊 Dashboard', callback_data: 'my_dashboard' }],
+          [{ text: '🏠 Main Menu', callback_data: 'menu_main' }]
+        ]
       }
+    })
+    return
+  }
+  
+  // Handle /dashboard or /profil command
+  if (text.startsWith('/dashboard') || text.startsWith('/profil') || text.startsWith('/profile')) {
+    const dashboardText = generateDashboardMenuText(user, userStats)
+    await sendMessage(botToken, chatId, dashboardText, {
+      parseMode: 'HTML',
+      replyMarkup: generateDashboardKeyboard()
+    })
+    return
+  }
+  
+  // Handle /riwayat or /history command
+  if (text.startsWith('/riwayat') || text.startsWith('/history')) {
+    const page = 1
+    const itemsPerPage = 5
+    const totalPages = Math.max(1, Math.ceil(userOrders.length / itemsPerPage))
+    const pageOrders = userOrders.slice(0, itemsPerPage)
+    
+    const historyText = generateDetailedHistoryText(pageOrders, page, totalPages)
+    await sendMessage(botToken, chatId, historyText, {
+      parseMode: 'HTML',
+      replyMarkup: generateHistoryKeyboard(page, totalPages)
     })
     return
   }
 
   // Handle /help command
   if (text.startsWith('/help')) {
-    const helpText = `*❓ Bantuan*\n\n` +
-      `*Perintah:*\n` +
-      `/start - Menu utama\n` +
-      `/stock - Cek stok produk\n` +
-      `/saldo - Cek saldo\n` +
-      `/help - Bantuan\n\n` +
-      `*Cara Order:*\n` +
+    const helpText = `<b>❓ BANTUAN</b>\n` +
+      `━━━━━━━━━━━━━━━━━━━━━\n\n` +
+      `<b>📋 Perintah Tersedia:</b>\n` +
+      `├ /start - Menu utama\n` +
+      `├ /stock - Cek stok produk\n` +
+      `├ /saldo - Cek saldo\n` +
+      `├ /dashboard - Dashboard profil\n` +
+      `├ /riwayat - Riwayat transaksi\n` +
+      `└ /help - Bantuan\n\n` +
+      `<b>🛒 Cara Order:</b>\n` +
       `1. Ketik /stock atau klik List Produk\n` +
       `2. Pilih nomor produk\n` +
       `3. Klik Beli dan atur jumlah\n` +
-      `4. Bayar dengan saldo`
+      `4. Pilih metode pembayaran\n` +
+      `5. Produk dikirim otomatis\n\n` +
+      `<i>Hubungi CS jika ada kendala</i>`
     
     await sendMessage(botToken, chatId, helpText, {
+      parseMode: 'HTML',
       replyMarkup: generateMainMenuKeyboard(userStats.balance)
     })
     return
